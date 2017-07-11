@@ -13,6 +13,28 @@ type Balance struct {
 	Amount float32   `json:"amount"`
 }
 
+// Validate checks the fields of a Balance and returns any logic errors that are present within it.
+func (balance Balance) Validate() error {
+	if balance.Date.IsZero() {
+		return BalanceZeroDate
+	}
+	return nil
+}
+
+// BalanceFieldError represents an error with the logic of a Balance item.
+type BalanceFieldError string
+
+// A collection of possible BalanceFieldErrors
+const (
+	BalanceZeroDate = BalanceFieldError("Date of balance is zero.")
+)
+
+// Error ensures that BalanceFieldError adheres to the error interface.
+func (e BalanceFieldError) Error() string {
+	return string(e)
+}
+
+
 //Balances holds multiple Balance items.
 type Balances []Balance
 

@@ -6,6 +6,20 @@ import (
 	"time"
 )
 
+func Test_Validate(t *testing.T) {
+	invalidBalance := Balance{}
+	err := invalidBalance.Validate()
+	if err != BalanceZeroDate {
+		t.Errorf("Unexpected error.\nExpected: %s\nActual  : %s", BalanceZeroDate, err)
+	}
+
+	validBalance := Balance{Date:time.Now()}
+	err = validBalance.Validate()
+	if err != nil {
+		t.Errorf("Unexpected error.\nExpected: %s\nActual  : %s", nil, err)
+	}
+}
+
 type BalanceErrorSet struct {
 	Balance
 	error

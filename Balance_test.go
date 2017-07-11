@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func Test_Validate(t *testing.T) {
+func Test_ValidateBalance(t *testing.T) {
 	invalidBalance := Balance{}
 	err := invalidBalance.Validate()
 	if err != BalanceZeroDate {

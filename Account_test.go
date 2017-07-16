@@ -16,10 +16,6 @@ func Test_ValidateAccount(t *testing.T) {
 			AccountFieldError: AccountFieldError{EmptyNameError, ZeroDateOpenedError},
 		},
 		{
-			insertedAccount:   Account{},
-			AccountFieldError: AccountFieldError{EmptyNameError, ZeroDateOpenedError},
-		},
-		{
 			insertedAccount: Account{
 				Name:"TEST_ACCOUNT",
 			},
@@ -27,24 +23,42 @@ func Test_ValidateAccount(t *testing.T) {
 		},
 		{
 			insertedAccount: Account{
-				DateOpened: time.Date(2000,1,1,1,1,1,1,time.UTC),
+				TimeRange:TimeRange{
+					Start:pq.NullTime{
+						Valid: true,
+						Time: time.Date(2000,1,1,1,1,1,1,time.UTC),
+					},
+				},
 			},
 			AccountFieldError: AccountFieldError{EmptyNameError},
 		},
 		{
 			insertedAccount: Account{
 				Name:"TEST_ACCOUNT",
-				DateClosed: pq.NullTime{Valid:true},
+				TimeRange: TimeRange{
+					Start:pq.NullTime{},
+					End:pq.NullTime{
+						Valid:true,
+					},
+				},
 			},
 			AccountFieldError: AccountFieldError{ZeroDateOpenedError, ZeroValidDateClosedError},
 		},
 		{
 			insertedAccount: Account{
 				Name:"TEST_ACCOUNT",
-				DateOpened: time.Date(2000,1,1,1,1,1,1,time.UTC),
-				DateClosed: pq.NullTime{Valid:true, Time:time.Date(1999,1,1,1,1,1,1,time.UTC)},
+				TimeRange: TimeRange{
+					Start:pq.NullTime{
+						Valid:true,
+						Time:time.Date(2000,1,1,1,1,1,1,time.UTC),
+					},
+					End:pq.NullTime{
+						Valid:true,
+						Time:time.Date(1999,1,1,1,1,1,1,time.UTC),
+					},
+				},
 			},
-			AccountFieldError: AccountFieldError{DateClosedBeforeDateOpenedError1},
+			AccountFieldError: AccountFieldError{string(DateClosedBeforeDateOpenedError)},
 		},
 		{
 			insertedAccount:   newTestAccount(),
@@ -63,8 +77,16 @@ func Test_ValidateAccount(t *testing.T) {
 func newTestAccount() Account {
 	return Account{
 		Name:       "TEST_ACCOUNT",
-		DateOpened: time.Date(2000, 1, 1, 1, 1, 1, 1, time.UTC),
-		DateClosed: pq.NullTime{Valid: true, Time: time.Date(2001, 1, 1, 1, 1, 1, 1, time.UTC)},
+		TimeRange: TimeRange{
+			Start:pq.NullTime{
+				Valid: true,
+				Time: time.Date(2000, 1, 1, 1, 1, 1, 1, time.UTC),
+			},
+			End:pq.NullTime{
+				Valid: true,
+				Time: time.Date(2001, 1, 1, 1, 1, 1, 1, time.UTC),
+			},
+		},
 	}
 }
 
@@ -90,11 +112,19 @@ func Test_IsOpen(t *testing.T) {
 			IsOpen:  true,
 		},
 		{
-			Account: Account{DateClosed:pq.NullTime{Valid:false}},
+			Account: Account{
+				TimeRange:TimeRange{
+					End:pq.NullTime{Valid:false},
+				},
+			},
 			IsOpen:  true,
 		},
 		{
-			Account: Account{DateClosed:pq.NullTime{Valid:true}},
+			Account: Account{
+				TimeRange: TimeRange{
+					End: pq.NullTime{Valid: true},
+				},
+			},
 			IsOpen:  false,
 		},
 	}

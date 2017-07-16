@@ -23,7 +23,6 @@ const (
 	EmptyNameError                   = "Empty name."
 	ZeroDateOpenedError              = "No opened date given."
 	ZeroValidDateClosedError         = "Closed date marked as valid but not set."
-	DateClosedBeforeDateOpenedError1 = "Closed date is before opened date."
 )
 
 

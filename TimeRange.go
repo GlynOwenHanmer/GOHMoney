@@ -2,6 +2,7 @@ package GOHMoney
 
 import (
 	"github.com/lib/pq"
+	"time"
 )
 
 // TimeRange represents a range of time that can be open ended at none, either or both ends.
@@ -11,15 +12,28 @@ type TimeRange struct {
 }
 
 // Validate checks the fields of TimeRange to ensure that if either the Start or End time is present, that the End time isn't before the Start time and returns an error if it is.
-func (tr TimeRange) Validate() error {
+func (timeRange TimeRange) Validate() error {
 	switch {
-	case tr.Start.Valid == false,
-		tr.End.Valid == false:
+	case timeRange.Start.Valid == false,
+		timeRange.End.Valid == false:
 		return nil
-	case tr.End.Time.Before(tr.Start.Time):
+	case timeRange.End.Time.Before(timeRange.Start.Time):
 		return DateClosedBeforeDateOpenedError
 	}
 	return nil
+}
+
+// Contains returns true if the TimeRange contains given time.
+// Contains will always return true when both the Start time and End time are not Valid
+// Contains returns true if the time is on or after the TimeRange's Start time and before the TimeRange's End time.
+func (timeRange TimeRange) Contains(time time.Time) bool {
+	switch {
+	case timeRange.Start.Valid && time.Before(timeRange.Start.Time):
+		return false
+	case timeRange.End.Valid && (time.Equal(timeRange.End.Time) || time.After(timeRange.End.Time)):
+		return false
+	}
+	return true
 }
 
 // timeRangeValidationError holds an error describing an issue with a TimeRange object

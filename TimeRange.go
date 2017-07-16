@@ -13,11 +13,7 @@ type TimeRange struct {
 
 // Validate checks the fields of TimeRange to ensure that if either the Start or End time is present, that the End time isn't before the Start time and returns an error if it is.
 func (timeRange TimeRange) Validate() error {
-	switch {
-	case timeRange.Start.Valid == false,
-		timeRange.End.Valid == false:
-		return nil
-	case timeRange.End.Time.Before(timeRange.Start.Time):
+	if timeRange.Start.Valid && timeRange.End.Valid && timeRange.End.Time.Before(timeRange.Start.Time) {
 		return DateClosedBeforeDateOpenedError
 	}
 	return nil
@@ -27,10 +23,10 @@ func (timeRange TimeRange) Validate() error {
 // Contains will always return true when both the Start time and End time are not Valid
 // Contains returns true if the time is on or after the TimeRange's Start time and before the TimeRange's End time.
 func (timeRange TimeRange) Contains(time time.Time) bool {
-	switch {
-	case timeRange.Start.Valid && time.Before(timeRange.Start.Time):
+	if timeRange.Start.Valid && time.Before(timeRange.Start.Time) {
 		return false
-	case timeRange.End.Valid && (time.Equal(timeRange.End.Time) || time.After(timeRange.End.Time)):
+	}
+	if timeRange.End.Valid && (time.Equal(timeRange.End.Time) || time.After(timeRange.End.Time)) {
 		return false
 	}
 	return true

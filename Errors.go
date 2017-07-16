@@ -20,10 +20,10 @@ func (e AccountFieldError) Error() string {
 
 // Various error strings describing possible errors with potential new Account items.
 const (
-	EmptyNameError = "Empty name."
-	ZeroDateOpenedError = "No opened date given."
-	ZeroValidDateClosedError = "Closed date marked as valid but not set."
-	DateClosedBeforeDateOpenedError = "Closed date is before opened date."
+	EmptyNameError                   = "Empty name."
+	ZeroDateOpenedError              = "No opened date given."
+	ZeroValidDateClosedError         = "Closed date marked as valid but not set."
+	DateClosedBeforeDateOpenedError1 = "Closed date is before opened date."
 )
 
 

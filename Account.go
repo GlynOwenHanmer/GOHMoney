@@ -40,7 +40,7 @@ func (account Account) Validate() AccountFieldError {
 		if account.DateClosed.Time.IsZero() {
 			fieldErrorDescriptions = append(fieldErrorDescriptions, ZeroValidDateClosedError)
 		} else if account.DateClosed.Time.Before(account.DateOpened) {
-			fieldErrorDescriptions = append(fieldErrorDescriptions, DateClosedBeforeDateOpenedError)
+			fieldErrorDescriptions = append(fieldErrorDescriptions, DateClosedBeforeDateOpenedError1)
 		}
 	}
 	return AccountFieldError(fieldErrorDescriptions)

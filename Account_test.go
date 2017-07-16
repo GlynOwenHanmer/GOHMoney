@@ -44,7 +44,7 @@ func Test_ValidateAccount(t *testing.T) {
 				DateOpened: time.Date(2000,1,1,1,1,1,1,time.UTC),
 				DateClosed: pq.NullTime{Valid:true, Time:time.Date(1999,1,1,1,1,1,1,time.UTC)},
 			},
-			AccountFieldError: AccountFieldError{DateClosedBeforeDateOpenedError},
+			AccountFieldError: AccountFieldError{DateClosedBeforeDateOpenedError1},
 		},
 		{
 			insertedAccount:   newTestAccount(),

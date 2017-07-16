@@ -11,6 +11,14 @@ type TimeRange struct {
 	End   pq.NullTime
 }
 
+// Equal returns true if two TimeRange objects have matching Start and End NullTimes
+func (a TimeRange) Equal(b TimeRange) bool {
+	if !NullTime(a.Start).equal(NullTime(b.Start)) || !NullTime(a.End).equal(NullTime(b.End)) {
+		return false
+	}
+	return true
+}
+
 // Validate checks the fields of TimeRange to ensure that if either the Start or End time is present, that the End time isn't before the Start time and returns an error if it is.
 func (timeRange TimeRange) Validate() error {
 	if timeRange.Start.Valid && timeRange.End.Valid && timeRange.End.Time.Before(timeRange.Start.Time) {

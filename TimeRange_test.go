@@ -184,3 +184,39 @@ func Test_Contains(t *testing.T) {
 		}
 	}
 }
+
+func Test_Equal(t *testing.T) {
+	testSets := []struct {
+		a, b TimeRange
+		equal bool
+	}{
+		{
+			a:TimeRange{},
+			b:TimeRange{},
+			equal:true,
+		},
+		{
+			a:TimeRange{
+				Start:pq.NullTime{
+					Valid:true,
+				},
+			},
+			b:TimeRange{},
+			equal:false,
+		},
+		{
+			a:TimeRange{
+				End:pq.NullTime{
+					Valid:true,
+				},
+			},
+			b:TimeRange{},
+			equal:false,
+		},
+	}
+	for _, testSet := range testSets {
+		if equal := testSet.a.Equal(testSet.b); equal != testSet.equal {
+			t.Errorf(`Unexpected equal result.\nExpected: %t, Actual  : %t`, testSet.equal, equal)
+		}
+	}
+}

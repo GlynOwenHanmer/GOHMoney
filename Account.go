@@ -3,6 +3,8 @@ package GOHMoney
 import (
 	"encoding/json"
 	"strings"
+	"github.com/lib/pq"
+	"time"
 )
 
 // An Account holds the logic for an account.
@@ -40,6 +42,38 @@ func (account Account) Validate() AccountFieldError {
 		fieldErrorDescriptions = append(fieldErrorDescriptions, ZeroValidDateClosedError)
 	}
 	return AccountFieldError(fieldErrorDescriptions)
+}
+
+// ValidateBalance validates a Balance against an Account.
+// ValidateBalance returns any logical errors between the Account and the Balance.
+// ValidateBalance first attempts to validate the Account as an entity by itself. If there are any errors with the Account, these errors are returned and the Balance is not attempted to be validated against the account.
+// If the Date of the Balance is outside of the TimeRange of the Account, a BalanceDateOutOfAccountTimeRange will be returned.
+func (account Account) ValidateBalance(balance Balance) error {
+	if err := account.Validate(); err != nil {
+		return err
+	}
+	if !account.TimeRange.Contains(balance.Date) {
+		return BalanceDateOutOfAccountTimeRange{
+			BalanceDate:balance.Date,
+			AccountTimeRange:account.TimeRange,
+		}
+	}
+	return nil
+}
+
+// NewAccount creates a new Account object with a Valid Start time and returns it, also returning any logical errors with the newly created account.
+func NewAccount(name string, opened time.Time, closed pq.NullTime) (Account, error) {
+	newAccount := Account{
+		Name: name,
+		TimeRange: TimeRange{
+			Start: pq.NullTime{
+				Valid: true,
+				Time: opened,
+			},
+			End: closed,
+		},
+	}
+	return newAccount, newAccount.Validate()
 }
 
 // Accounts holds multiple Account items.

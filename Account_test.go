@@ -4,6 +4,8 @@ import (
 	"testing"
 	"github.com/lib/pq"
 	"time"
+	"bytes"
+	"fmt"
 )
 
 func Test_ValidateAccount(t *testing.T) {
@@ -133,5 +135,129 @@ func Test_IsOpen(t *testing.T) {
 		if actual != testSet.IsOpen {
 			t.Errorf("Account IsOpen expected %t, got %t. Account: %v", testSet.IsOpen, actual, testSet.Account)
 		}
+	}
+}
+
+func Test_InvalidAccountValidateBalance(t *testing.T) {
+	present := time.Now()
+	past := present.AddDate(-1, 0, 0)
+	future := present.AddDate(1, 0, 0)
+
+	invalidAccount := Account{
+		TimeRange:TimeRange{
+			Start:pq.NullTime{
+				Valid:true,
+				Time:future,
+			},
+			End:pq.NullTime{
+				Valid:true,
+				Time:past,
+			},
+		},
+	}
+
+	accountErr := invalidAccount.Validate();
+	balanceErr := invalidAccount.ValidateBalance(Balance{});
+	switch {
+	case accountErr == nil && balanceErr == nil:
+		break
+	case accountErr == nil || balanceErr == nil,
+		accountErr.Error() != balanceErr.Error():
+		t.Errorf("ValidateBalance did not return Account error.\nExpected: %s\nActual  : %s", accountErr, balanceErr)
+	}
+}
+
+func Test_AccountValidateBalance(t *testing.T) {
+	present := time.Now()
+	past := present.AddDate(-1, 0, 0)
+	future := present.AddDate(1, 0, 0)
+
+	openAccount := Account{
+		Name: "Test Account",
+		TimeRange:TimeRange{
+			Start: pq.NullTime{
+				Valid: true,
+				Time:  present,
+			},
+			End: pq.NullTime{Valid: false},
+		},
+	}
+	closedAccount := Account{
+		Name: "Test Account",
+		TimeRange:TimeRange{
+			Start:pq.NullTime{
+				Valid:true,
+				Time:present,
+			},
+			End:pq.NullTime{
+				Valid:true,
+				Time:future,
+			},
+		},
+	}
+
+	pastBalance := Balance{Date:past}
+	presentBalance := Balance{Date:present}
+	futureBalance := Balance{Date:future}
+	testSets := []struct{
+		Account
+		Balance
+		error
+	}{
+		{
+			Account: openAccount,
+			Balance: pastBalance,
+			error:BalanceDateOutOfAccountTimeRange{
+				BalanceDate:pastBalance.Date,
+				AccountTimeRange:openAccount.TimeRange,
+			},
+		},
+		{
+			Account: openAccount,
+			Balance: presentBalance,
+			error:nil,
+		},
+		{
+			Account: openAccount,
+			Balance: futureBalance,
+			error:nil,
+		},
+		{
+			Account: closedAccount,
+			Balance: pastBalance,
+			error:BalanceDateOutOfAccountTimeRange{
+				BalanceDate:pastBalance.Date,
+				AccountTimeRange:closedAccount.TimeRange,
+			},
+		},
+		{
+			Account: closedAccount,
+			Balance: presentBalance,
+			error:nil,
+		},
+		{
+			Account: closedAccount,
+			Balance: futureBalance,
+			error:BalanceDateOutOfAccountTimeRange{
+				BalanceDate:futureBalance.Date,
+				AccountTimeRange:closedAccount.TimeRange,
+			},
+		},
+	}
+	for _, testSet := range testSets {
+		err := testSet.Account.ValidateBalance(testSet.Balance)
+		if testSet.error == err {
+			continue
+		}
+		testSetTyped, testSetErrorIsType := testSet.error.(BalanceDateOutOfAccountTimeRange)
+		actualErrorTyped, actualErrorIsType := err.(BalanceDateOutOfAccountTimeRange)
+		if testSetErrorIsType != actualErrorIsType {
+			t.Fatalf(`Expected BalanceDateOutOfAccountTimeRange but a different type was returned.`)
+		}
+		var message bytes.Buffer
+		fmt.Fprintf(&message, "Unexpected error.\nExpected: %+v\nActual  : %+v", testSetTyped, actualErrorTyped)
+		fmt.Fprintf(&message, "\nExpected error: BalanceDate: %s, AccountTimeRange: %+v", testSetTyped.BalanceDate, testSetTyped.AccountTimeRange)
+		fmt.Fprintf(&message, "\nActual error  : BalanceDate: %s, AccountTimeRange: %+v", actualErrorTyped.BalanceDate, actualErrorTyped.AccountTimeRange)
+		t.Errorf(message.String())
 	}
 }

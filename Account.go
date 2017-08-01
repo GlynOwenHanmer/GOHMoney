@@ -41,7 +41,10 @@ func (account Account) Validate() AccountFieldError {
 	if account.TimeRange.End.Valid && account.TimeRange.End.Time.IsZero() {
 		fieldErrorDescriptions = append(fieldErrorDescriptions, ZeroValidDateClosedError)
 	}
-	return AccountFieldError(fieldErrorDescriptions)
+	if len(fieldErrorDescriptions) > 0 {
+		return AccountFieldError(fieldErrorDescriptions)
+	}
+	return nil
 }
 
 // ValidateBalance validates a Balance against an Account.
@@ -65,7 +68,7 @@ func (account Account) ValidateBalance(balance Balance) error {
 }
 
 // NewAccount creates a new Account object with a Valid Start time and returns it, also returning any logical errors with the newly created account.
-func NewAccount(name string, opened time.Time, closed pq.NullTime) (Account, error) {
+func NewAccount(name string, opened time.Time, closed pq.NullTime) (Account, AccountFieldError) {
 	newAccount := Account{
 		Name: name,
 		TimeRange: TimeRange{

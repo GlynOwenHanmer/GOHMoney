@@ -66,6 +66,19 @@ func Test_ValidateAccount(t *testing.T) {
 			insertedAccount:   newTestAccount(),
 			AccountFieldError: nil,
 		},
+		{
+			insertedAccount: Account{
+				Name: "TEST_ACCOUNT",
+				TimeRange: TimeRange{
+					Start:pq.NullTime{
+						Valid:true,
+						Time:time.Now(),
+					},
+					End:pq.NullTime{},
+				},
+			},
+			AccountFieldError: nil,
+		},
 	}
 	for _, testSet := range testSets {
 		actual := testSet.insertedAccount.Validate()

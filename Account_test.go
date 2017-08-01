@@ -163,7 +163,7 @@ func Test_InvalidAccountValidateBalance(t *testing.T) {
 		break
 	case accountErr == nil || balanceErr == nil,
 		accountErr.Error() != balanceErr.Error():
-		t.Errorf("ValidateBalance did not return Account error.\nExpected: %s\nActual  : %s", accountErr, balanceErr)
+		t.Errorf("ValidateBalance did not return Account error when given invalid account.\nExpected: %s\nActual  : %s", accountErr, balanceErr)
 	}
 }
 

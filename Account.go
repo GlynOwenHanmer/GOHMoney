@@ -52,6 +52,9 @@ func (account Account) ValidateBalance(balance Balance) error {
 	if err := account.Validate(); err != nil {
 		return err
 	}
+	if err := balance.Validate(); err != nil {
+		return err
+	}
 	if !account.TimeRange.Contains(balance.Date) {
 		return BalanceDateOutOfAccountTimeRange{
 			BalanceDate:balance.Date,

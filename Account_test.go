@@ -187,7 +187,7 @@ func Test_AccountValidateBalance(t *testing.T) {
 
 	openAccount := Account{
 		Name: "Test Account",
-		TimeRange:TimeRange{
+		TimeRange: TimeRange{
 			Start: pq.NullTime{
 				Valid: true,
 				Time:  present,
@@ -197,22 +197,22 @@ func Test_AccountValidateBalance(t *testing.T) {
 	}
 	closedAccount := Account{
 		Name: "Test Account",
-		TimeRange:TimeRange{
-			Start:pq.NullTime{
-				Valid:true,
-				Time:present,
+		TimeRange: TimeRange{
+			Start: pq.NullTime{
+				Valid: true,
+				Time:  present,
 			},
-			End:pq.NullTime{
-				Valid:true,
-				Time:future,
+			End: pq.NullTime{
+				Valid: true,
+				Time:  future,
 			},
 		},
 	}
 
-	pastBalance := Balance{Date:past}
-	presentBalance := Balance{Date:present}
-	futureBalance := Balance{Date:future}
-	testSets := []struct{
+	pastBalance := Balance{Date: past}
+	presentBalance := Balance{Date: present}
+	futureBalance := Balance{Date: future}
+	testSets := []struct {
 		Account
 		Balance
 		error
@@ -220,40 +220,40 @@ func Test_AccountValidateBalance(t *testing.T) {
 		{
 			Account: openAccount,
 			Balance: pastBalance,
-			error:BalanceDateOutOfAccountTimeRange{
-				BalanceDate:pastBalance.Date,
-				AccountTimeRange:openAccount.TimeRange,
+			error: BalanceDateOutOfAccountTimeRange{
+				BalanceDate:      pastBalance.Date,
+				AccountTimeRange: openAccount.TimeRange,
 			},
 		},
 		{
 			Account: openAccount,
 			Balance: presentBalance,
-			error:nil,
+			error:   nil,
 		},
 		{
 			Account: openAccount,
 			Balance: futureBalance,
-			error:nil,
+			error:   nil,
 		},
 		{
 			Account: closedAccount,
 			Balance: pastBalance,
-			error:BalanceDateOutOfAccountTimeRange{
-				BalanceDate:pastBalance.Date,
-				AccountTimeRange:closedAccount.TimeRange,
+			error: BalanceDateOutOfAccountTimeRange{
+				BalanceDate:      pastBalance.Date,
+				AccountTimeRange: closedAccount.TimeRange,
 			},
 		},
 		{
 			Account: closedAccount,
 			Balance: presentBalance,
-			error:nil,
+			error:   nil,
 		},
 		{
 			Account: closedAccount,
 			Balance: futureBalance,
-			error:BalanceDateOutOfAccountTimeRange{
-				BalanceDate:futureBalance.Date,
-				AccountTimeRange:closedAccount.TimeRange,
+			error: BalanceDateOutOfAccountTimeRange{
+				BalanceDate:      futureBalance.Date,
+				AccountTimeRange: closedAccount.TimeRange,
 			},
 		},
 	}
@@ -272,5 +272,59 @@ func Test_AccountValidateBalance(t *testing.T) {
 		fmt.Fprintf(&message, "\nExpected error: BalanceDate: %s, AccountTimeRange: %+v", testSetTyped.BalanceDate, testSetTyped.AccountTimeRange)
 		fmt.Fprintf(&message, "\nActual error  : BalanceDate: %s, AccountTimeRange: %+v", actualErrorTyped.BalanceDate, actualErrorTyped.AccountTimeRange)
 		t.Errorf(message.String())
+	}
+}
+
+func Test_NewAccount(t *testing.T) {
+	now := time.Now()
+	testSets := []struct{
+		name string
+		start time.Time
+		end pq.NullTime
+		error
+	}{
+		{
+			name:  "TEST_ACCOUNT",
+			start: now,
+			end:   pq.NullTime{},
+			error: nil,
+		},
+		{
+			name:  "TEST_ACCOUNT",
+			start: now,
+			end:   pq.NullTime{Valid:true},
+			error: AccountFieldError{DateClosedBeforeDateOpenedError.Error()},
+		},
+	}
+	for _, testSet := range testSets {
+		account, err := NewAccount(testSet.name, testSet.start,testSet.end)
+		actualFieldError, actualIsTyped := err.(AccountFieldError)
+		expectedFieldError, expectedIsTyped := testSet.error.(AccountFieldError)
+		if actualIsTyped != expectedIsTyped {
+			t.Errorf("Unexpected error.\n\tExpected: %s\n\tActual  : %s", testSet.error, err)
+		} else if !actualIsTyped && err != testSet.error{
+			t.Errorf("Unexpected error.\n\tExpected: %s\n\tActual  : %s", testSet.error, err)
+		} else if actualIsTyped && !actualFieldError.equal(expectedFieldError) {
+			t.Errorf("Error is correct type but unexpected contents.\n\tExpected: %s\n\tActual  : %s", expectedFieldError, actualFieldError)
+		}
+		//if err == testSet.error {
+		//	t.Errorf("Unexpected error.\n\tExpected: %s\n\tActual  : %s", testSet.error, err)
+		//}
+		if account.Name != testSet.name {
+			t.Errorf("Unexpected name.\n\tExpected: %s\n\tActual  : %s", testSet.name, account.Name)
+		}
+		if !account.Start.Valid {
+			t.Errorf("Returned invalid start time.")
+		}
+		if !account.Start.Time.Equal(testSet.start) {
+			t.Errorf("Unexpected start.\n\tExpected: %s\n\tActual  : %s", testSet.start, account.Start.Time)
+		}
+		if account.End.Valid != testSet.end.Valid {
+			t.Errorf("Unexpected end time validity.\n\tExpected: %s\n\tActual  : %s", account.End.Valid, testSet.end.Valid)
+		}
+		if !account.End.Time.Equal(testSet.end.Time) {
+			t.Errorf("Unexpected end time.\n\tExpected: %s\n\tActual  : %s", testSet.end.Time, account.End.Time)
+		}
+
 	}
 }

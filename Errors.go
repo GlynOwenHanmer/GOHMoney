@@ -22,6 +22,14 @@ func (e AccountFieldError) Error() string {
 	return string(errorString.String())
 }
 
+func (errors AccountFieldError) equal(errors2 AccountFieldError) bool {
+	if len(errors) != len(errors2) { return false }
+	for i := range errors {
+		if errors[i] != errors2[i] { return false }
+	}
+	return true
+}
+
 // Various error strings describing possible errors with potential new Account items.
 const (
 	EmptyNameError                   = "Empty name."

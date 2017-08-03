@@ -5,6 +5,7 @@ import (
 	"strings"
 	"github.com/lib/pq"
 	"time"
+	"fmt"
 )
 
 // An Account holds the logic for an account.
@@ -31,17 +32,28 @@ func (account Account) Validate() AccountFieldError {
 	var fieldErrorDescriptions []string
 	if len(strings.TrimSpace(account.Name)) == 0 {
 		fieldErrorDescriptions = append(fieldErrorDescriptions, EmptyNameError)
+		fmt.Printf("Len empt: %d\n", len(fieldErrorDescriptions))
 	}
+	valErr := account.TimeRange.Validate()
 	if err := account.TimeRange.Validate(); err != nil {
+		fmt.Println(valErr)
 		fieldErrorDescriptions = append(fieldErrorDescriptions, err.Error())
+		fmt.Printf("Len time: %d\n", len(fieldErrorDescriptions))
+
 	}
 	if !account.TimeRange.Start.Valid || account.TimeRange.Start.Time.IsZero() {
 		fieldErrorDescriptions = append(fieldErrorDescriptions, ZeroDateOpenedError)
+		fmt.Printf("Len zerodate: %d\n", len(fieldErrorDescriptions))
+
 	}
 	if account.TimeRange.End.Valid && account.TimeRange.End.Time.IsZero() {
 		fieldErrorDescriptions = append(fieldErrorDescriptions, ZeroValidDateClosedError)
+		fmt.Printf("Len timeend: %d\n", len(fieldErrorDescriptions))
 	}
+	fmt.Printf("Len fini: %d\n", len(fieldErrorDescriptions))
+
 	if len(fieldErrorDescriptions) > 0 {
+		fmt.Println("returning err")
 		return AccountFieldError(fieldErrorDescriptions)
 	}
 	return nil
@@ -68,7 +80,7 @@ func (account Account) ValidateBalance(balance Balance) error {
 }
 
 // NewAccount creates a new Account object with a Valid Start time and returns it, also returning any logical errors with the newly created account.
-func NewAccount(name string, opened time.Time, closed pq.NullTime) (Account, AccountFieldError) {
+func NewAccount(name string, opened time.Time, closed pq.NullTime) (Account, error) {
 	newAccount := Account{
 		Name: name,
 		TimeRange: TimeRange{
@@ -79,7 +91,11 @@ func NewAccount(name string, opened time.Time, closed pq.NullTime) (Account, Acc
 			End: closed,
 		},
 	}
-	return newAccount, newAccount.Validate()
+	var err error
+	if accountErr := newAccount.Validate(); len(accountErr) > 0 {
+		err = accountErr
+	}
+	return newAccount, err
 }
 
 // Accounts holds multiple Account items.

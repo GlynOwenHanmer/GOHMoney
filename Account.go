@@ -68,7 +68,7 @@ func (account Account) ValidateBalance(balance Balance) error {
 }
 
 // NewAccount creates a new Account object with a Valid Start time and returns it, also returning any logical errors with the newly created account.
-func NewAccount(name string, opened time.Time, closed pq.NullTime) (Account, AccountFieldError) {
+func NewAccount(name string, opened time.Time, closed pq.NullTime) (Account, error) {
 	newAccount := Account{
 		Name: name,
 		TimeRange: TimeRange{
@@ -79,7 +79,11 @@ func NewAccount(name string, opened time.Time, closed pq.NullTime) (Account, Acc
 			End: closed,
 		},
 	}
-	return newAccount, newAccount.Validate()
+	var err error
+	if accountErr := newAccount.Validate(); len(accountErr) > 0 {
+		err = accountErr
+	}
+	return newAccount, err
 }
 
 // Accounts holds multiple Account items.

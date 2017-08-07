@@ -291,7 +291,7 @@ func Test_NewAccount(t *testing.T) {
 			error: nil,
 		},
 		{
-			name:  "TEST_ACCOUNT",
+			name:  "TEST_ACCOUNT_WITH_ACCOUNT_ERROR",
 			start: now,
 			end:   pq.NullTime{Valid:true, Time:now.AddDate(0,0,-1)},
 			error: AccountFieldError{DateClosedBeforeDateOpenedError.Error()},

@@ -277,12 +277,13 @@ func Test_AccountValidateBalance(t *testing.T) {
 
 func Test_NewAccount(t *testing.T) {
 	now := time.Now()
-	testSets := []struct{
+	type testSet struct {
 		name string
 		start time.Time
 		end pq.NullTime
 		error
-	}{
+	}
+	testSets := []testSet{
 		{
 			name:  "TEST_ACCOUNT",
 			start: now,
@@ -292,38 +293,44 @@ func Test_NewAccount(t *testing.T) {
 		{
 			name:  "TEST_ACCOUNT",
 			start: now,
-			end:   pq.NullTime{Valid:true},
+			end:   pq.NullTime{Valid:true, Time:now.AddDate(0,0,-1)},
 			error: AccountFieldError{DateClosedBeforeDateOpenedError.Error()},
 		},
 	}
-	for _, testSet := range testSets {
-		account, err := NewAccount(testSet.name, testSet.start,testSet.end)
+	logTestSet := func(ts testSet){t.Logf("Start: %s,\tEnd: %s,", ts.start, ts.end)}
+	for _, set := range testSets {
+		account, err := NewAccount(set.name, set.start, set.end)
 		actualFieldError, actualIsTyped := err.(AccountFieldError)
-		expectedFieldError, expectedIsTyped := testSet.error.(AccountFieldError)
+		expectedFieldError, expectedIsTyped := set.error.(AccountFieldError)
+
 		if actualIsTyped != expectedIsTyped {
-			t.Errorf("Unexpected error.\n\tExpected: %s\n\tActual  : %s", testSet.error, err)
-		} else if !actualIsTyped && err != testSet.error{
-			t.Errorf("Unexpected error.\n\tExpected: %s\n\tActual  : %s", testSet.error, err)
+			t.Errorf("Unexpected error.\n\tExpected: %s\n\tActual  : %s", set.error, err)
+		} else if !actualIsTyped && err != set.error{
+			t.Errorf("Unexpected error.\n\tExpected: %s\n\tActual  : %s", set.error, err)
+			logTestSet(set)
 		} else if actualIsTyped && !actualFieldError.equal(expectedFieldError) {
 			t.Errorf("Error is correct type but unexpected contents.\n\tExpected: %s\n\tActual  : %s", expectedFieldError, actualFieldError)
+			logTestSet(set)
 		}
-		//if err == testSet.error {
-		//	t.Errorf("Unexpected error.\n\tExpected: %s\n\tActual  : %s", testSet.error, err)
-		//}
-		if account.Name != testSet.name {
-			t.Errorf("Unexpected name.\n\tExpected: %s\n\tActual  : %s", testSet.name, account.Name)
+		if account.Name != set.name {
+			t.Errorf("Unexpected name.\n\tExpected: %s\n\tActual  : %s", set.name, account.Name)
+			logTestSet(set)
 		}
 		if !account.Start.Valid {
 			t.Errorf("Returned invalid start time.")
+			logTestSet(set)
 		}
-		if !account.Start.Time.Equal(testSet.start) {
-			t.Errorf("Unexpected start.\n\tExpected: %s\n\tActual  : %s", testSet.start, account.Start.Time)
+		if !account.Start.Time.Equal(set.start) {
+			t.Errorf("Unexpected start.\n\tExpected: %s\n\tActual  : %s", set.start, account.Start.Time)
+			logTestSet(set)
 		}
-		if account.End.Valid != testSet.end.Valid {
-			t.Errorf("Unexpected end time validity.\n\tExpected: %s\n\tActual  : %s", account.End.Valid, testSet.end.Valid)
+		if account.End.Valid != set.end.Valid {
+			t.Errorf("Unexpected end time validity.\n\tExpected: %s\n\tActual  : %s", account.End.Valid, set.end.Valid)
+			logTestSet(set)
 		}
-		if !account.End.Time.Equal(testSet.end.Time) {
-			t.Errorf("Unexpected end time.\n\tExpected: %s\n\tActual  : %s", testSet.end.Time, account.End.Time)
+		if !account.End.Time.Equal(set.end.Time) {
+			t.Errorf("Unexpected end time.\n\tExpected: %s\n\tActual  : %s", set.end.Time, account.End.Time)
+			logTestSet(set)
 		}
 
 	}

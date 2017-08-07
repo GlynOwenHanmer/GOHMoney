@@ -5,7 +5,6 @@ import (
 	"strings"
 	"github.com/lib/pq"
 	"time"
-	"fmt"
 )
 
 // An Account holds the logic for an account.
@@ -32,28 +31,17 @@ func (account Account) Validate() AccountFieldError {
 	var fieldErrorDescriptions []string
 	if len(strings.TrimSpace(account.Name)) == 0 {
 		fieldErrorDescriptions = append(fieldErrorDescriptions, EmptyNameError)
-		fmt.Printf("Len empt: %d\n", len(fieldErrorDescriptions))
 	}
-	valErr := account.TimeRange.Validate()
 	if err := account.TimeRange.Validate(); err != nil {
-		fmt.Println(valErr)
 		fieldErrorDescriptions = append(fieldErrorDescriptions, err.Error())
-		fmt.Printf("Len time: %d\n", len(fieldErrorDescriptions))
-
 	}
 	if !account.TimeRange.Start.Valid || account.TimeRange.Start.Time.IsZero() {
 		fieldErrorDescriptions = append(fieldErrorDescriptions, ZeroDateOpenedError)
-		fmt.Printf("Len zerodate: %d\n", len(fieldErrorDescriptions))
-
 	}
 	if account.TimeRange.End.Valid && account.TimeRange.End.Time.IsZero() {
 		fieldErrorDescriptions = append(fieldErrorDescriptions, ZeroValidDateClosedError)
-		fmt.Printf("Len timeend: %d\n", len(fieldErrorDescriptions))
 	}
-	fmt.Printf("Len fini: %d\n", len(fieldErrorDescriptions))
-
 	if len(fieldErrorDescriptions) > 0 {
-		fmt.Println("returning err")
 		return AccountFieldError(fieldErrorDescriptions)
 	}
 	return nil

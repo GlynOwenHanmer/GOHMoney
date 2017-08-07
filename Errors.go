@@ -22,6 +22,8 @@ func (e AccountFieldError) Error() string {
 	return string(errorString.String())
 }
 
+// equal returns true if two AccountFieldErrors contain the same error information strings in exactly the same order.
+// Duplicate error information strings held within the AccountFieldError are counted as individual error strings.
 func (errors AccountFieldError) equal(errors2 AccountFieldError) bool {
 	if len(errors) != len(errors2) { return false }
 	for i := range errors {

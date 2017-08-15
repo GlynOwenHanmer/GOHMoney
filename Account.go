@@ -13,12 +13,12 @@ type Account struct {
 	timeRange TimeRange
 }
 
-// Start returns the start time of the Account's TimeRange
+// Start returns the start time that the Account opened.
 func (account Account) Start() time.Time {
 	return account.timeRange.Start.Time
 }
 
-// End returns the end time of the Account's TimeRange. The End time is returned as a NullTime object as it may not be a valid time when the Account is not yet closed.
+// End returns the a NullTime object that is Valid if the account has been closed.
 func (account Account) End() pq.NullTime {
 	return account.timeRange.End
 }
@@ -94,6 +94,46 @@ func NewAccount(name string, opened time.Time, closed pq.NullTime) (Account, err
 		err = accountErr
 	}
 	return newAccount, err
+}
+
+
+// MarshalJSON marshals an Account into a json blob, returning the blob with any errors that occur during the marshalling.
+func (account Account) MarshalJSON() ([]byte, error) {
+	type Alias Account
+	return json.Marshal(&struct {
+		*Alias
+		Start time.Time
+		End pq.NullTime
+	}{
+		Alias:    (*Alias)(&account),
+		Start: account.Start(),
+		End: account.End(),
+	})
+}
+
+// UnmarshalJSON attempts to unmarshal a json blob into an Account object, returning any errors that occur during the unmarshalling.
+func (account *Account) UnmarshalJSON(data []byte) error {
+	type Alias Account
+	aux := &struct {
+		Start time.Time
+		End pq.NullTime
+		*Alias
+	}{
+		Alias: (*Alias)(account),
+
+	}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	account.timeRange = TimeRange{
+		Start:pq.NullTime{Valid:true, Time:aux.Start},
+		End:aux.End,
+	}
+	var returnErr error
+	if err := account.Validate(); err != nil {
+		returnErr = err
+	}
+	return returnErr
 }
 
 // Accounts holds multiple Account items.

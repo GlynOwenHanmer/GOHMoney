@@ -9,7 +9,7 @@ import (
 
 // An Account holds the logic for an account.
 type Account struct {
-	Name       string	`json:"name"`
+	Name       string
 	timeRange TimeRange
 }
 

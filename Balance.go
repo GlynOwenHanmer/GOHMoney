@@ -9,8 +9,8 @@ const EmptyBalancesMessage  = "Empty Balances Object"
 
 // Balance holds the logic for a balance item.
 type Balance struct {
-	Date   time.Time `json:"date"`
-	Amount float32   `json:"amount"`
+	Date   time.Time
+	Amount float32
 }
 
 // Validate checks the fields of a Balance and returns any logic errors that are present within it.

@@ -10,12 +10,22 @@ import (
 // An Account holds the logic for an account.
 type Account struct {
 	Name       string	`json:"name"`
-	TimeRange
+	timeRange TimeRange
+}
+
+// Start returns the start time of the Account's TimeRange
+func (account Account) Start() time.Time {
+	return account.timeRange.Start.Time
+}
+
+// End returns the end time of the Account's TimeRange. The End time is returned as a NullTime object as it may not be a valid time when the Account is not yet closed.
+func (account Account) End() pq.NullTime {
+	return account.timeRange.End
 }
 
 // IsOpen return true if the Account is open.
 func (account Account) IsOpen() bool {
-	return !account.TimeRange.End.Valid
+	return !account.timeRange.End.Valid
 }
 
 // String() ensures that Account conforms to the Stringer interface.
@@ -32,13 +42,13 @@ func (account Account) Validate() AccountFieldError {
 	if len(strings.TrimSpace(account.Name)) == 0 {
 		fieldErrorDescriptions = append(fieldErrorDescriptions, EmptyNameError)
 	}
-	if err := account.TimeRange.Validate(); err != nil {
+	if err := account.timeRange.Validate(); err != nil {
 		fieldErrorDescriptions = append(fieldErrorDescriptions, err.Error())
 	}
-	if !account.TimeRange.Start.Valid || account.TimeRange.Start.Time.IsZero() {
+	if !account.timeRange.Start.Valid || account.timeRange.Start.Time.IsZero() {
 		fieldErrorDescriptions = append(fieldErrorDescriptions, ZeroDateOpenedError)
 	}
-	if account.TimeRange.End.Valid && account.TimeRange.End.Time.IsZero() {
+	if account.timeRange.End.Valid && account.timeRange.End.Time.IsZero() {
 		fieldErrorDescriptions = append(fieldErrorDescriptions, ZeroValidDateClosedError)
 	}
 	if len(fieldErrorDescriptions) > 0 {
@@ -58,10 +68,10 @@ func (account Account) ValidateBalance(balance Balance) error {
 	if err := balance.Validate(); err != nil {
 		return err
 	}
-	if !account.TimeRange.Contains(balance.Date) {
+	if !account.timeRange.Contains(balance.Date) {
 		return BalanceDateOutOfAccountTimeRange{
 			BalanceDate:balance.Date,
-			AccountTimeRange:account.TimeRange,
+			AccountTimeRange:account.timeRange,
 		}
 	}
 	return nil
@@ -71,7 +81,7 @@ func (account Account) ValidateBalance(balance Balance) error {
 func NewAccount(name string, opened time.Time, closed pq.NullTime) (Account, error) {
 	newAccount := Account{
 		Name: name,
-		TimeRange: TimeRange{
+		timeRange: TimeRange{
 			Start: pq.NullTime{
 				Valid: true,
 				Time: opened,

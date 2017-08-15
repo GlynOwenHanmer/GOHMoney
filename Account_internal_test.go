@@ -25,7 +25,7 @@ func Test_ValidateAccount(t *testing.T) {
 		},
 		{
 			insertedAccount: Account{
-				TimeRange:TimeRange{
+				timeRange:TimeRange{
 					Start:pq.NullTime{
 						Valid: true,
 						Time: time.Date(2000,1,1,1,1,1,1,time.UTC),
@@ -37,7 +37,7 @@ func Test_ValidateAccount(t *testing.T) {
 		{
 			insertedAccount: Account{
 				Name:"TEST_ACCOUNT",
-				TimeRange: TimeRange{
+				timeRange: TimeRange{
 					Start:pq.NullTime{},
 					End:pq.NullTime{
 						Valid:true,
@@ -49,7 +49,7 @@ func Test_ValidateAccount(t *testing.T) {
 		{
 			insertedAccount: Account{
 				Name:"TEST_ACCOUNT",
-				TimeRange: TimeRange{
+				timeRange: TimeRange{
 					Start:pq.NullTime{
 						Valid:true,
 						Time:time.Date(2000,1,1,1,1,1,1,time.UTC),
@@ -69,7 +69,7 @@ func Test_ValidateAccount(t *testing.T) {
 		{
 			insertedAccount: Account{
 				Name: "TEST_ACCOUNT",
-				TimeRange: TimeRange{
+				timeRange: TimeRange{
 					Start:pq.NullTime{
 						Valid:true,
 						Time:time.Now(),
@@ -92,7 +92,7 @@ func Test_ValidateAccount(t *testing.T) {
 func newTestAccount() Account {
 	return Account{
 		Name:       "TEST_ACCOUNT",
-		TimeRange: TimeRange{
+		timeRange: TimeRange{
 			Start:pq.NullTime{
 				Valid: true,
 				Time: time.Date(2000, 1, 1, 1, 1, 1, 1, time.UTC),
@@ -128,7 +128,7 @@ func Test_IsOpen(t *testing.T) {
 		},
 		{
 			Account: Account{
-				TimeRange:TimeRange{
+				timeRange:TimeRange{
 					End:pq.NullTime{Valid:false},
 				},
 			},
@@ -136,7 +136,7 @@ func Test_IsOpen(t *testing.T) {
 		},
 		{
 			Account: Account{
-				TimeRange: TimeRange{
+				timeRange: TimeRange{
 					End: pq.NullTime{Valid: true},
 				},
 			},
@@ -157,7 +157,7 @@ func Test_InvalidAccountValidateBalance(t *testing.T) {
 	future := present.AddDate(1, 0, 0)
 
 	invalidAccount := Account{
-		TimeRange:TimeRange{
+		timeRange:TimeRange{
 			Start:pq.NullTime{
 				Valid:true,
 				Time:future,
@@ -187,7 +187,7 @@ func Test_AccountValidateBalance(t *testing.T) {
 
 	openAccount := Account{
 		Name: "Test Account",
-		TimeRange: TimeRange{
+		timeRange: TimeRange{
 			Start: pq.NullTime{
 				Valid: true,
 				Time:  present,
@@ -197,7 +197,7 @@ func Test_AccountValidateBalance(t *testing.T) {
 	}
 	closedAccount := Account{
 		Name: "Test Account",
-		TimeRange: TimeRange{
+		timeRange: TimeRange{
 			Start: pq.NullTime{
 				Valid: true,
 				Time:  present,
@@ -222,7 +222,7 @@ func Test_AccountValidateBalance(t *testing.T) {
 			Balance: pastBalance,
 			error: BalanceDateOutOfAccountTimeRange{
 				BalanceDate:      pastBalance.Date,
-				AccountTimeRange: openAccount.TimeRange,
+				AccountTimeRange: openAccount.timeRange,
 			},
 		},
 		{
@@ -240,7 +240,7 @@ func Test_AccountValidateBalance(t *testing.T) {
 			Balance: pastBalance,
 			error: BalanceDateOutOfAccountTimeRange{
 				BalanceDate:      pastBalance.Date,
-				AccountTimeRange: closedAccount.TimeRange,
+				AccountTimeRange: closedAccount.timeRange,
 			},
 		},
 		{
@@ -253,7 +253,7 @@ func Test_AccountValidateBalance(t *testing.T) {
 			Balance: futureBalance,
 			error: BalanceDateOutOfAccountTimeRange{
 				BalanceDate:      futureBalance.Date,
-				AccountTimeRange: closedAccount.TimeRange,
+				AccountTimeRange: closedAccount.timeRange,
 			},
 		},
 	}
@@ -316,22 +316,21 @@ func Test_NewAccount(t *testing.T) {
 			t.Errorf("Unexpected name.\n\tExpected: %s\n\tActual  : %s", set.name, account.Name)
 			logTestSet(set)
 		}
-		if !account.Start.Valid {
+		if !account.timeRange.Start.Valid {
 			t.Errorf("Returned invalid start time.")
 			logTestSet(set)
 		}
-		if !account.Start.Time.Equal(set.start) {
-			t.Errorf("Unexpected start.\n\tExpected: %s\n\tActual  : %s", set.start, account.Start.Time)
+		if !account.Start().Equal(set.start) {
+			t.Errorf("Unexpected start.\n\tExpected: %s\n\tActual  : %s", set.start, account.Start())
 			logTestSet(set)
 		}
-		if account.End.Valid != set.end.Valid {
-			t.Errorf("Unexpected end time validity.\n\tExpected: %s\n\tActual  : %s", account.End.Valid, set.end.Valid)
+		if account.End().Valid != set.end.Valid {
+			t.Errorf("Unexpected end time validity.\n\tExpected: %s\n\tActual  : %s", account.End().Valid, set.end.Valid)
 			logTestSet(set)
 		}
-		if !account.End.Time.Equal(set.end.Time) {
-			t.Errorf("Unexpected end time.\n\tExpected: %s\n\tActual  : %s", set.end.Time, account.End.Time)
+		if !account.End().Time.Equal(set.end.Time) {
+			t.Errorf("Unexpected end time.\n\tExpected: %s\n\tActual  : %s", set.end.Time, account.End().Time)
 			logTestSet(set)
 		}
-
 	}
 }

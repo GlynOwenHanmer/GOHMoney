@@ -45,10 +45,10 @@ func (account Account) Validate() AccountFieldError {
 	if err := account.timeRange.Validate(); err != nil {
 		fieldErrorDescriptions = append(fieldErrorDescriptions, err.Error())
 	}
-	if !account.timeRange.Start.Valid || account.timeRange.Start.Time.IsZero() {
+	if account.Start().IsZero() {
 		fieldErrorDescriptions = append(fieldErrorDescriptions, ZeroDateOpenedError)
 	}
-	if account.timeRange.End.Valid && account.timeRange.End.Time.IsZero() {
+	if account.End().Valid && account.End().Time.IsZero() {
 		fieldErrorDescriptions = append(fieldErrorDescriptions, ZeroValidDateClosedError)
 	}
 	if len(fieldErrorDescriptions) > 0 {

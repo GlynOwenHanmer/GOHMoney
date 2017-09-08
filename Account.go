@@ -138,5 +138,16 @@ func (account *Account) UnmarshalJSON(data []byte) error {
 	return returnErr
 }
 
+// Equal returns true if both accounts a and b are logically the same.
+func (a *Account) Equal (b *Account) bool {
+	switch {
+	case a.Name != b.Name:
+		return false
+	case !a.timeRange.Equal(b.timeRange):
+		return false
+	}
+	return true
+}
+
 // Accounts holds multiple Account items.
 type Accounts []Account

@@ -10,9 +10,9 @@ type TimeRange struct {
 	End   NullTime
 }
 
-// Equal returns true if two TimeRange objects have matching Start and End NullTimes
+// equal returns true if two TimeRange objects have matching Start and End NullTimes
 func (tr TimeRange) Equal(tr2 TimeRange) bool {
-	if !NullTime(tr.Start).equal(NullTime(tr2.Start)) || !NullTime(tr.End).equal(NullTime(tr2.End)) {
+	if !NullTime(tr.Start).Equal(NullTime(tr2.Start)) || !NullTime(tr.End).Equal(NullTime(tr2.End)) {
 		return false
 	}
 	return true
@@ -43,8 +43,8 @@ func (tr TimeRange) Contains(time time.Time) bool {
 type timeRangeValidationError string
 
 // Error ensures that timeRangeValidationError adheres to the error interface
-func (trve timeRangeValidationError) Error() string {
-	return string(trve)
+func (err timeRangeValidationError) Error() string {
+	return string(err)
 }
 
 const (

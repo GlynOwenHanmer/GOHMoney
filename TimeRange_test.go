@@ -215,7 +215,7 @@ func Test_Equal(t *testing.T) {
 	}
 	for _, testSet := range testSets {
 		if equal := testSet.a.Equal(testSet.b); equal != testSet.equal {
-			t.Errorf(`Unexpected equal result.\nExpected: %t, Actual  : %t`, testSet.equal, equal)
+			t.Errorf(`Unexpected Equal result.\nExpected: %t, Actual  : %t`, testSet.equal, equal)
 		}
 	}
 }

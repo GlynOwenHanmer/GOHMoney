@@ -1,27 +1,26 @@
 package GOHMoney
 
 import (
-	"github.com/lib/pq"
 	"time"
 )
 
 // TimeRange represents a range of time that can be open ended at none, either or both ends.
 type TimeRange struct {
-	Start pq.NullTime
-	End   pq.NullTime
+	Start NullTime
+	End   NullTime
 }
 
 // Equal returns true if two TimeRange objects have matching Start and End NullTimes
-func (a TimeRange) Equal(b TimeRange) bool {
-	if !NullTime(a.Start).equal(NullTime(b.Start)) || !NullTime(a.End).equal(NullTime(b.End)) {
+func (tr TimeRange) Equal(tr2 TimeRange) bool {
+	if !NullTime(tr.Start).equal(NullTime(tr2.Start)) || !NullTime(tr.End).equal(NullTime(tr2.End)) {
 		return false
 	}
 	return true
 }
 
 // Validate checks the fields of TimeRange to ensure that if either the Start or End time is present, that the End time isn't before the Start time and returns an error if it is.
-func (timeRange TimeRange) Validate() error {
-	if timeRange.Start.Valid && timeRange.End.Valid && timeRange.End.Time.Before(timeRange.Start.Time) {
+func (tr TimeRange) Validate() error {
+	if tr.Start.Valid && tr.End.Valid && tr.End.Time.Before(tr.Start.Time) {
 		return DateClosedBeforeDateOpenedError
 	}
 	return nil
@@ -30,11 +29,11 @@ func (timeRange TimeRange) Validate() error {
 // Contains returns true if the TimeRange contains given time.
 // Contains will always return true when both the Start time and End time are not Valid
 // Contains returns true if the time is on or after the TimeRange's Start time and before the TimeRange's End time.
-func (timeRange TimeRange) Contains(time time.Time) bool {
-	if timeRange.Start.Valid && time.Before(timeRange.Start.Time) {
+func (tr TimeRange) Contains(time time.Time) bool {
+	if tr.Start.Valid && time.Before(tr.Start.Time) {
 		return false
 	}
-	if timeRange.End.Valid && (time.Equal(timeRange.End.Time) || time.After(timeRange.End.Time)) {
+	if tr.End.Valid && !tr.End.Time.After(time) {
 		return false
 	}
 	return true
@@ -51,4 +50,3 @@ func (trve timeRangeValidationError) Error() string {
 const (
 	DateClosedBeforeDateOpenedError = timeRangeValidationError("Closed date is before opened date.")
 )
-

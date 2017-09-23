@@ -1,8 +1,8 @@
 package GOHMoney
 
 import (
-	"testing"
 	"errors"
+	"testing"
 	"time"
 )
 
@@ -13,7 +13,7 @@ func Test_ValidateBalance(t *testing.T) {
 		t.Errorf("Unexpected error.\nExpected: %s\nActual  : %s", BalanceZeroDate, err)
 	}
 
-	validBalance := Balance{Date:time.Now()}
+	validBalance := Balance{Date: time.Now()}
 	err = validBalance.Validate()
 	if err != nil {
 		t.Errorf("Unexpected error.\nExpected: %s\nActual  : %s", nil, err)
@@ -31,34 +31,34 @@ func Test_Earliest_EmptyBalances(t *testing.T) {
 	testEarliestSet(t, expected, balances)
 }
 
-func Test_Earliest_BalancesWithNoDate(t *testing.T){
+func Test_Earliest_BalancesWithNoDate(t *testing.T) {
 	balances := Balances{Balance{}}
-	expected := BalanceErrorSet{Balance{},nil}
+	expected := BalanceErrorSet{Balance{}, nil}
 	testEarliestSet(t, expected, balances)
 }
 
-func Test_Earliest_BalancesWithSingleDate(t *testing.T){
-	earliest := Balance{Date:time.Date(2000,1,1,1,1,1,1,time.UTC),Amount:10}
+func Test_Earliest_BalancesWithSingleDate(t *testing.T) {
+	earliest := Balance{Date: time.Date(2000, 1, 1, 1, 1, 1, 1, time.UTC), Amount: 10}
 	balances := Balances{earliest}
-	expected := BalanceErrorSet{earliest,nil}
+	expected := BalanceErrorSet{earliest, nil}
 	testEarliestSet(t, expected, balances)
 }
 
-func Test_Earliest_BalancesWithSameDate(t *testing.T){
-	date := time.Date(2000,1,1,1,1,1,1,time.UTC)
-	earliest := Balance{Date:date,Amount:10}
-	balances := Balances{earliest, Balance{Date:date,Amount:20}}
-	expected := BalanceErrorSet{earliest,nil}
+func Test_Earliest_BalancesWithSameDate(t *testing.T) {
+	date := time.Date(2000, 1, 1, 1, 1, 1, 1, time.UTC)
+	earliest := Balance{Date: date, Amount: 10}
+	balances := Balances{earliest, Balance{Date: date, Amount: 20}}
+	expected := BalanceErrorSet{earliest, nil}
 	testEarliestSet(t, expected, balances)
 }
 
-func Test_Earliest_BalancesWithMultipleDates(t *testing.T){
-	date1 := time.Date(2000,1,1,1,1,1,1,time.UTC)
-	date2 := time.Date(2001,1,1,1,1,1,1,time.UTC)
-	date3 := time.Date(2002,1,1,1,1,1,1,time.UTC)
-	earliest := Balance{Date: date1,Amount: 10}
-	balances := Balances{Balance{Date:date2}, earliest, Balance{Date: date1,Amount: 20}, Balance{Date:date3}}
-	expected := BalanceErrorSet{earliest,nil}
+func Test_Earliest_BalancesWithMultipleDates(t *testing.T) {
+	date1 := time.Date(2000, 1, 1, 1, 1, 1, 1, time.UTC)
+	date2 := time.Date(2001, 1, 1, 1, 1, 1, 1, time.UTC)
+	date3 := time.Date(2002, 1, 1, 1, 1, 1, 1, time.UTC)
+	earliest := Balance{Date: date1, Amount: 10}
+	balances := Balances{Balance{Date: date2}, earliest, Balance{Date: date1, Amount: 20}, Balance{Date: date3}}
+	expected := BalanceErrorSet{earliest, nil}
 	testEarliestSet(t, expected, balances)
 }
 
@@ -74,33 +74,33 @@ func Test_Latest_EmptyBalances(t *testing.T) {
 	testLatestSet(t, expected, balances)
 }
 
-func Test_Latest_BalancesWithNoDate(t *testing.T){
+func Test_Latest_BalancesWithNoDate(t *testing.T) {
 	balances := Balances{Balance{}}
-	expected := BalanceErrorSet{Balance{},nil}
+	expected := BalanceErrorSet{Balance{}, nil}
 	testLatestSet(t, expected, balances)
 }
 
-func Test_Latest_BalancesWithSingleDate(t *testing.T){
-	latest := Balance{Date: time.Date(2000,1,1,1,1,1,1,time.UTC),Amount: 10}
+func Test_Latest_BalancesWithSingleDate(t *testing.T) {
+	latest := Balance{Date: time.Date(2000, 1, 1, 1, 1, 1, 1, time.UTC), Amount: 10}
 	balances := Balances{latest}
 	expected := BalanceErrorSet{latest, nil}
 	testLatestSet(t, expected, balances)
 }
 
-func Test_Latest_BalancesWithSameDate(t *testing.T){
-	date := time.Date(2000,1,1,1,1,1,1,time.UTC)
-	latest := Balance{Date: date,Amount: 10}
-	balances := Balances{Balance{Date: date,Amount: 20}, latest}
+func Test_Latest_BalancesWithSameDate(t *testing.T) {
+	date := time.Date(2000, 1, 1, 1, 1, 1, 1, time.UTC)
+	latest := Balance{Date: date, Amount: 10}
+	balances := Balances{Balance{Date: date, Amount: 20}, latest}
 	expected := BalanceErrorSet{latest, nil}
 	testLatestSet(t, expected, balances)
 }
 
-func Test_Latest_BalancesWithMultipleDates(t *testing.T){
-	date1 := time.Date(2000,1,1,1,1,1,1,time.UTC)
-	date2 := time.Date(2001,1,1,1,1,1,1,time.UTC)
-	date3 := time.Date(2002,1,1,1,1,1,1,time.UTC)
-	latest := Balance{Date: date3,Amount: 10}
-	balances := Balances{Balance{Date:date2}, Balance{Date: date3}, latest, Balance{Date: date1,Amount: 20}}
+func Test_Latest_BalancesWithMultipleDates(t *testing.T) {
+	date1 := time.Date(2000, 1, 1, 1, 1, 1, 1, time.UTC)
+	date2 := time.Date(2001, 1, 1, 1, 1, 1, 1, time.UTC)
+	date3 := time.Date(2002, 1, 1, 1, 1, 1, 1, time.UTC)
+	latest := Balance{Date: date3, Amount: 10}
+	balances := Balances{Balance{Date: date2}, Balance{Date: date3}, latest, Balance{Date: date1, Amount: 20}}
 	expected := BalanceErrorSet{latest, nil}
 	testLatestSet(t, expected, balances)
 }
@@ -130,41 +130,41 @@ func testBalanceResults(t *testing.T, expected BalanceErrorSet, actual BalanceEr
 }
 
 func TestBalances_Sum(t *testing.T) {
-	testSets := []struct{
+	testSets := []struct {
 		Balances
 		expectedSum float32
 	}{
 		{
-			expectedSum:0,
+			expectedSum: 0,
 		},
 		{
 			Balances: Balances{
-				Balance{Amount:1},
+				Balance{Amount: 1},
 			},
-			expectedSum:1,
+			expectedSum: 1,
 		},
 		{
 			Balances: Balances{
-				Balance{Amount:1},
-				Balance{Amount:2},
+				Balance{Amount: 1},
+				Balance{Amount: 2},
 			},
-			expectedSum:3,
+			expectedSum: 3,
 		},
 
 		{
 			Balances: Balances{
-				Balance{Amount:1},
-				Balance{Amount:2},
-				Balance{Amount:-3},
+				Balance{Amount: 1},
+				Balance{Amount: 2},
+				Balance{Amount: -3},
 			},
-			expectedSum:0,
+			expectedSum: 0,
 		},
 	}
 
 	for _, testSet := range testSets {
 		actual := testSet.Balances.Sum()
 		if testSet.expectedSum != actual {
-			t.Errorf("Unexpected sum.\nExpected: %f\nActual  : %f\nBalances: %v", testSet.expectedSum, actual, testSet,Balances{})
+			t.Errorf("Unexpected sum.\nExpected: %f\nActual  : %f\nBalances: %v", testSet.expectedSum, actual, testSet, Balances{})
 		}
 	}
 }

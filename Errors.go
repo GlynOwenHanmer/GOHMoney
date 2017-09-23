@@ -15,7 +15,7 @@ func (e AccountFieldError) Error() string {
 	errorString.WriteString("AccountFieldError: ")
 	for i, field := range e {
 		errorString.WriteString(field)
-		if i < len(e) - 1 {
+		if i < len(e)-1 {
 			errorString.WriteByte(' ')
 		}
 	}
@@ -25,24 +25,28 @@ func (e AccountFieldError) Error() string {
 // equal returns true if two AccountFieldErrors contain the same error information strings in exactly the same order.
 // Duplicate error information strings held within the AccountFieldError are counted as individual error strings.
 func (errors AccountFieldError) equal(errors2 AccountFieldError) bool {
-	if len(errors) != len(errors2) { return false }
+	if len(errors) != len(errors2) {
+		return false
+	}
 	for i := range errors {
-		if errors[i] != errors2[i] { return false }
+		if errors[i] != errors2[i] {
+			return false
+		}
 	}
 	return true
 }
 
 // Various error strings describing possible errors with potential new Account items.
 const (
-	EmptyNameError                   = "Empty name."
-	ZeroDateOpenedError              = "No opened date given."
-	ZeroValidDateClosedError         = "Closed date marked as valid but not set."
+	EmptyNameError           = "Empty name."
+	ZeroDateOpenedError      = "No opened date given."
+	ZeroValidDateClosedError = "Closed date marked as valid but not set."
 )
 
 // BalanceDateOutOfAccountTimeRange is a type returned when the date of a Balance is not contained within the TimeRange of the Account that holds it.
 // BalanceDate and AccountTimeRange fields are present and provide the exact detail of the timings that have discrepancies.
 type BalanceDateOutOfAccountTimeRange struct {
-	BalanceDate time.Time
+	BalanceDate      time.Time
 	AccountTimeRange TimeRange
 }
 

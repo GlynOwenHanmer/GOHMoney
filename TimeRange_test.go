@@ -1,68 +1,67 @@
 package GOHMoney
 
 import (
-	"testing"
-	"github.com/lib/pq"
-	"time"
 	"bytes"
 	"fmt"
+	"testing"
+	"time"
 )
 
 func Test_Validate(t *testing.T) {
-	testSets := []struct{
+	testSets := []struct {
 		TimeRange
 		error
 	}{
 		{
-			TimeRange:TimeRange{
-				Start: pq.NullTime{Valid: false},
-				End:   pq.NullTime{Valid: false},
+			TimeRange: TimeRange{
+				Start: NullTime{Valid: false},
+				End:   NullTime{Valid: false},
 			},
 			error: nil,
 		},
 		{
-			TimeRange:TimeRange{
-				Start: pq.NullTime{Valid: true},
-				End:   pq.NullTime{Valid: false},
+			TimeRange: TimeRange{
+				Start: NullTime{Valid: true},
+				End:   NullTime{Valid: false},
 			},
 			error: nil,
 		},
 		{
-			TimeRange:TimeRange{
-				Start: pq.NullTime{Valid: false},
-				End:   pq.NullTime{Valid: true},
+			TimeRange: TimeRange{
+				Start: NullTime{Valid: false},
+				End:   NullTime{Valid: true},
 			},
 			error: nil,
 		},
 		{
-			TimeRange:TimeRange{
-				Start: pq.NullTime{Valid: true},
-				End:   pq.NullTime{Valid: true},
+			TimeRange: TimeRange{
+				Start: NullTime{Valid: true},
+				End:   NullTime{Valid: true},
 			},
 			error: nil,
 		},
 		{
-			TimeRange:TimeRange{
-				Start:pq.NullTime{
-					Valid:true,
-					Time:time.Now().AddDate(-1,0,0),
+			TimeRange: TimeRange{
+				Start: NullTime{
+					Valid: true,
+					Time:  time.Now().AddDate(-1, 0, 0),
 				},
-				End:pq.NullTime{
-					Valid:true,
-					Time:time.Now(),
+				End: NullTime{
+					Valid: true,
+					Time:  time.Now(),
 				},
 			},
 			error: nil,
 		},
 		{
-			TimeRange:TimeRange{
-				Start:pq.NullTime{
-					Valid:true,
-					Time:time.Now(),
+			TimeRange: TimeRange{
+				Start: NullTime{
+					Valid: true,
+					Time:  time.Now(),
 				},
-				End:pq.NullTime{
-					Valid:true,
-					Time:time.Now().AddDate(-1,0,0),
+				End: NullTime{
+					Valid: true,
+					Time:  time.Now().AddDate(-1, 0, 0),
 				},
 			},
 			error: DateClosedBeforeDateOpenedError,
@@ -80,36 +79,36 @@ func Test_Contains(t *testing.T) {
 	testStartTime := time.Now()
 	openRange := TimeRange{}
 	openEnded := TimeRange{
-		Start:pq.NullTime{
+		Start: NullTime{
 			Valid: true,
 			Time:  testStartTime,
 		},
 	}
 	openStarted := TimeRange{
-		End:pq.NullTime{
+		End: NullTime{
 			Valid: true,
 			Time:  testStartTime,
 		},
 	}
 	closedEnds := TimeRange{
-		Start:pq.NullTime{
+		Start: NullTime{
 			Valid: true,
 			Time:  testStartTime,
 		},
-		End:pq.NullTime{
+		End: NullTime{
 			Valid: true,
-			Time:  testStartTime.AddDate(1,0,0),
+			Time:  testStartTime.AddDate(1, 0, 0),
 		},
 	}
 
-	testSets := []struct{
+	testSets := []struct {
 		TimeRange
 		time.Time
 		contains bool
 	}{
 		{
-			TimeRange:openRange,
-			contains:true,
+			TimeRange: openRange,
+			contains:  true,
 		},
 		{
 			TimeRange: openRange,
@@ -118,58 +117,58 @@ func Test_Contains(t *testing.T) {
 		},
 		{
 			TimeRange: openEnded,
-			Time:     testStartTime.AddDate(-1,0,0),
-			contains: false,
+			Time:      testStartTime.AddDate(-1, 0, 0),
+			contains:  false,
 		},
 		{
-			TimeRange:openEnded,
-			Time:     testStartTime,
-			contains: true,
+			TimeRange: openEnded,
+			Time:      testStartTime,
+			contains:  true,
 		},
 		{
-			TimeRange:openEnded,
-			Time:     testStartTime.AddDate(1,0,0),
-			contains: true,
+			TimeRange: openEnded,
+			Time:      testStartTime.AddDate(1, 0, 0),
+			contains:  true,
 		},
 		{
 			TimeRange: openStarted,
-			Time:     testStartTime.AddDate(-1,0,0),
-			contains: true,
+			Time:      testStartTime.AddDate(-1, 0, 0),
+			contains:  true,
 		},
 		{
-			TimeRange:openStarted,
-			Time:     testStartTime,
-			contains: false,
+			TimeRange: openStarted,
+			Time:      testStartTime,
+			contains:  false,
 		},
 		{
-			TimeRange:openStarted,
-			Time:     testStartTime.AddDate(1,0,0),
-			contains: false,
+			TimeRange: openStarted,
+			Time:      testStartTime.AddDate(1, 0, 0),
+			contains:  false,
 		},
 		{
-			TimeRange:closedEnds,
-			Time:testStartTime.AddDate(-2,0,0),
-			contains:false,
+			TimeRange: closedEnds,
+			Time:      testStartTime.AddDate(-2, 0, 0),
+			contains:  false,
 		},
 		{
-			TimeRange:closedEnds,
-			Time:testStartTime,
-			contains:true,
+			TimeRange: closedEnds,
+			Time:      testStartTime,
+			contains:  true,
 		},
 		{
-			TimeRange:closedEnds,
-			Time:testStartTime.AddDate(0,6,0),
-			contains:true,
+			TimeRange: closedEnds,
+			Time:      testStartTime.AddDate(0, 6, 0),
+			contains:  true,
 		},
 		{
-			TimeRange:closedEnds,
-			Time:testStartTime.AddDate(1,0,0),
-			contains:false,
+			TimeRange: closedEnds,
+			Time:      testStartTime.AddDate(1, 0, 0),
+			contains:  false,
 		},
 		{
-			TimeRange:closedEnds,
-			Time:testStartTime.AddDate(2,0,0),
-			contains:false,
+			TimeRange: closedEnds,
+			Time:      testStartTime.AddDate(2, 0, 0),
+			contains:  false,
 		},
 	}
 	for _, testSet := range testSets {
@@ -187,31 +186,31 @@ func Test_Contains(t *testing.T) {
 
 func Test_Equal(t *testing.T) {
 	testSets := []struct {
-		a, b TimeRange
+		a, b  TimeRange
 		equal bool
 	}{
 		{
-			a:TimeRange{},
-			b:TimeRange{},
-			equal:true,
+			a:     TimeRange{},
+			b:     TimeRange{},
+			equal: true,
 		},
 		{
-			a:TimeRange{
-				Start:pq.NullTime{
-					Valid:true,
+			a: TimeRange{
+				Start: NullTime{
+					Valid: true,
 				},
 			},
-			b:TimeRange{},
-			equal:false,
+			b:     TimeRange{},
+			equal: false,
 		},
 		{
-			a:TimeRange{
-				End:pq.NullTime{
-					Valid:true,
+			a: TimeRange{
+				End: NullTime{
+					Valid: true,
 				},
 			},
-			b:TimeRange{},
-			equal:false,
+			b:     TimeRange{},
+			equal: false,
 		},
 	}
 	for _, testSet := range testSets {

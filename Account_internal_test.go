@@ -1,15 +1,14 @@
 package GOHMoney
 
 import (
-	"testing"
-	"github.com/lib/pq"
-	"time"
 	"bytes"
 	"fmt"
+	"testing"
+	"time"
 )
 
 func Test_ValidateAccount(t *testing.T) {
-	testSets := []struct{
+	testSets := []struct {
 		insertedAccount Account
 		AccountFieldError
 	}{
@@ -19,16 +18,16 @@ func Test_ValidateAccount(t *testing.T) {
 		},
 		{
 			insertedAccount: Account{
-				Name:"TEST_ACCOUNT",
+				Name: "TEST_ACCOUNT",
 			},
 			AccountFieldError: AccountFieldError{ZeroDateOpenedError},
 		},
 		{
 			insertedAccount: Account{
-				timeRange:TimeRange{
-					Start:pq.NullTime{
+				timeRange: TimeRange{
+					Start: NullTime{
 						Valid: true,
-						Time: time.Date(2000,1,1,1,1,1,1,time.UTC),
+						Time:  time.Date(2000, 1, 1, 1, 1, 1, 1, time.UTC),
 					},
 				},
 			},
@@ -36,11 +35,11 @@ func Test_ValidateAccount(t *testing.T) {
 		},
 		{
 			insertedAccount: Account{
-				Name:"TEST_ACCOUNT",
+				Name: "TEST_ACCOUNT",
 				timeRange: TimeRange{
-					Start:pq.NullTime{},
-					End:pq.NullTime{
-						Valid:true,
+					Start: NullTime{},
+					End: NullTime{
+						Valid: true,
 					},
 				},
 			},
@@ -48,15 +47,15 @@ func Test_ValidateAccount(t *testing.T) {
 		},
 		{
 			insertedAccount: Account{
-				Name:"TEST_ACCOUNT",
+				Name: "TEST_ACCOUNT",
 				timeRange: TimeRange{
-					Start:pq.NullTime{
-						Valid:true,
-						Time:time.Date(2000,1,1,1,1,1,1,time.UTC),
+					Start: NullTime{
+						Valid: true,
+						Time:  time.Date(2000, 1, 1, 1, 1, 1, 1, time.UTC),
 					},
-					End:pq.NullTime{
-						Valid:true,
-						Time:time.Date(1999,1,1,1,1,1,1,time.UTC),
+					End: NullTime{
+						Valid: true,
+						Time:  time.Date(1999, 1, 1, 1, 1, 1, 1, time.UTC),
 					},
 				},
 			},
@@ -70,11 +69,11 @@ func Test_ValidateAccount(t *testing.T) {
 			insertedAccount: Account{
 				Name: "TEST_ACCOUNT",
 				timeRange: TimeRange{
-					Start:pq.NullTime{
-						Valid:true,
-						Time:time.Now(),
+					Start: NullTime{
+						Valid: true,
+						Time:  time.Now(),
 					},
-					End:pq.NullTime{},
+					End: NullTime{},
 				},
 			},
 			AccountFieldError: nil,
@@ -91,15 +90,15 @@ func Test_ValidateAccount(t *testing.T) {
 
 func newTestAccount() Account {
 	return Account{
-		Name:       "TEST_ACCOUNT",
+		Name: "TEST_ACCOUNT",
 		timeRange: TimeRange{
-			Start:pq.NullTime{
+			Start: NullTime{
 				Valid: true,
-				Time: time.Date(2000, 1, 1, 1, 1, 1, 1, time.UTC),
+				Time:  time.Date(2000, 1, 1, 1, 1, 1, 1, time.UTC),
 			},
-			End:pq.NullTime{
+			End: NullTime{
 				Valid: true,
-				Time: time.Date(2001, 1, 1, 1, 1, 1, 1, time.UTC),
+				Time:  time.Date(2001, 1, 1, 1, 1, 1, 1, time.UTC),
 			},
 		},
 	}
@@ -128,19 +127,19 @@ func Test_IsOpen(t *testing.T) {
 		},
 		{
 			Account: Account{
-				timeRange:TimeRange{
-					End:pq.NullTime{Valid:false},
+				timeRange: TimeRange{
+					End: NullTime{Valid: false},
 				},
 			},
-			IsOpen:  true,
+			IsOpen: true,
 		},
 		{
 			Account: Account{
 				timeRange: TimeRange{
-					End: pq.NullTime{Valid: true},
+					End: NullTime{Valid: true},
 				},
 			},
-			IsOpen:  false,
+			IsOpen: false,
 		},
 	}
 	for _, testSet := range testSets {
@@ -157,20 +156,20 @@ func Test_InvalidAccountValidateBalance(t *testing.T) {
 	future := present.AddDate(1, 0, 0)
 
 	invalidAccount := Account{
-		timeRange:TimeRange{
-			Start:pq.NullTime{
-				Valid:true,
-				Time:future,
+		timeRange: TimeRange{
+			Start: NullTime{
+				Valid: true,
+				Time:  future,
 			},
-			End:pq.NullTime{
-				Valid:true,
-				Time:past,
+			End: NullTime{
+				Valid: true,
+				Time:  past,
 			},
 		},
 	}
 
-	accountErr := invalidAccount.Validate();
-	balanceErr := invalidAccount.ValidateBalance(Balance{});
+	accountErr := invalidAccount.Validate()
+	balanceErr := invalidAccount.ValidateBalance(Balance{})
 	switch {
 	case accountErr == nil && balanceErr == nil:
 		break
@@ -188,21 +187,21 @@ func Test_AccountValidateBalance(t *testing.T) {
 	openAccount := Account{
 		Name: "Test Account",
 		timeRange: TimeRange{
-			Start: pq.NullTime{
+			Start: NullTime{
 				Valid: true,
 				Time:  present,
 			},
-			End: pq.NullTime{Valid: false},
+			End: NullTime{Valid: false},
 		},
 	}
 	closedAccount := Account{
 		Name: "Test Account",
 		timeRange: TimeRange{
-			Start: pq.NullTime{
+			Start: NullTime{
 				Valid: true,
 				Time:  present,
 			},
-			End: pq.NullTime{
+			End: NullTime{
 				Valid: true,
 				Time:  future,
 			},
@@ -251,15 +250,15 @@ func Test_AccountValidateBalance(t *testing.T) {
 		{
 			Account: closedAccount,
 			Balance: futureBalance,
-			error: nil,
+			error:   nil,
 		},
 		{
 			Account: closedAccount,
 			Balance: Balance{
-				Date:futureBalance.Date.AddDate(1,0,0),
+				Date: futureBalance.Date.AddDate(1, 0, 0),
 			},
 			error: BalanceDateOutOfAccountTimeRange{
-				BalanceDate:      futureBalance.Date.AddDate(1,0,0),
+				BalanceDate:      futureBalance.Date.AddDate(1, 0, 0),
 				AccountTimeRange: closedAccount.timeRange,
 			},
 		},
@@ -287,26 +286,26 @@ func Test_AccountValidateBalance(t *testing.T) {
 func Test_NewAccount(t *testing.T) {
 	now := time.Now()
 	type testSet struct {
-		name string
+		name  string
 		start time.Time
-		end pq.NullTime
+		end   NullTime
 		error
 	}
 	testSets := []testSet{
 		{
 			name:  "TEST_ACCOUNT",
 			start: now,
-			end:   pq.NullTime{},
+			end:   NullTime{},
 			error: nil,
 		},
 		{
 			name:  "TEST_ACCOUNT_WITH_ACCOUNT_ERROR",
 			start: now,
-			end:   pq.NullTime{Valid:true, Time:now.AddDate(0,0,-1)},
+			end:   NullTime{Valid: true, Time: now.AddDate(0, 0, -1)},
 			error: AccountFieldError{DateClosedBeforeDateOpenedError.Error()},
 		},
 	}
-	logTestSet := func(ts testSet){t.Logf("Start: %s,\tEnd: %s,", ts.start, ts.end)}
+	logTestSet := func(ts testSet) { t.Logf("Start: %s,\tEnd: %s,", ts.start, ts.end) }
 	for _, set := range testSets {
 		account, err := NewAccount(set.name, set.start, set.end)
 		actualFieldError, actualIsTyped := err.(AccountFieldError)
@@ -314,7 +313,7 @@ func Test_NewAccount(t *testing.T) {
 
 		if actualIsTyped != expectedIsTyped {
 			t.Errorf("Unexpected error.\n\tExpected: %s\n\tActual  : %s", set.error, err)
-		} else if !actualIsTyped && err != set.error{
+		} else if !actualIsTyped && err != set.error {
 			t.Errorf("Unexpected error.\n\tExpected: %s\n\tActual  : %s", set.error, err)
 			logTestSet(set)
 		} else if actualIsTyped && !actualFieldError.equal(expectedFieldError) {

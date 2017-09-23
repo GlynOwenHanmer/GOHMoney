@@ -3,13 +3,12 @@ package GOHMoney
 import (
 	"encoding/json"
 	"strings"
-	"github.com/lib/pq"
 	"time"
 )
 
 // An Account holds the logic for an account.
 type Account struct {
-	Name       string
+	Name      string
 	timeRange TimeRange
 }
 
@@ -19,7 +18,7 @@ func (account Account) Start() time.Time {
 }
 
 // End returns the a NullTime object that is Valid if the account has been closed.
-func (account Account) End() pq.NullTime {
+func (account Account) End() NullTime {
 	return account.timeRange.End
 }
 
@@ -32,7 +31,11 @@ func (account Account) IsOpen() bool {
 func (account Account) String() string {
 	jsonBytes, err := json.Marshal(account)
 	var ret string
-	if err != nil {ret = "Unable to form Account string."} else {ret = string(jsonBytes)}
+	if err != nil {
+		ret = "Unable to form Account string."
+	} else {
+		ret = string(jsonBytes)
+	}
 	return ret
 }
 
@@ -68,36 +71,32 @@ func (account Account) ValidateBalance(balance Balance) error {
 	if err := balance.Validate(); err != nil {
 		return err
 	}
-	if !account.timeRange.Contains(balance.Date) {
-		if !account.End().Valid || !account.End().Time.Equal(balance.Date){
-			return BalanceDateOutOfAccountTimeRange{
-				BalanceDate:balance.Date,
-				AccountTimeRange:account.timeRange,
-			}
+	if !account.timeRange.Contains(balance.Date) && (!account.End().Valid || !account.End().Time.Equal(balance.Date)) {
+		return BalanceDateOutOfAccountTimeRange{
+			BalanceDate:      balance.Date,
+			AccountTimeRange: account.timeRange,
 		}
 	}
 	return nil
 }
 
 // NewAccount creates a new Account object with a Valid Start time and returns it, also returning any logical errors with the newly created account.
-func NewAccount(name string, opened time.Time, closed pq.NullTime) (Account, error) {
-	newAccount := Account{
+func NewAccount(name string, opened time.Time, closed NullTime) (a Account, err error) {
+	a = Account{
 		Name: name,
 		timeRange: TimeRange{
-			Start: pq.NullTime{
+			Start: NullTime{
 				Valid: true,
-				Time: opened,
+				Time:  opened,
 			},
 			End: closed,
 		},
 	}
-	var err error
-	if accountErr := newAccount.Validate(); len(accountErr) > 0 {
-		err = accountErr
+	if aErr := a.Validate(); len(aErr) > 0 {
+		err = aErr
 	}
-	return newAccount, err
+	return a, err
 }
-
 
 // MarshalJSON marshals an Account into a json blob, returning the blob with any errors that occur during the marshalling.
 func (account Account) MarshalJSON() ([]byte, error) {
@@ -105,11 +104,11 @@ func (account Account) MarshalJSON() ([]byte, error) {
 	return json.Marshal(&struct {
 		*Alias
 		Start time.Time
-		End pq.NullTime
+		End   NullTime
 	}{
-		Alias:    (*Alias)(&account),
+		Alias: (*Alias)(&account),
 		Start: account.Start(),
-		End: account.End(),
+		End:   account.End(),
 	})
 }
 
@@ -118,18 +117,17 @@ func (account *Account) UnmarshalJSON(data []byte) error {
 	type Alias Account
 	aux := &struct {
 		Start time.Time
-		End pq.NullTime
+		End   NullTime
 		*Alias
 	}{
 		Alias: (*Alias)(account),
-
 	}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
 	account.timeRange = TimeRange{
-		Start:pq.NullTime{Valid:true, Time:aux.Start},
-		End:aux.End,
+		Start: NullTime{Valid: true, Time: aux.Start},
+		End:   aux.End,
 	}
 	var returnErr error
 	if err := account.Validate(); err != nil {
@@ -139,7 +137,7 @@ func (account *Account) UnmarshalJSON(data []byte) error {
 }
 
 // Equal returns true if both accounts a and b are logically the same.
-func (a *Account) Equal (b *Account) bool {
+func (a *Account) Equal(b *Account) bool {
 	switch {
 	case a.Name != b.Name:
 		return false

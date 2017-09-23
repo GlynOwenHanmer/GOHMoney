@@ -1,11 +1,11 @@
 package GOHMoney
 
 import (
-	"time"
 	"errors"
+	"time"
 )
 
-const EmptyBalancesMessage  = "Empty Balances Object"
+const EmptyBalancesMessage = "Empty Balances Object"
 
 // Balance holds the logic for a balance item.
 type Balance struct {
@@ -34,7 +34,6 @@ func (e BalanceFieldError) Error() string {
 	return string(e)
 }
 
-
 //Balances holds multiple Balance items.
 type Balances []Balance
 
@@ -49,30 +48,30 @@ func (bs Balances) Sum() float32 {
 
 // Earliest returns the Balance with the earliest date contained in a Balances set.
 // If multiple Balance object have the same date, the Balance encountered first will be returned.
-func (bs Balances) Earliest() (Balance, error) {
+func (bs Balances) Earliest() (e Balance, err error) {
 	if len(bs) == 0 {
 		return Balance{}, errors.New(EmptyBalancesMessage)
 	}
-	earliest := Balance{Date: time.Date(3000, 1, 1, 1, 1, 1, 1, time.UTC)}
+	e = Balance{Date: time.Date(3000, 1, 1, 1, 1, 1, 1, time.UTC)}
 	for _, b := range bs {
-		if b.Date.Before(earliest.Date) {
-			earliest = Balance(b)
+		if b.Date.Before(e.Date) {
+			e = Balance(b)
 		}
 	}
-	return earliest, nil
+	return
 }
 
 // Latest returns the Balance with the latest date contained in a Balances set.
 // If multiple Balance object have the same date, the Balance encountered last will be returned.
-func (bs Balances) Latest() (Balance, error) {
+func (bs Balances) Latest() (l Balance, err error) {
 	if len(bs) == 0 {
 		return Balance{}, errors.New(EmptyBalancesMessage)
 	}
-	latest := Balance{Date: time.Date(0, 1, 1, 1, 1, 1, 1, time.UTC)}
+	l = Balance{Date: time.Date(0, 1, 1, 1, 1, 1, 1, time.UTC)}
 	for _, b := range bs {
-		if b.Date.After(latest.Date) || b.Date.Equal(latest.Date) {
-			latest = Balance(b)
+		if !l.Date.After(b.Date) {
+			l = Balance(b)
 		}
 	}
-	return latest, nil
+	return
 }

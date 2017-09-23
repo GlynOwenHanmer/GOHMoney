@@ -3,54 +3,54 @@ package GOHMoney
 import "testing"
 
 func TestAccountFieldError_equal(t *testing.T) {
-	testSets := []struct{
+	testSets := []struct {
 		errA, errB AccountFieldError
-		equal bool
+		equal      bool
 	}{
 		{
-			errA:AccountFieldError{},
-			errB:AccountFieldError{},
-			equal:true,
+			errA:  AccountFieldError{},
+			errB:  AccountFieldError{},
+			equal: true,
 		},
 		{
-			errA:AccountFieldError{
+			errA: AccountFieldError{
 				EmptyNameError,
 			},
-			errB:AccountFieldError{},
-			equal:false,
+			errB:  AccountFieldError{},
+			equal: false,
 		},
 		{
-			errA:AccountFieldError{
+			errA: AccountFieldError{
 				EmptyNameError,
 			},
-			errB:AccountFieldError{
+			errB: AccountFieldError{
 				EmptyNameError,
 			},
-			equal:true,
+			equal: true,
 		},
 		{
-			errA:AccountFieldError{
+			errA: AccountFieldError{
 				ZeroDateOpenedError,
 				EmptyNameError,
 			},
-			errB:AccountFieldError{
+			errB: AccountFieldError{
 				EmptyNameError,
 				ZeroDateOpenedError,
 			},
-			equal:false,
+			equal: false,
 		},
 		{
-			errA:AccountFieldError{
-				ZeroDateOpenedError,
-				EmptyNameError,
-				ZeroValidDateClosedError,
-			},
-			errB:AccountFieldError{
+			errA: AccountFieldError{
 				ZeroDateOpenedError,
 				EmptyNameError,
 				ZeroValidDateClosedError,
 			},
-			equal:true,
+			errB: AccountFieldError{
+				ZeroDateOpenedError,
+				EmptyNameError,
+				ZeroValidDateClosedError,
+			},
+			equal: true,
 		},
 	}
 	for _, testSet := range testSets {

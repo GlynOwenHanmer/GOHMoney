@@ -5,6 +5,7 @@ import (
 	"strings"
 	"time"
 	"github.com/GlynOwenHanmer/GOHMoney"
+	"github.com/GlynOwenHanmer/GOHMoney/balance"
 )
 
 // New creates a new Account object with a Valid Start time and returns it, also returning any logical errors with the newly created account.
@@ -84,16 +85,16 @@ func (account Account) Validate() GOHMoney.AccountFieldError {
 // ValidateBalance returns any logical errors between the Account and the Balance.
 // ValidateBalance first attempts to validate the Account as an entity by itself. If there are any errors with the Account, these errors are returned and the Balance is not attempted to be validated against the account.
 // If the Date of the Balance is outside of the TimeRange of the Account, a BalanceDateOutOfAccountTimeRange will be returned.
-func (account Account) ValidateBalance(balance GOHMoney.Balance) error {
+func (account Account) ValidateBalance(b balance.Balance) error {
 	if err := account.Validate(); err != nil {
 		return err
 	}
-	if err := balance.Validate(); err != nil {
+	if err := b.Validate(); err != nil {
 		return err
 	}
-	if !account.timeRange.Contains(balance.Date) && (!account.End().Valid || !account.End().Time.Equal(balance.Date)) {
+	if !account.timeRange.Contains(b.Date) && (!account.End().Valid || !account.End().Time.Equal(b.Date)) {
 		return GOHMoney.BalanceDateOutOfAccountTimeRange{
-			BalanceDate:      balance.Date,
+			BalanceDate:      b.Date,
 			AccountTimeRange: account.timeRange,
 		}
 	}

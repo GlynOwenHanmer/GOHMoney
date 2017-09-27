@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 	"github.com/GlynOwenHanmer/GOHMoney"
+	"github.com/GlynOwenHanmer/GOHMoney/balance"
 )
 
 func Test_ValidateAccount(t *testing.T) {
@@ -170,7 +171,7 @@ func Test_InvalidAccountValidateBalance(t *testing.T) {
 	}
 
 	accountErr := invalidAccount.Validate()
-	balanceErr := invalidAccount.ValidateBalance(GOHMoney.Balance{})
+	balanceErr := invalidAccount.ValidateBalance(balance.Balance{})
 	switch {
 	case accountErr == nil && balanceErr == nil:
 		break
@@ -209,12 +210,12 @@ func Test_AccountValidateBalance(t *testing.T) {
 		},
 	}
 
-	pastBalance := GOHMoney.Balance{Date: past}
-	presentBalance := GOHMoney.Balance{Date: present}
-	futureBalance := GOHMoney.Balance{Date: future}
+	pastBalance := balance.Balance{Date: past}
+	presentBalance := balance.Balance{Date: present}
+	futureBalance := balance.Balance{Date: future}
 	testSets := []struct {
 		Account
-		GOHMoney.Balance
+		balance.Balance
 		error
 	}{
 		{
@@ -255,7 +256,7 @@ func Test_AccountValidateBalance(t *testing.T) {
 		},
 		{
 			Account: closedAccount,
-			Balance: GOHMoney.Balance{
+			Balance: balance.Balance{
 				Date: futureBalance.Date.AddDate(1, 0, 0),
 			},
 			error: GOHMoney.BalanceDateOutOfAccountTimeRange{

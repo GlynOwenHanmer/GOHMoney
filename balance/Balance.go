@@ -1,4 +1,4 @@
-package GOHMoney
+package balance
 
 import (
 	"errors"

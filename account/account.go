@@ -1,15 +1,35 @@
-package GOHMoney
+package account
 
 import (
 	"encoding/json"
 	"strings"
 	"time"
+	"github.com/GlynOwenHanmer/GOHMoney"
 )
+
+// New creates a new Account object with a Valid Start time and returns it, also returning any logical errors with the newly created account.
+func New(name string, opened time.Time, closed GOHMoney.NullTime) (a Account, err error) {
+	a = Account{
+		Name: name,
+		timeRange: GOHMoney.TimeRange{
+			Start: GOHMoney.NullTime{
+				Valid: true,
+				Time:  opened,
+			},
+			End: closed,
+		},
+	}
+	if aErr := a.Validate(); len(aErr) > 0 {
+		err = aErr
+	}
+	return a, err
+}
+
 
 // An Account holds the logic for an account.
 type Account struct {
 	Name      string
-	timeRange TimeRange
+	timeRange GOHMoney.TimeRange
 }
 
 // Start returns the start time that the Account opened.
@@ -18,7 +38,7 @@ func (account Account) Start() time.Time {
 }
 
 // End returns the a NullTime object that is Valid if the account has been closed.
-func (account Account) End() NullTime {
+func (account Account) End() GOHMoney.NullTime {
 	return account.timeRange.End
 }
 
@@ -40,22 +60,22 @@ func (account Account) String() string {
 }
 
 // Validate checks the state of an account to see if it is has any logical errors. Validate returns a set of errors representing errors with different fields of the account.
-func (account Account) Validate() AccountFieldError {
+func (account Account) Validate() GOHMoney.AccountFieldError {
 	var fieldErrorDescriptions []string
 	if len(strings.TrimSpace(account.Name)) == 0 {
-		fieldErrorDescriptions = append(fieldErrorDescriptions, EmptyNameError)
+		fieldErrorDescriptions = append(fieldErrorDescriptions, GOHMoney.EmptyNameError)
 	}
 	if err := account.timeRange.Validate(); err != nil {
 		fieldErrorDescriptions = append(fieldErrorDescriptions, err.Error())
 	}
 	if account.Start().IsZero() {
-		fieldErrorDescriptions = append(fieldErrorDescriptions, ZeroDateOpenedError)
+		fieldErrorDescriptions = append(fieldErrorDescriptions, GOHMoney.ZeroDateOpenedError)
 	}
 	if account.End().Valid && account.End().Time.IsZero() {
-		fieldErrorDescriptions = append(fieldErrorDescriptions, ZeroValidDateClosedError)
+		fieldErrorDescriptions = append(fieldErrorDescriptions, GOHMoney.ZeroValidDateClosedError)
 	}
 	if len(fieldErrorDescriptions) > 0 {
-		return AccountFieldError(fieldErrorDescriptions)
+		return GOHMoney.AccountFieldError(fieldErrorDescriptions)
 	}
 	return nil
 }
@@ -64,7 +84,7 @@ func (account Account) Validate() AccountFieldError {
 // ValidateBalance returns any logical errors between the Account and the Balance.
 // ValidateBalance first attempts to validate the Account as an entity by itself. If there are any errors with the Account, these errors are returned and the Balance is not attempted to be validated against the account.
 // If the Date of the Balance is outside of the TimeRange of the Account, a BalanceDateOutOfAccountTimeRange will be returned.
-func (account Account) ValidateBalance(balance Balance) error {
+func (account Account) ValidateBalance(balance GOHMoney.Balance) error {
 	if err := account.Validate(); err != nil {
 		return err
 	}
@@ -72,30 +92,12 @@ func (account Account) ValidateBalance(balance Balance) error {
 		return err
 	}
 	if !account.timeRange.Contains(balance.Date) && (!account.End().Valid || !account.End().Time.Equal(balance.Date)) {
-		return BalanceDateOutOfAccountTimeRange{
+		return GOHMoney.BalanceDateOutOfAccountTimeRange{
 			BalanceDate:      balance.Date,
 			AccountTimeRange: account.timeRange,
 		}
 	}
 	return nil
-}
-
-// NewAccount creates a new Account object with a Valid Start time and returns it, also returning any logical errors with the newly created account.
-func NewAccount(name string, opened time.Time, closed NullTime) (a Account, err error) {
-	a = Account{
-		Name: name,
-		timeRange: TimeRange{
-			Start: NullTime{
-				Valid: true,
-				Time:  opened,
-			},
-			End: closed,
-		},
-	}
-	if aErr := a.Validate(); len(aErr) > 0 {
-		err = aErr
-	}
-	return a, err
 }
 
 // MarshalJSON marshals an Account into a json blob, returning the blob with any errors that occur during the marshalling.
@@ -104,7 +106,7 @@ func (account Account) MarshalJSON() ([]byte, error) {
 	return json.Marshal(&struct {
 		*Alias
 		Start time.Time
-		End   NullTime
+		End   GOHMoney.NullTime
 	}{
 		Alias: (*Alias)(&account),
 		Start: account.Start(),
@@ -117,7 +119,7 @@ func (account *Account) UnmarshalJSON(data []byte) error {
 	type Alias Account
 	aux := &struct {
 		Start time.Time
-		End   NullTime
+		End   GOHMoney.NullTime
 		*Alias
 	}{
 		Alias: (*Alias)(account),
@@ -125,8 +127,8 @@ func (account *Account) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	account.timeRange = TimeRange{
-		Start: NullTime{Valid: true, Time: aux.Start},
+	account.timeRange = GOHMoney.TimeRange{
+		Start: GOHMoney.NullTime{Valid: true, Time: aux.Start},
 		End:   aux.End,
 	}
 	var returnErr error
@@ -137,7 +139,7 @@ func (account *Account) UnmarshalJSON(data []byte) error {
 }
 
 // Equal returns true if both accounts a and b are logically the same.
-func (a *Account) Equal(b *Account) bool {
+func (a Account) Equal(b Account) bool {
 	switch {
 	case a.Name != b.Name:
 		return false

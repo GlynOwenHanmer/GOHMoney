@@ -1,65 +1,66 @@
-package GOHMoney
+package account
 
 import (
 	"bytes"
 	"fmt"
 	"testing"
 	"time"
+	"github.com/GlynOwenHanmer/GOHMoney"
 )
 
 func Test_ValidateAccount(t *testing.T) {
 	testSets := []struct {
 		insertedAccount Account
-		AccountFieldError
+		GOHMoney.AccountFieldError
 	}{
 		{
 			insertedAccount:   Account{},
-			AccountFieldError: AccountFieldError{EmptyNameError, ZeroDateOpenedError},
+			AccountFieldError: GOHMoney.AccountFieldError{GOHMoney.EmptyNameError, GOHMoney.ZeroDateOpenedError},
 		},
 		{
 			insertedAccount: Account{
 				Name: "TEST_ACCOUNT",
 			},
-			AccountFieldError: AccountFieldError{ZeroDateOpenedError},
+			AccountFieldError: GOHMoney.AccountFieldError{GOHMoney.ZeroDateOpenedError},
 		},
 		{
 			insertedAccount: Account{
-				timeRange: TimeRange{
-					Start: NullTime{
+				timeRange: GOHMoney.TimeRange{
+					Start: GOHMoney.NullTime{
 						Valid: true,
 						Time:  time.Date(2000, 1, 1, 1, 1, 1, 1, time.UTC),
 					},
 				},
 			},
-			AccountFieldError: AccountFieldError{EmptyNameError},
+			AccountFieldError: GOHMoney.AccountFieldError{GOHMoney.EmptyNameError},
 		},
 		{
 			insertedAccount: Account{
 				Name: "TEST_ACCOUNT",
-				timeRange: TimeRange{
-					Start: NullTime{},
-					End: NullTime{
+				timeRange: GOHMoney.TimeRange{
+					Start: GOHMoney.NullTime{},
+					End: GOHMoney.NullTime{
 						Valid: true,
 					},
 				},
 			},
-			AccountFieldError: AccountFieldError{ZeroDateOpenedError, ZeroValidDateClosedError},
+			AccountFieldError: GOHMoney.AccountFieldError{GOHMoney.ZeroDateOpenedError, GOHMoney.ZeroValidDateClosedError},
 		},
 		{
 			insertedAccount: Account{
 				Name: "TEST_ACCOUNT",
-				timeRange: TimeRange{
-					Start: NullTime{
+				timeRange: GOHMoney.TimeRange{
+					Start: GOHMoney.NullTime{
 						Valid: true,
 						Time:  time.Date(2000, 1, 1, 1, 1, 1, 1, time.UTC),
 					},
-					End: NullTime{
+					End: GOHMoney.NullTime{
 						Valid: true,
 						Time:  time.Date(1999, 1, 1, 1, 1, 1, 1, time.UTC),
 					},
 				},
 			},
-			AccountFieldError: AccountFieldError{string(DateClosedBeforeDateOpenedError)},
+			AccountFieldError: GOHMoney.AccountFieldError{string(GOHMoney.DateClosedBeforeDateOpenedError)},
 		},
 		{
 			insertedAccount:   newTestAccount(),
@@ -68,12 +69,12 @@ func Test_ValidateAccount(t *testing.T) {
 		{
 			insertedAccount: Account{
 				Name: "TEST_ACCOUNT",
-				timeRange: TimeRange{
-					Start: NullTime{
+				timeRange: GOHMoney.TimeRange{
+					Start: GOHMoney.NullTime{
 						Valid: true,
 						Time:  time.Now(),
 					},
-					End: NullTime{},
+					End: GOHMoney.NullTime{},
 				},
 			},
 			AccountFieldError: nil,
@@ -91,12 +92,12 @@ func Test_ValidateAccount(t *testing.T) {
 func newTestAccount() Account {
 	return Account{
 		Name: "TEST_ACCOUNT",
-		timeRange: TimeRange{
-			Start: NullTime{
+		timeRange: GOHMoney.TimeRange{
+			Start: GOHMoney.NullTime{
 				Valid: true,
 				Time:  time.Date(2000, 1, 1, 1, 1, 1, 1, time.UTC),
 			},
-			End: NullTime{
+			End: GOHMoney.NullTime{
 				Valid: true,
 				Time:  time.Date(2001, 1, 1, 1, 1, 1, 1, time.UTC),
 			},
@@ -127,16 +128,16 @@ func Test_IsOpen(t *testing.T) {
 		},
 		{
 			Account: Account{
-				timeRange: TimeRange{
-					End: NullTime{Valid: false},
+				timeRange: GOHMoney.TimeRange{
+					End: GOHMoney.NullTime{Valid: false},
 				},
 			},
 			IsOpen: true,
 		},
 		{
 			Account: Account{
-				timeRange: TimeRange{
-					End: NullTime{Valid: true},
+				timeRange: GOHMoney.TimeRange{
+					End: GOHMoney.NullTime{Valid: true},
 				},
 			},
 			IsOpen: false,
@@ -156,12 +157,12 @@ func Test_InvalidAccountValidateBalance(t *testing.T) {
 	future := present.AddDate(1, 0, 0)
 
 	invalidAccount := Account{
-		timeRange: TimeRange{
-			Start: NullTime{
+		timeRange: GOHMoney.TimeRange{
+			Start: GOHMoney.NullTime{
 				Valid: true,
 				Time:  future,
 			},
-			End: NullTime{
+			End: GOHMoney.NullTime{
 				Valid: true,
 				Time:  past,
 			},
@@ -169,7 +170,7 @@ func Test_InvalidAccountValidateBalance(t *testing.T) {
 	}
 
 	accountErr := invalidAccount.Validate()
-	balanceErr := invalidAccount.ValidateBalance(Balance{})
+	balanceErr := invalidAccount.ValidateBalance(GOHMoney.Balance{})
 	switch {
 	case accountErr == nil && balanceErr == nil:
 		break
@@ -186,40 +187,40 @@ func Test_AccountValidateBalance(t *testing.T) {
 
 	openAccount := Account{
 		Name: "Test Account",
-		timeRange: TimeRange{
-			Start: NullTime{
+		timeRange: GOHMoney.TimeRange{
+			Start: GOHMoney.NullTime{
 				Valid: true,
 				Time:  present,
 			},
-			End: NullTime{Valid: false},
+			End: GOHMoney.NullTime{Valid: false},
 		},
 	}
 	closedAccount := Account{
 		Name: "Test Account",
-		timeRange: TimeRange{
-			Start: NullTime{
+		timeRange: GOHMoney.TimeRange{
+			Start: GOHMoney.NullTime{
 				Valid: true,
 				Time:  present,
 			},
-			End: NullTime{
+			End: GOHMoney.NullTime{
 				Valid: true,
 				Time:  future,
 			},
 		},
 	}
 
-	pastBalance := Balance{Date: past}
-	presentBalance := Balance{Date: present}
-	futureBalance := Balance{Date: future}
+	pastBalance := GOHMoney.Balance{Date: past}
+	presentBalance := GOHMoney.Balance{Date: present}
+	futureBalance := GOHMoney.Balance{Date: future}
 	testSets := []struct {
 		Account
-		Balance
+		GOHMoney.Balance
 		error
 	}{
 		{
 			Account: openAccount,
 			Balance: pastBalance,
-			error: BalanceDateOutOfAccountTimeRange{
+			error: GOHMoney.BalanceDateOutOfAccountTimeRange{
 				BalanceDate:      pastBalance.Date,
 				AccountTimeRange: openAccount.timeRange,
 			},
@@ -237,7 +238,7 @@ func Test_AccountValidateBalance(t *testing.T) {
 		{
 			Account: closedAccount,
 			Balance: pastBalance,
-			error: BalanceDateOutOfAccountTimeRange{
+			error: GOHMoney.BalanceDateOutOfAccountTimeRange{
 				BalanceDate:      pastBalance.Date,
 				AccountTimeRange: closedAccount.timeRange,
 			},
@@ -254,10 +255,10 @@ func Test_AccountValidateBalance(t *testing.T) {
 		},
 		{
 			Account: closedAccount,
-			Balance: Balance{
+			Balance: GOHMoney.Balance{
 				Date: futureBalance.Date.AddDate(1, 0, 0),
 			},
-			error: BalanceDateOutOfAccountTimeRange{
+			error: GOHMoney.BalanceDateOutOfAccountTimeRange{
 				BalanceDate:      futureBalance.Date.AddDate(1, 0, 0),
 				AccountTimeRange: closedAccount.timeRange,
 			},
@@ -268,8 +269,8 @@ func Test_AccountValidateBalance(t *testing.T) {
 		if testSet.error == err {
 			continue
 		}
-		testSetTyped, testSetErrorIsType := testSet.error.(BalanceDateOutOfAccountTimeRange)
-		actualErrorTyped, actualErrorIsType := err.(BalanceDateOutOfAccountTimeRange)
+		testSetTyped, testSetErrorIsType := testSet.error.(GOHMoney.BalanceDateOutOfAccountTimeRange)
+		actualErrorTyped, actualErrorIsType := err.(GOHMoney.BalanceDateOutOfAccountTimeRange)
 		if testSetErrorIsType != actualErrorIsType {
 			t.Errorf("Expected and resultant errors are differently typed.\nExpected: %s\nActual  : %s", testSet.error, err)
 			t.Logf("Account: %s\nBalance: %s", testSet.Account, testSet.Balance)
@@ -277,8 +278,8 @@ func Test_AccountValidateBalance(t *testing.T) {
 		}
 		var message bytes.Buffer
 		fmt.Fprintf(&message, "Unexpected error.\nExpected: %+v\nActual  : %+v", testSetTyped, actualErrorTyped)
-		fmt.Fprintf(&message, "\nExpected error: BalanceDate: %s, AccountTimeRange: %+v", testSetTyped.BalanceDate, testSetTyped.AccountTimeRange)
-		fmt.Fprintf(&message, "\nActual error  : BalanceDate: %s, AccountTimeRange: %+v", actualErrorTyped.BalanceDate, actualErrorTyped.AccountTimeRange)
+		fmt.Fprintf(&message, "\nExpected error: BalanceDate: %s, AccountGOHMoney.TimeRange: %+v", testSetTyped.BalanceDate, testSetTyped.AccountTimeRange)
+		fmt.Fprintf(&message, "\nActual error  : BalanceDate: %s, AccountGOHMoney.TimeRange: %+v", actualErrorTyped.BalanceDate, actualErrorTyped.AccountTimeRange)
 		t.Errorf(message.String())
 	}
 }
@@ -288,35 +289,35 @@ func Test_NewAccount(t *testing.T) {
 	type testSet struct {
 		name  string
 		start time.Time
-		end   NullTime
+		end   GOHMoney.NullTime
 		error
 	}
 	testSets := []testSet{
 		{
 			name:  "TEST_ACCOUNT",
 			start: now,
-			end:   NullTime{},
+			end:   GOHMoney.NullTime{},
 			error: nil,
 		},
 		{
 			name:  "TEST_ACCOUNT_WITH_ACCOUNT_ERROR",
 			start: now,
-			end:   NullTime{Valid: true, Time: now.AddDate(0, 0, -1)},
-			error: AccountFieldError{DateClosedBeforeDateOpenedError.Error()},
+			end:   GOHMoney.NullTime{Valid: true, Time: now.AddDate(0, 0, -1)},
+			error: GOHMoney.AccountFieldError{GOHMoney.DateClosedBeforeDateOpenedError.Error()},
 		},
 	}
 	logTestSet := func(ts testSet) { t.Logf("Start: %s,\tEnd: %s,", ts.start, ts.end) }
 	for _, set := range testSets {
-		account, err := NewAccount(set.name, set.start, set.end)
-		actualFieldError, actualIsTyped := err.(AccountFieldError)
-		expectedFieldError, expectedIsTyped := set.error.(AccountFieldError)
+		account, err := New(set.name, set.start, set.end)
+		actualFieldError, actualIsTyped := err.(GOHMoney.AccountFieldError)
+		expectedFieldError, expectedIsTyped := set.error.(GOHMoney.AccountFieldError)
 
 		if actualIsTyped != expectedIsTyped {
 			t.Errorf("Unexpected error.\n\tExpected: %s\n\tActual  : %s", set.error, err)
 		} else if !actualIsTyped && err != set.error {
 			t.Errorf("Unexpected error.\n\tExpected: %s\n\tActual  : %s", set.error, err)
 			logTestSet(set)
-		} else if actualIsTyped && !actualFieldError.equal(expectedFieldError) {
+		} else if actualIsTyped && !actualFieldError.Equal(expectedFieldError) {
 			t.Errorf("Error is correct type but unexpected contents.\n\tExpected: %s\n\tActual  : %s", expectedFieldError, actualFieldError)
 			logTestSet(set)
 		}

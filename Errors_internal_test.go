@@ -1,66 +1,69 @@
-package GOHMoney
+package GOHMoney_test
 
-import "testing"
+import (
+	"testing"
+	"github.com/GlynOwenHanmer/GOHMoney"
+)
 
 func TestAccountFieldError_equal(t *testing.T) {
 	testSets := []struct {
-		errA, errB AccountFieldError
+		errA, errB GOHMoney.AccountFieldError
 		equal      bool
 	}{
 		{
-			errA:  AccountFieldError{},
-			errB:  AccountFieldError{},
+			errA:  GOHMoney.AccountFieldError{},
+			errB:  GOHMoney.AccountFieldError{},
 			equal: true,
 		},
 		{
-			errA: AccountFieldError{
-				EmptyNameError,
+			errA: GOHMoney.AccountFieldError{
+				GOHMoney.EmptyNameError,
 			},
-			errB:  AccountFieldError{},
+			errB:  GOHMoney.AccountFieldError{},
 			equal: false,
 		},
 		{
-			errA: AccountFieldError{
-				EmptyNameError,
+			errA: GOHMoney.AccountFieldError{
+				GOHMoney.EmptyNameError,
 			},
-			errB: AccountFieldError{
-				EmptyNameError,
+			errB: GOHMoney.AccountFieldError{
+				GOHMoney.EmptyNameError,
 			},
 			equal: true,
 		},
 		{
-			errA: AccountFieldError{
-				ZeroDateOpenedError,
-				EmptyNameError,
+			errA: GOHMoney.AccountFieldError{
+				GOHMoney.ZeroDateOpenedError,
+				GOHMoney.EmptyNameError,
 			},
-			errB: AccountFieldError{
-				EmptyNameError,
-				ZeroDateOpenedError,
+			errB: GOHMoney.AccountFieldError{
+				GOHMoney.EmptyNameError,
+				GOHMoney.ZeroDateOpenedError,
 			},
 			equal: false,
 		},
 		{
-			errA: AccountFieldError{
-				ZeroDateOpenedError,
-				EmptyNameError,
-				ZeroValidDateClosedError,
+			errA: GOHMoney.AccountFieldError{
+				GOHMoney.ZeroDateOpenedError,
+				GOHMoney.EmptyNameError,
+				GOHMoney.ZeroValidDateClosedError,
 			},
-			errB: AccountFieldError{
-				ZeroDateOpenedError,
-				EmptyNameError,
-				ZeroValidDateClosedError,
+			errB: GOHMoney.AccountFieldError{
+				GOHMoney.ZeroDateOpenedError,
+				GOHMoney.EmptyNameError,
+				GOHMoney.ZeroValidDateClosedError,
 			},
 			equal: true,
 		},
 	}
 	for _, testSet := range testSets {
-		equalA := testSet.errA.equal(testSet.errB)
-		equalB := testSet.errB.equal(testSet.errA)
+		equalA := testSet.errA.Equal(testSet.errB)
+		equalB := testSet.errB.Equal(testSet.errA)
 		if equalA != equalB {
-			t.Fatalf("equal did not return same value when comparing AccountFieldError to other AccountFieldError the reverse way around.")
+			t.Fatalf("Equal did not return same value when comparing GOHMoney.AccountFieldError to other GOHMoney.AccountFieldError the reverse way around.")
 		}
 		if testSet.equal != equalA {
-			t.Errorf("Unexpected equal value.\n\tExpected: %t\n\tActual  : %t", testSet.equal, equalA)
+			t.Errorf("Unexpected Equal value.\n\tExpected: %t\n\tActual  : %t", testSet.equal, equalA)
 		}
 	}
 }

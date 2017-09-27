@@ -10,7 +10,7 @@ type TimeRange struct {
 	End   NullTime
 }
 
-// equal returns true if two TimeRange objects have matching Start and End NullTimes
+// Equal returns true if two TimeRange objects have matching Start and End NullTimes
 func (tr TimeRange) Equal(tr2 TimeRange) bool {
 	if !NullTime(tr.Start).Equal(NullTime(tr2.Start)) || !NullTime(tr.End).Equal(NullTime(tr2.End)) {
 		return false

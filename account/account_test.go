@@ -1,4 +1,4 @@
-package GOHMoney_test
+package account_test
 
 import (
 	"encoding/json"
@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/GlynOwenHanmer/GOHMoney"
+	"github.com/GlynOwenHanmer/GOHMoney/account"
 )
 
 func TestAccount_MarshalJSON(t *testing.T) {
@@ -27,34 +28,34 @@ func TestAccount_MarshalJSON(t *testing.T) {
 		},
 	}
 	for _, set := range testSets {
-		account, err := GOHMoney.NewAccount("TEST ACCOUNT", set.start, set.end)
+		a, err := account.New("TEST ACCOUNT", set.start, set.end)
 		if err != nil {
-			t.Fatalf("Error creating new account for testings. Error: %s", err.Error())
+			t.Fatalf("Error creating new a for testings. Error: %s", err.Error())
 		}
-		bytes, err := json.Marshal(&account)
+		bytes, err := json.Marshal(&a)
 		if err != nil {
 			t.Fatalf("Error marshalling json for testing. Error: %s", err.Error())
 		}
-		var unmarshalled GOHMoney.Account
+		var unmarshalled account.Account
 		err = json.Unmarshal(bytes, &unmarshalled)
 		if err != nil {
 			t.Errorf("Error unmarshalling Account json blob. Error: %s\njson: %s", err.Error(), bytes)
 		}
-		if unmarshalled.Name != account.Name {
-			t.Errorf(`Unexpected name. Expected "%s" but got "%s"`, account.Name, unmarshalled.Name)
+		if unmarshalled.Name != a.Name {
+			t.Errorf(`Unexpected name. Expected "%s" but got "%s"`, a.Name, unmarshalled.Name)
 		}
-		if !account.Start().Equal(unmarshalled.Start()) {
-			t.Errorf("Unexpected account Start.\n\tExpected: %s\n\tActual  : %s", account.Start(), unmarshalled.Start())
+		if !a.Start().Equal(unmarshalled.Start()) {
+			t.Errorf("Unexpected a Start.\n\tExpected: %s\n\tActual  : %s", a.Start(), unmarshalled.Start())
 		}
-		if account.End().Valid != unmarshalled.End().Valid || !account.End().Time.Equal(unmarshalled.End().Time) {
-			t.Errorf("Unexpected account End. \n\tExpected: %s\n\tActual  : %s", account.End(), unmarshalled.End())
+		if a.End().Valid != unmarshalled.End().Valid || !a.End().Time.Equal(unmarshalled.End().Time) {
+			t.Errorf("Unexpected a End. \n\tExpected: %s\n\tActual  : %s", a.End(), unmarshalled.End())
 		}
 	}
 }
 
 func TestAccount_Equal(t *testing.T) {
 	now := time.Now()
-	a, err := GOHMoney.NewAccount("A", now, GOHMoney.NullTime{})
+	a, err := account.New("A", now, GOHMoney.NullTime{})
 	if err != nil {
 		t.Errorf("Error creating account for testing: %s", err)
 	}
@@ -72,11 +73,11 @@ func TestAccount_Equal(t *testing.T) {
 		{"B", now.AddDate(-1, 0, 0), GOHMoney.NullTime{Valid: true, Time: now.Add(1)}, false},
 	}
 	for _, test := range tests {
-		b, err := GOHMoney.NewAccount(test.name, test.start, test.end)
+		b, err := account.New(test.name, test.start, test.end)
 		if err != nil {
 			t.Errorf("Error creating account for testing: %s", err)
 		}
-		equal := a.Equal(&b)
+		equal := a.Equal(b)
 		if equal != test.equal {
 			t.Errorf("Expected %s, but got %t.\nA: %s\nB: %s", test.equal, equal, a, b)
 		}

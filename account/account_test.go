@@ -48,7 +48,7 @@ func TestAccount_MarshalJSON(t *testing.T) {
 			t.Errorf("Unexpected a Start.\n\tExpected: %s\n\tActual  : %s", a.Start(), unmarshalled.Start())
 		}
 		if a.End().Valid != unmarshalled.End().Valid || !a.End().Time.Equal(unmarshalled.End().Time) {
-			t.Errorf("Unexpected a End. \n\tExpected: %s\n\tActual  : %s", a.End(), unmarshalled.End())
+			t.Errorf("Unexpected a End. \n\tExpected: %v\n\tActual  : %v", a.End(), unmarshalled.End())
 		}
 	}
 }
@@ -79,7 +79,7 @@ func TestAccount_Equal(t *testing.T) {
 		}
 		equal := a.Equal(b)
 		if equal != test.equal {
-			t.Errorf("Expected %s, but got %t.\nA: %s\nB: %s", test.equal, equal, a, b)
+			t.Errorf("Expected %t, but got %t.\nA: %v\nB: %v", test.equal, equal, a, b)
 		}
 	}
 }

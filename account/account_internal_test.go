@@ -274,7 +274,7 @@ func Test_AccountValidateBalance(t *testing.T) {
 		actualErrorTyped, actualErrorIsType := err.(GOHMoney.BalanceDateOutOfAccountTimeRange)
 		if testSetErrorIsType != actualErrorIsType {
 			t.Errorf("Expected and resultant errors are differently typed.\nExpected: %s\nActual  : %s", testSet.error, err)
-			t.Logf("Account: %s\nBalance: %s", testSet.Account, testSet.Balance)
+			t.Logf("Account: %s\nBalance: %v", testSet.Account, testSet.Balance)
 			continue
 		}
 		var message bytes.Buffer
@@ -307,7 +307,7 @@ func Test_NewAccount(t *testing.T) {
 			error: GOHMoney.AccountFieldError{GOHMoney.DateClosedBeforeDateOpenedError.Error()},
 		},
 	}
-	logTestSet := func(ts testSet) { t.Logf("Start: %s,\tEnd: %s,", ts.start, ts.end) }
+	logTestSet := func(ts testSet) { t.Logf("Start: %s,\tEnd: %v,", ts.start, ts.end) }
 	for _, set := range testSets {
 		account, err := New(set.name, set.start, set.end)
 		actualFieldError, actualIsTyped := err.(GOHMoney.AccountFieldError)
@@ -335,7 +335,7 @@ func Test_NewAccount(t *testing.T) {
 			logTestSet(set)
 		}
 		if account.End().Valid != set.end.Valid {
-			t.Errorf("Unexpected end time validity.\n\tExpected: %s\n\tActual  : %s", account.End().Valid, set.end.Valid)
+			t.Errorf("Unexpected end time validity.\n\tExpected: %t\n\tActual  : %t", account.End().Valid, set.end.Valid)
 			logTestSet(set)
 		}
 		if !account.End().Time.Equal(set.end.Time) {

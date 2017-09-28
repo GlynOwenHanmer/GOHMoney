@@ -17,7 +17,7 @@ func Test_ValidateBalance(t *testing.T) {
 	validBalance := balance.Balance{Date: time.Now()}
 	err = validBalance.Validate()
 	if err != nil {
-		t.Errorf("Unexpected error.\nExpected: %s\nActual  : %s", nil, err)
+		t.Errorf("Unexpected error.\nExpected: %s\nActual  : %s", error(nil), err)
 	}
 }
 
@@ -116,9 +116,9 @@ func testBalanceResults(t *testing.T, expected BalanceErrorSet, actual BalanceEr
 	if expected.error != actual.error {
 		switch {
 		case expected.error == nil:
-			t.Errorf("Error unexpected\nExpected: %s\nActual  : %s", nil, actual)
+			t.Errorf("Expected no error but got %v", actual)
 		case actual.error == nil:
-			t.Errorf("Error unexpected\nExpected: %s\nActual  : %s", expected, nil)
+			t.Errorf("Error error (%v) but didn't get one", expected)
 		case expected.error.Error() == actual.error.Error():
 			break
 		default:
@@ -126,7 +126,7 @@ func testBalanceResults(t *testing.T, expected BalanceErrorSet, actual BalanceEr
 		}
 	}
 	if expected.Balance != actual.Balance {
-		t.Errorf("Balance unexpected\nExpected: %s\nActual  : %s", expected.Balance, actual.Balance)
+		t.Errorf("Balance unexpected\nExpected: %v\nActual  : %v", expected.Balance, actual.Balance)
 	}
 }
 
@@ -165,7 +165,7 @@ func TestBalances_Sum(t *testing.T) {
 	for _, testSet := range testSets {
 		actual := testSet.Balances.Sum()
 		if testSet.expectedSum != actual {
-			t.Errorf("Unexpected sum.\nExpected: %f\nActual  : %f\nBalances: %v", testSet.expectedSum, actual, testSet, balance.Balances{})
+			t.Errorf("Unexpected sum.\nExpected: %f\nActual  : %f\nBalances: %v", testSet.expectedSum, actual, testSet.Balances)
 		}
 	}
 }

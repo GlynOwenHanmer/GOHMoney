@@ -6,18 +6,23 @@ import (
 )
 
 // EmptyBalancesMessage is the error message used when a Balances object contains no Balance items.
-const EmptyBalancesMessage = "Empty Balances Object"
+const EmptyBalancesMessage = "empty Balances object"
+
+// New creates a new Balance object
+func New(date time.Time, amount Money) (b Balance, err error) {
+	return Balance{Amount: amount, Date: date}, b.Validate()
+}
 
 // Balance holds the logic for a balance item.
 type Balance struct {
 	Date   time.Time
-	Amount float32
+	Amount Money
 }
 
 // Validate checks the fields of a Balance and returns any logic errors that are present within it.
-func (balance Balance) Validate() error {
-	if balance.Date.IsZero() {
-		return BalanceZeroDate
+func (b Balance) Validate() error {
+	if b.Date.IsZero() {
+		return ZeroDate
 	}
 	return nil
 }
@@ -27,7 +32,7 @@ type FieldError string
 
 // A collection of possible BalanceFieldErrors
 const (
-	BalanceZeroDate = FieldError("Date of balance is zero.")
+	ZeroDate = FieldError("Date of balance is zero.")
 )
 
 // Error ensures that FieldError adheres to the error interface.
@@ -38,13 +43,17 @@ func (e FieldError) Error() string {
 //Balances holds multiple Balance items.
 type Balances []Balance
 
-// Sum returns the value of all of the balances amount summed together.
-func (bs Balances) Sum() float32 {
-	var sum float32
+// Sum returns the value of all of the balances Amount summed together.
+func (bs Balances) Sum() (Money, error) {
+	sum := NewMoney(0)
+	var err error
 	for _, b := range bs {
-		sum += b.Amount
+		sum, err = sum.Add(b.Amount)
+		if err != nil {
+			break
+		}
 	}
-	return sum
+	return sum, err
 }
 
 // Earliest returns the Balance with the earliest date contained in a Balances set.

@@ -1,4 +1,4 @@
-package GOHMoney
+package time
 
 import (
 	"bytes"
@@ -9,39 +9,39 @@ import (
 
 func Test_Validate(t *testing.T) {
 	testSets := []struct {
-		TimeRange
+		Range
 		error
 	}{
 		{
-			TimeRange: TimeRange{
+			Range: Range{
 				Start: NullTime{Valid: false},
 				End:   NullTime{Valid: false},
 			},
 			error: nil,
 		},
 		{
-			TimeRange: TimeRange{
+			Range: Range{
 				Start: NullTime{Valid: true},
 				End:   NullTime{Valid: false},
 			},
 			error: nil,
 		},
 		{
-			TimeRange: TimeRange{
+			Range: Range{
 				Start: NullTime{Valid: false},
 				End:   NullTime{Valid: true},
 			},
 			error: nil,
 		},
 		{
-			TimeRange: TimeRange{
+			Range: Range{
 				Start: NullTime{Valid: true},
 				End:   NullTime{Valid: true},
 			},
 			error: nil,
 		},
 		{
-			TimeRange: TimeRange{
+			Range: Range{
 				Start: NullTime{
 					Valid: true,
 					Time:  time.Now().AddDate(-1, 0, 0),
@@ -54,7 +54,7 @@ func Test_Validate(t *testing.T) {
 			error: nil,
 		},
 		{
-			TimeRange: TimeRange{
+			Range: Range{
 				Start: NullTime{
 					Valid: true,
 					Time:  time.Now(),
@@ -64,11 +64,11 @@ func Test_Validate(t *testing.T) {
 					Time:  time.Now().AddDate(-1, 0, 0),
 				},
 			},
-			error: DateClosedBeforeDateOpenedError,
+			error: EndTimeBeforeStartTime,
 		},
 	}
 	for _, testSet := range testSets {
-		err := testSet.TimeRange.Validate()
+		err := testSet.Range.Validate()
 		if err != testSet.error {
 			t.Errorf("Unexpected error.\nExpected: %s\nActual  : %s", testSet.error, err)
 		}
@@ -77,20 +77,20 @@ func Test_Validate(t *testing.T) {
 
 func Test_Contains(t *testing.T) {
 	testStartTime := time.Now()
-	openRange := TimeRange{}
-	openEnded := TimeRange{
+	openRange := Range{}
+	openEnded := Range{
 		Start: NullTime{
 			Valid: true,
 			Time:  testStartTime,
 		},
 	}
-	openStarted := TimeRange{
+	openStarted := Range{
 		End: NullTime{
 			Valid: true,
 			Time:  testStartTime,
 		},
 	}
-	closedEnds := TimeRange{
+	closedEnds := Range{
 		Start: NullTime{
 			Valid: true,
 			Time:  testStartTime,
@@ -102,82 +102,82 @@ func Test_Contains(t *testing.T) {
 	}
 
 	testSets := []struct {
-		TimeRange
+		Range
 		time.Time
 		contains bool
 	}{
 		{
-			TimeRange: openRange,
-			contains:  true,
+			Range:    openRange,
+			contains: true,
 		},
 		{
-			TimeRange: openRange,
-			Time:      testStartTime,
-			contains:  true,
+			Range:    openRange,
+			Time:     testStartTime,
+			contains: true,
 		},
 		{
-			TimeRange: openEnded,
-			Time:      testStartTime.AddDate(-1, 0, 0),
-			contains:  false,
+			Range:    openEnded,
+			Time:     testStartTime.AddDate(-1, 0, 0),
+			contains: false,
 		},
 		{
-			TimeRange: openEnded,
-			Time:      testStartTime,
-			contains:  true,
+			Range:    openEnded,
+			Time:     testStartTime,
+			contains: true,
 		},
 		{
-			TimeRange: openEnded,
-			Time:      testStartTime.AddDate(1, 0, 0),
-			contains:  true,
+			Range:    openEnded,
+			Time:     testStartTime.AddDate(1, 0, 0),
+			contains: true,
 		},
 		{
-			TimeRange: openStarted,
-			Time:      testStartTime.AddDate(-1, 0, 0),
-			contains:  true,
+			Range:    openStarted,
+			Time:     testStartTime.AddDate(-1, 0, 0),
+			contains: true,
 		},
 		{
-			TimeRange: openStarted,
-			Time:      testStartTime,
-			contains:  false,
+			Range:    openStarted,
+			Time:     testStartTime,
+			contains: false,
 		},
 		{
-			TimeRange: openStarted,
-			Time:      testStartTime.AddDate(1, 0, 0),
-			contains:  false,
+			Range:    openStarted,
+			Time:     testStartTime.AddDate(1, 0, 0),
+			contains: false,
 		},
 		{
-			TimeRange: closedEnds,
-			Time:      testStartTime.AddDate(-2, 0, 0),
-			contains:  false,
+			Range:    closedEnds,
+			Time:     testStartTime.AddDate(-2, 0, 0),
+			contains: false,
 		},
 		{
-			TimeRange: closedEnds,
-			Time:      testStartTime,
-			contains:  true,
+			Range:    closedEnds,
+			Time:     testStartTime,
+			contains: true,
 		},
 		{
-			TimeRange: closedEnds,
-			Time:      testStartTime.AddDate(0, 6, 0),
-			contains:  true,
+			Range:    closedEnds,
+			Time:     testStartTime.AddDate(0, 6, 0),
+			contains: true,
 		},
 		{
-			TimeRange: closedEnds,
-			Time:      testStartTime.AddDate(1, 0, 0),
-			contains:  false,
+			Range:    closedEnds,
+			Time:     testStartTime.AddDate(1, 0, 0),
+			contains: false,
 		},
 		{
-			TimeRange: closedEnds,
-			Time:      testStartTime.AddDate(2, 0, 0),
-			contains:  false,
+			Range:    closedEnds,
+			Time:     testStartTime.AddDate(2, 0, 0),
+			contains: false,
 		},
 	}
 	for _, testSet := range testSets {
-		contains := testSet.TimeRange.Contains(testSet.Time)
+		contains := testSet.Range.Contains(testSet.Time)
 		if contains != testSet.contains {
 			var message bytes.Buffer
 			fmt.Fprint(&message, `Unexpected Contains result.`)
 			fmt.Fprintf(&message, "\nExpected Contains: %t\nActual Contains  : %t", testSet.contains, contains)
-			fmt.Fprintf(&message, "\nTimeRange: %+v", testSet.TimeRange)
+			fmt.Fprintf(&message, "\nTimeRange: %+v", testSet.Range)
 			fmt.Fprintf(&message, "\nTime: %+v", testSet.Time)
 			t.Error(message.String())
 		}
@@ -186,30 +186,30 @@ func Test_Contains(t *testing.T) {
 
 func Test_Equal(t *testing.T) {
 	testSets := []struct {
-		a, b  TimeRange
+		a, b  Range
 		equal bool
 	}{
 		{
-			a:     TimeRange{},
-			b:     TimeRange{},
+			a:     Range{},
+			b:     Range{},
 			equal: true,
 		},
 		{
-			a: TimeRange{
+			a: Range{
 				Start: NullTime{
 					Valid: true,
 				},
 			},
-			b:     TimeRange{},
+			b:     Range{},
 			equal: false,
 		},
 		{
-			a: TimeRange{
+			a: Range{
 				End: NullTime{
 					Valid: true,
 				},
 			},
-			b:     TimeRange{},
+			b:     Range{},
 			equal: false,
 		},
 	}

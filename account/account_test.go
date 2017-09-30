@@ -5,23 +5,23 @@ import (
 	"testing"
 	"time"
 
-	"github.com/GlynOwenHanmer/GOHMoney"
 	"github.com/GlynOwenHanmer/GOHMoney/account"
+	gohtime "github.com/GlynOwenHanmer/GOHMoney/time"
 )
 
 func TestAccount_MarshalJSON(t *testing.T) {
 	now := time.Now()
 	testSets := []struct {
 		start time.Time
-		end   GOHMoney.NullTime
+		end   gohtime.NullTime
 	}{
 		{
 			start: now,
-			end:   GOHMoney.NullTime{},
+			end:   gohtime.NullTime{},
 		},
 		{
 			start: now,
-			end: GOHMoney.NullTime{
+			end: gohtime.NullTime{
 				Valid: true,
 				Time:  now.AddDate(1, 0, 0),
 			},
@@ -55,22 +55,22 @@ func TestAccount_MarshalJSON(t *testing.T) {
 
 func TestAccount_Equal(t *testing.T) {
 	now := time.Now()
-	a, err := account.New("A", now, GOHMoney.NullTime{})
+	a, err := account.New("A", now, gohtime.NullTime{})
 	if err != nil {
 		t.Errorf("Error creating account for testing: %s", err)
 	}
 	tests := []struct {
 		name  string
 		start time.Time
-		end   GOHMoney.NullTime
+		end   gohtime.NullTime
 		equal bool
 	}{
-		{"A", now, GOHMoney.NullTime{}, true},
-		{"B", now, GOHMoney.NullTime{}, false},
-		{"A", now.AddDate(-1, 0, 0), GOHMoney.NullTime{}, false},
-		{"A", now, GOHMoney.NullTime{Valid: true, Time: now.Add(1)}, false},
-		{"A", now.AddDate(-1, 0, 0), GOHMoney.NullTime{Valid: true, Time: now.Add(1)}, false},
-		{"B", now.AddDate(-1, 0, 0), GOHMoney.NullTime{Valid: true, Time: now.Add(1)}, false},
+		{"A", now, gohtime.NullTime{}, true},
+		{"B", now, gohtime.NullTime{}, false},
+		{"A", now.AddDate(-1, 0, 0), gohtime.NullTime{}, false},
+		{"A", now, gohtime.NullTime{Valid: true, Time: now.Add(1)}, false},
+		{"A", now.AddDate(-1, 0, 0), gohtime.NullTime{Valid: true, Time: now.Add(1)}, false},
+		{"B", now.AddDate(-1, 0, 0), gohtime.NullTime{Valid: true, Time: now.Add(1)}, false},
 	}
 	for _, test := range tests {
 		b, err := account.New(test.name, test.start, test.end)

@@ -1,4 +1,4 @@
-package GOHMoney
+package time
 
 import (
 	"time"

@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/GlynOwenHanmer/GOHMoney"
+	gohtime "github.com/GlynOwenHanmer/GOHMoney/time"
 )
 
-// DateOutOfAccountTimeRange is a type returned when the date of a Balance is not contained within the TimeRange of the Account that holds it.
+// DateOutOfAccountTimeRange is a type returned when the date of a Balance is not contained within the Range of the Account that holds it.
 // BalanceDate and AccountTimeRange fields are present and provide the exact detail of the timings that have discrepancies.
 type DateOutOfAccountTimeRange struct {
 	BalanceDate      time.Time
-	AccountTimeRange GOHMoney.TimeRange
+	AccountTimeRange gohtime.Range
 }
 
 // Error ensures that DateOutOfAccountTimeRange adheres to the error interface.

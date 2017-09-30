@@ -1,45 +1,43 @@
-package GOHMoney_test
+package time
 
 import (
 	"bytes"
 	"fmt"
 	"testing"
 	"time"
-
-	"github.com/GlynOwenHanmer/GOHMoney"
 )
 
 func TestNullTime_Equal(t *testing.T) {
 	timeNow := time.Now()
 	testSets := []struct {
-		a, b  GOHMoney.NullTime
+		a, b  NullTime
 		equal bool
 	}{
 		// a not Valid, b not Valid
 		{
-			a:     GOHMoney.NullTime{},
-			b:     GOHMoney.NullTime{},
+			a:     NullTime{},
+			b:     NullTime{},
 			equal: true,
 		},
 		{
-			a: GOHMoney.NullTime{
+			a: NullTime{
 				Time: timeNow,
 			},
-			b:     GOHMoney.NullTime{},
+			b:     NullTime{},
 			equal: false,
 		},
 		{
-			a: GOHMoney.NullTime{},
-			b: GOHMoney.NullTime{
+			a: NullTime{},
+			b: NullTime{
 				Time: timeNow,
 			},
 			equal: false,
 		},
 		{
-			a: GOHMoney.NullTime{
+			a: NullTime{
 				Time: timeNow,
 			},
-			b: GOHMoney.NullTime{
+			b: NullTime{
 				Time: timeNow,
 			},
 			equal: true,
@@ -47,35 +45,35 @@ func TestNullTime_Equal(t *testing.T) {
 
 		// a Valid, b not Valid
 		{
-			a: GOHMoney.NullTime{
+			a: NullTime{
 				Valid: true,
 			},
-			b:     GOHMoney.NullTime{},
+			b:     NullTime{},
 			equal: false,
 		},
 		{
-			a: GOHMoney.NullTime{
+			a: NullTime{
 				Valid: true,
 				Time:  timeNow,
 			},
-			b:     GOHMoney.NullTime{},
+			b:     NullTime{},
 			equal: false,
 		},
 		{
-			a: GOHMoney.NullTime{
+			a: NullTime{
 				Valid: true,
 			},
-			b: GOHMoney.NullTime{
+			b: NullTime{
 				Time: timeNow,
 			},
 			equal: false,
 		},
 		{
-			a: GOHMoney.NullTime{
+			a: NullTime{
 				Valid: true,
 				Time:  timeNow,
 			},
-			b: GOHMoney.NullTime{
+			b: NullTime{
 				Time: timeNow,
 			},
 			equal: false,
@@ -83,34 +81,34 @@ func TestNullTime_Equal(t *testing.T) {
 
 		// a not Valid, b Valid
 		{
-			a: GOHMoney.NullTime{},
-			b: GOHMoney.NullTime{
+			a: NullTime{},
+			b: NullTime{
 				Valid: true,
 			},
 			equal: false,
 		},
 		{
-			a: GOHMoney.NullTime{
+			a: NullTime{
 				Time: timeNow,
 			},
-			b: GOHMoney.NullTime{
+			b: NullTime{
 				Valid: true,
 			},
 			equal: false,
 		},
 		{
-			a: GOHMoney.NullTime{},
-			b: GOHMoney.NullTime{
+			a: NullTime{},
+			b: NullTime{
 				Valid: true,
 				Time:  timeNow,
 			},
 			equal: false,
 		},
 		{
-			a: GOHMoney.NullTime{
+			a: NullTime{
 				Time: timeNow,
 			},
-			b: GOHMoney.NullTime{
+			b: NullTime{
 				Valid: true,
 				Time:  timeNow,
 			},
@@ -119,40 +117,40 @@ func TestNullTime_Equal(t *testing.T) {
 
 		// a Valid, b Valid
 		{
-			a: GOHMoney.NullTime{
+			a: NullTime{
 				Valid: true,
 			},
-			b: GOHMoney.NullTime{
+			b: NullTime{
 				Valid: true,
 			},
 			equal: true,
 		},
 		{
-			a: GOHMoney.NullTime{
+			a: NullTime{
 				Valid: true,
 				Time:  timeNow,
 			},
-			b: GOHMoney.NullTime{
+			b: NullTime{
 				Valid: true,
 			},
 			equal: false,
 		},
 		{
-			a: GOHMoney.NullTime{
+			a: NullTime{
 				Valid: true,
 			},
-			b: GOHMoney.NullTime{
+			b: NullTime{
 				Valid: true,
 				Time:  timeNow,
 			},
 			equal: false,
 		},
 		{
-			a: GOHMoney.NullTime{
+			a: NullTime{
 				Valid: true,
 				Time:  timeNow,
 			},
-			b: GOHMoney.NullTime{
+			b: NullTime{
 				Valid: true,
 				Time:  timeNow,
 			},
@@ -174,11 +172,11 @@ func TestNullTime_Equal(t *testing.T) {
 func TestNullTime_EqualTime(t *testing.T) {
 	now := time.Now()
 	testSets := []struct {
-		a  GOHMoney.NullTime
+		a  NullTime
 		bs map[time.Time]bool
 	}{
 		{
-			a: GOHMoney.NullTime{
+			a: NullTime{
 				Valid: false,
 				Time:  now,
 			},
@@ -187,7 +185,7 @@ func TestNullTime_EqualTime(t *testing.T) {
 			},
 		},
 		{
-			a: GOHMoney.NullTime{
+			a: NullTime{
 				Valid: true,
 				Time:  now,
 			},

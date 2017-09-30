@@ -5,16 +5,16 @@ import (
 	"strings"
 	"time"
 
-	"github.com/GlynOwenHanmer/GOHMoney"
 	"github.com/GlynOwenHanmer/GOHMoney/balance"
+	gohtime "github.com/GlynOwenHanmer/GOHMoney/time"
 )
 
 // New creates a new Account object with a Valid Start time and returns it, also returning any logical errors with the newly created account.
-func New(name string, opened time.Time, closed GOHMoney.NullTime) (a Account, err error) {
+func New(name string, opened time.Time, closed gohtime.NullTime) (a Account, err error) {
 	a = Account{
 		Name: name,
-		timeRange: GOHMoney.TimeRange{
-			Start: GOHMoney.NullTime{
+		timeRange: gohtime.Range{
+			Start: gohtime.NullTime{
 				Valid: true,
 				Time:  opened,
 			},
@@ -30,7 +30,7 @@ func New(name string, opened time.Time, closed GOHMoney.NullTime) (a Account, er
 // An Account holds the logic for an account.
 type Account struct {
 	Name      string
-	timeRange GOHMoney.TimeRange
+	timeRange gohtime.Range
 }
 
 // Start returns the start time that the Account opened.
@@ -39,7 +39,7 @@ func (a Account) Start() time.Time {
 }
 
 // End returns the a NullTime object that is Valid if the account has been closed.
-func (a Account) End() GOHMoney.NullTime {
+func (a Account) End() gohtime.NullTime {
 	return a.timeRange.End
 }
 
@@ -107,7 +107,7 @@ func (a Account) MarshalJSON() ([]byte, error) {
 	return json.Marshal(&struct {
 		*Alias
 		Start time.Time
-		End   GOHMoney.NullTime
+		End   gohtime.NullTime
 	}{
 		Alias: (*Alias)(&a),
 		Start: a.Start(),
@@ -120,7 +120,7 @@ func (a *Account) UnmarshalJSON(data []byte) error {
 	type Alias Account
 	aux := &struct {
 		Start time.Time
-		End   GOHMoney.NullTime
+		End   gohtime.NullTime
 		*Alias
 	}{
 		Alias: (*Alias)(a),
@@ -128,8 +128,8 @@ func (a *Account) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	a.timeRange = GOHMoney.TimeRange{
-		Start: GOHMoney.NullTime{Valid: true, Time: aux.Start},
+	a.timeRange = gohtime.Range{
+		Start: gohtime.NullTime{Valid: true, Time: aux.Start},
 		End:   aux.End,
 	}
 	var returnErr error

@@ -84,7 +84,7 @@ func (a Account) Validate() FieldError {
 // ValidateBalance validates a Balance against an Account.
 // ValidateBalance returns any logical errors between the Account and the Balance.
 // ValidateBalance first attempts to validate the Account as an entity by itself. If there are any errors with the Account, these errors are returned and the Balance is not attempted to be validated against the account.
-// If the Date of the Balance is outside of the TimeRange of the Account, a BalanceDateOutOfAccountTimeRange will be returned.
+// If the Date of the Balance is outside of the TimeRange of the Account, a DateOutOfAccountTimeRange will be returned.
 func (a Account) ValidateBalance(b balance.Balance) error {
 	if err := a.Validate(); err != nil {
 		return err
@@ -93,7 +93,7 @@ func (a Account) ValidateBalance(b balance.Balance) error {
 		return err
 	}
 	if !a.timeRange.Contains(b.Date) && (!a.End().Valid || !a.End().Time.Equal(b.Date)) {
-		return GOHMoney.BalanceDateOutOfAccountTimeRange{
+		return balance.DateOutOfAccountTimeRange{
 			BalanceDate:      b.Date,
 			AccountTimeRange: a.timeRange,
 		}

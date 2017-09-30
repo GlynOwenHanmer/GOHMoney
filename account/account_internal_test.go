@@ -222,7 +222,7 @@ func Test_AccountValidateBalance(t *testing.T) {
 		{
 			Account: openAccount,
 			Balance: pastBalance,
-			error: GOHMoney.BalanceDateOutOfAccountTimeRange{
+			error: balance.DateOutOfAccountTimeRange{
 				BalanceDate:      pastBalance.Date,
 				AccountTimeRange: openAccount.timeRange,
 			},
@@ -240,7 +240,7 @@ func Test_AccountValidateBalance(t *testing.T) {
 		{
 			Account: closedAccount,
 			Balance: pastBalance,
-			error: GOHMoney.BalanceDateOutOfAccountTimeRange{
+			error: balance.DateOutOfAccountTimeRange{
 				BalanceDate:      pastBalance.Date,
 				AccountTimeRange: closedAccount.timeRange,
 			},
@@ -260,7 +260,7 @@ func Test_AccountValidateBalance(t *testing.T) {
 			Balance: balance.Balance{
 				Date: futureBalance.Date.AddDate(1, 0, 0),
 			},
-			error: GOHMoney.BalanceDateOutOfAccountTimeRange{
+			error: balance.DateOutOfAccountTimeRange{
 				BalanceDate:      futureBalance.Date.AddDate(1, 0, 0),
 				AccountTimeRange: closedAccount.timeRange,
 			},
@@ -271,8 +271,8 @@ func Test_AccountValidateBalance(t *testing.T) {
 		if testSet.error == err {
 			continue
 		}
-		testSetTyped, testSetErrorIsType := testSet.error.(GOHMoney.BalanceDateOutOfAccountTimeRange)
-		actualErrorTyped, actualErrorIsType := err.(GOHMoney.BalanceDateOutOfAccountTimeRange)
+		testSetTyped, testSetErrorIsType := testSet.error.(balance.DateOutOfAccountTimeRange)
+		actualErrorTyped, actualErrorIsType := err.(balance.DateOutOfAccountTimeRange)
 		if testSetErrorIsType != actualErrorIsType {
 			t.Errorf("Expected and resultant errors are differently typed.\nExpected: %s\nActual  : %s", testSet.error, err)
 			t.Logf("Account: %s\nBalance: %v", testSet.Account, testSet.Balance)

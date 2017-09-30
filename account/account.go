@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/GlynOwenHanmer/GOHMoney/balance"
-	gohtime "github.com/GlynOwenHanmer/GOHMoney/time"
+	gohtime "github.com/GlynOwenHanmer/go-time"
 )
 
 // New creates a new Account object with a Valid Start time and returns it, also returning any logical errors with the newly created account.

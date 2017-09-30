@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/GlynOwenHanmer/GOHMoney/balance"
-	gohtime "github.com/GlynOwenHanmer/GOHMoney/time"
+	gohtime "github.com/GlynOwenHanmer/go-time"
 )
 
 func Test_ValidateAccount(t *testing.T) {
@@ -310,7 +310,7 @@ func Test_NewAccount(t *testing.T) {
 	}
 	logTestSet := func(ts testSet) { t.Logf("Start: %s,\tEnd: %v,", ts.start, ts.end) }
 	for _, set := range testSets {
-		account, err := New(set.name, set.start, set.end)
+		a, err := New(set.name, set.start, set.end)
 		actualFieldError, actualIsTyped := err.(FieldError)
 		expectedFieldError, expectedIsTyped := set.error.(FieldError)
 
@@ -323,24 +323,24 @@ func Test_NewAccount(t *testing.T) {
 			t.Errorf("Error is correct type but unexpected contents.\n\tExpected: %s\n\tActual  : %s", expectedFieldError, actualFieldError)
 			logTestSet(set)
 		}
-		if account.Name != set.name {
-			t.Errorf("Unexpected name.\n\tExpected: %s\n\tActual  : %s", set.name, account.Name)
+		if a.Name != set.name {
+			t.Errorf("Unexpected name.\n\tExpected: %s\n\tActual  : %s", set.name, a.Name)
 			logTestSet(set)
 		}
-		if !account.timeRange.Start.Valid {
+		if !a.timeRange.Start.Valid {
 			t.Errorf("Returned invalid start time.")
 			logTestSet(set)
 		}
-		if !account.Start().Equal(set.start) {
-			t.Errorf("Unexpected start.\n\tExpected: %s\n\tActual  : %s", set.start, account.Start())
+		if !a.Start().Equal(set.start) {
+			t.Errorf("Unexpected start.\n\tExpected: %s\n\tActual  : %s", set.start, a.Start())
 			logTestSet(set)
 		}
-		if account.End().Valid != set.end.Valid {
-			t.Errorf("Unexpected end time validity.\n\tExpected: %t\n\tActual  : %t", account.End().Valid, set.end.Valid)
+		if a.End().Valid != set.end.Valid {
+			t.Errorf("Unexpected end time validity.\n\tExpected: %t\n\tActual  : %t", a.End().Valid, set.end.Valid)
 			logTestSet(set)
 		}
-		if !account.End().Time.Equal(set.end.Time) {
-			t.Errorf("Unexpected end time.\n\tExpected: %s\n\tActual  : %s", set.end.Time, account.End().Time)
+		if !a.End().Time.Equal(set.end.Time) {
+			t.Errorf("Unexpected end time.\n\tExpected: %s\n\tActual  : %s", set.end.Time, a.End().Time)
 			logTestSet(set)
 		}
 	}

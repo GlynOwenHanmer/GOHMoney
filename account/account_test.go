@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/GlynOwenHanmer/GOHMoney/account"
-	gohtime "github.com/GlynOwenHanmer/GOHMoney/time"
+	gohtime "github.com/GlynOwenHanmer/go-time"
 )
 
 func TestAccount_MarshalJSON(t *testing.T) {

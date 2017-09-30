@@ -11,8 +11,8 @@ type NullTime pq.NullTime
 
 // Equal returns true if the two NullTime objects are exactly the same.
 // Equal even evaluates the Time fields of both NullTime objects if they are both not Valid
-func (a NullTime) Equal(b NullTime) bool {
-	if a.Valid != b.Valid || !a.Time.Equal(b.Time) {
+func (nt NullTime) Equal(other NullTime) bool {
+	if nt.Valid != other.Valid || !nt.Time.Equal(other.Time) {
 		return false
 	}
 	return true

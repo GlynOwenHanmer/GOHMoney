@@ -48,5 +48,6 @@ func (err timeRangeValidationError) Error() string {
 }
 
 const (
+	// DateClosedBeforeDateOpenedError is a timeRangeValidationError that is returned when a Balance's closing date is set to before the opening date.
 	DateClosedBeforeDateOpenedError = timeRangeValidationError("Closed date is before opened date.")
 )

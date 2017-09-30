@@ -5,6 +5,7 @@ import (
 	"time"
 )
 
+// EmptyBalancesMessage is the error message used when a Balances object contains no Balance items.
 const EmptyBalancesMessage = "Empty Balances Object"
 
 // Balance holds the logic for a balance item.
@@ -21,16 +22,16 @@ func (balance Balance) Validate() error {
 	return nil
 }
 
-// BalanceFieldError represents an error with the logic of a Balance item.
-type BalanceFieldError string
+// FieldError represents an error with the logic of a Balance item.
+type FieldError string
 
 // A collection of possible BalanceFieldErrors
 const (
-	BalanceZeroDate = BalanceFieldError("Date of balance is zero.")
+	BalanceZeroDate = FieldError("Date of balance is zero.")
 )
 
-// Error ensures that BalanceFieldError adheres to the error interface.
-func (e BalanceFieldError) Error() string {
+// Error ensures that FieldError adheres to the error interface.
+func (e FieldError) Error() string {
 	return string(e)
 }
 

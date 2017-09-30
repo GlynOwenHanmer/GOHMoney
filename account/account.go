@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"strings"
 	"time"
+
 	"github.com/GlynOwenHanmer/GOHMoney"
 	"github.com/GlynOwenHanmer/GOHMoney/balance"
 )
@@ -26,7 +27,6 @@ func New(name string, opened time.Time, closed GOHMoney.NullTime) (a Account, er
 	return a, err
 }
 
-
 // An Account holds the logic for an account.
 type Account struct {
 	Name      string
@@ -34,23 +34,23 @@ type Account struct {
 }
 
 // Start returns the start time that the Account opened.
-func (account Account) Start() time.Time {
-	return account.timeRange.Start.Time
+func (a Account) Start() time.Time {
+	return a.timeRange.Start.Time
 }
 
 // End returns the a NullTime object that is Valid if the account has been closed.
-func (account Account) End() GOHMoney.NullTime {
-	return account.timeRange.End
+func (a Account) End() GOHMoney.NullTime {
+	return a.timeRange.End
 }
 
 // IsOpen return true if the Account is open.
-func (account Account) IsOpen() bool {
-	return !account.timeRange.End.Valid
+func (a Account) IsOpen() bool {
+	return !a.timeRange.End.Valid
 }
 
 // String() ensures that Account conforms to the Stringer interface.
-func (account Account) String() string {
-	jsonBytes, err := json.Marshal(account)
+func (a Account) String() string {
+	jsonBytes, err := json.Marshal(a)
 	var ret string
 	if err != nil {
 		ret = "Unable to form Account string."
@@ -61,22 +61,22 @@ func (account Account) String() string {
 }
 
 // Validate checks the state of an account to see if it is has any logical errors. Validate returns a set of errors representing errors with different fields of the account.
-func (account Account) Validate() GOHMoney.AccountFieldError {
+func (a Account) Validate() FieldError {
 	var fieldErrorDescriptions []string
-	if len(strings.TrimSpace(account.Name)) == 0 {
-		fieldErrorDescriptions = append(fieldErrorDescriptions, GOHMoney.EmptyNameError)
+	if len(strings.TrimSpace(a.Name)) == 0 {
+		fieldErrorDescriptions = append(fieldErrorDescriptions, EmptyNameError)
 	}
-	if err := account.timeRange.Validate(); err != nil {
+	if err := a.timeRange.Validate(); err != nil {
 		fieldErrorDescriptions = append(fieldErrorDescriptions, err.Error())
 	}
-	if account.Start().IsZero() {
-		fieldErrorDescriptions = append(fieldErrorDescriptions, GOHMoney.ZeroDateOpenedError)
+	if a.Start().IsZero() {
+		fieldErrorDescriptions = append(fieldErrorDescriptions, ZeroDateOpenedError)
 	}
-	if account.End().Valid && account.End().Time.IsZero() {
-		fieldErrorDescriptions = append(fieldErrorDescriptions, GOHMoney.ZeroValidDateClosedError)
+	if a.End().Valid && a.End().Time.IsZero() {
+		fieldErrorDescriptions = append(fieldErrorDescriptions, ZeroValidDateClosedError)
 	}
 	if len(fieldErrorDescriptions) > 0 {
-		return GOHMoney.AccountFieldError(fieldErrorDescriptions)
+		return FieldError(fieldErrorDescriptions)
 	}
 	return nil
 }
@@ -85,55 +85,55 @@ func (account Account) Validate() GOHMoney.AccountFieldError {
 // ValidateBalance returns any logical errors between the Account and the Balance.
 // ValidateBalance first attempts to validate the Account as an entity by itself. If there are any errors with the Account, these errors are returned and the Balance is not attempted to be validated against the account.
 // If the Date of the Balance is outside of the TimeRange of the Account, a BalanceDateOutOfAccountTimeRange will be returned.
-func (account Account) ValidateBalance(b balance.Balance) error {
-	if err := account.Validate(); err != nil {
+func (a Account) ValidateBalance(b balance.Balance) error {
+	if err := a.Validate(); err != nil {
 		return err
 	}
 	if err := b.Validate(); err != nil {
 		return err
 	}
-	if !account.timeRange.Contains(b.Date) && (!account.End().Valid || !account.End().Time.Equal(b.Date)) {
+	if !a.timeRange.Contains(b.Date) && (!a.End().Valid || !a.End().Time.Equal(b.Date)) {
 		return GOHMoney.BalanceDateOutOfAccountTimeRange{
 			BalanceDate:      b.Date,
-			AccountTimeRange: account.timeRange,
+			AccountTimeRange: a.timeRange,
 		}
 	}
 	return nil
 }
 
 // MarshalJSON marshals an Account into a json blob, returning the blob with any errors that occur during the marshalling.
-func (account Account) MarshalJSON() ([]byte, error) {
+func (a Account) MarshalJSON() ([]byte, error) {
 	type Alias Account
 	return json.Marshal(&struct {
 		*Alias
 		Start time.Time
 		End   GOHMoney.NullTime
 	}{
-		Alias: (*Alias)(&account),
-		Start: account.Start(),
-		End:   account.End(),
+		Alias: (*Alias)(&a),
+		Start: a.Start(),
+		End:   a.End(),
 	})
 }
 
 // UnmarshalJSON attempts to unmarshal a json blob into an Account object, returning any errors that occur during the unmarshalling.
-func (account *Account) UnmarshalJSON(data []byte) error {
+func (a *Account) UnmarshalJSON(data []byte) error {
 	type Alias Account
 	aux := &struct {
 		Start time.Time
 		End   GOHMoney.NullTime
 		*Alias
 	}{
-		Alias: (*Alias)(account),
+		Alias: (*Alias)(a),
 	}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	account.timeRange = GOHMoney.TimeRange{
+	a.timeRange = GOHMoney.TimeRange{
 		Start: GOHMoney.NullTime{Valid: true, Time: aux.Start},
 		End:   aux.End,
 	}
 	var returnErr error
-	if err := account.Validate(); err != nil {
+	if err := a.Validate(); err != nil {
 		returnErr = err
 	}
 	return returnErr

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"testing"
 	"time"
+
 	"github.com/GlynOwenHanmer/GOHMoney/balance"
 )
 

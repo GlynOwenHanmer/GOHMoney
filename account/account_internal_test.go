@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"testing"
 	"time"
+
 	"github.com/GlynOwenHanmer/GOHMoney"
 	"github.com/GlynOwenHanmer/GOHMoney/balance"
 )
@@ -12,17 +13,17 @@ import (
 func Test_ValidateAccount(t *testing.T) {
 	testSets := []struct {
 		insertedAccount Account
-		GOHMoney.AccountFieldError
+		FieldError
 	}{
 		{
-			insertedAccount:   Account{},
-			AccountFieldError: GOHMoney.AccountFieldError{GOHMoney.EmptyNameError, GOHMoney.ZeroDateOpenedError},
+			insertedAccount: Account{},
+			FieldError:      FieldError{EmptyNameError, ZeroDateOpenedError},
 		},
 		{
 			insertedAccount: Account{
 				Name: "TEST_ACCOUNT",
 			},
-			AccountFieldError: GOHMoney.AccountFieldError{GOHMoney.ZeroDateOpenedError},
+			FieldError: FieldError{ZeroDateOpenedError},
 		},
 		{
 			insertedAccount: Account{
@@ -33,7 +34,7 @@ func Test_ValidateAccount(t *testing.T) {
 					},
 				},
 			},
-			AccountFieldError: GOHMoney.AccountFieldError{GOHMoney.EmptyNameError},
+			FieldError: FieldError{EmptyNameError},
 		},
 		{
 			insertedAccount: Account{
@@ -45,7 +46,7 @@ func Test_ValidateAccount(t *testing.T) {
 					},
 				},
 			},
-			AccountFieldError: GOHMoney.AccountFieldError{GOHMoney.ZeroDateOpenedError, GOHMoney.ZeroValidDateClosedError},
+			FieldError: FieldError{ZeroDateOpenedError, ZeroValidDateClosedError},
 		},
 		{
 			insertedAccount: Account{
@@ -61,11 +62,11 @@ func Test_ValidateAccount(t *testing.T) {
 					},
 				},
 			},
-			AccountFieldError: GOHMoney.AccountFieldError{string(GOHMoney.DateClosedBeforeDateOpenedError)},
+			FieldError: FieldError{string(GOHMoney.DateClosedBeforeDateOpenedError)},
 		},
 		{
-			insertedAccount:   newTestAccount(),
-			AccountFieldError: nil,
+			insertedAccount: newTestAccount(),
+			FieldError:      nil,
 		},
 		{
 			insertedAccount: Account{
@@ -78,12 +79,12 @@ func Test_ValidateAccount(t *testing.T) {
 					End: GOHMoney.NullTime{},
 				},
 			},
-			AccountFieldError: nil,
+			FieldError: nil,
 		},
 	}
 	for _, testSet := range testSets {
 		actual := testSet.insertedAccount.Validate()
-		expected := testSet.AccountFieldError
+		expected := testSet.FieldError
 		if !stringSlicesMatch(expected, actual) {
 			t.Errorf("Unexpected error.\nExpected: %s\nActual  : %s\nInserted Account: %s", expected, actual, testSet.insertedAccount)
 		}
@@ -304,14 +305,14 @@ func Test_NewAccount(t *testing.T) {
 			name:  "TEST_ACCOUNT_WITH_ACCOUNT_ERROR",
 			start: now,
 			end:   GOHMoney.NullTime{Valid: true, Time: now.AddDate(0, 0, -1)},
-			error: GOHMoney.AccountFieldError{GOHMoney.DateClosedBeforeDateOpenedError.Error()},
+			error: FieldError{GOHMoney.DateClosedBeforeDateOpenedError.Error()},
 		},
 	}
 	logTestSet := func(ts testSet) { t.Logf("Start: %s,\tEnd: %v,", ts.start, ts.end) }
 	for _, set := range testSets {
 		account, err := New(set.name, set.start, set.end)
-		actualFieldError, actualIsTyped := err.(GOHMoney.AccountFieldError)
-		expectedFieldError, expectedIsTyped := set.error.(GOHMoney.AccountFieldError)
+		actualFieldError, actualIsTyped := err.(FieldError)
+		expectedFieldError, expectedIsTyped := set.error.(FieldError)
 
 		if actualIsTyped != expectedIsTyped {
 			t.Errorf("Unexpected error.\n\tExpected: %s\n\tActual  : %s", set.error, err)

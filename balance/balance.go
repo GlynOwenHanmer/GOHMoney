@@ -10,18 +10,29 @@ const EmptyBalancesMessage = "empty Balances object"
 
 // New creates a new Balance object
 func New(date time.Time, amount Money) (b Balance, err error) {
-	return Balance{Amount: amount, Date: date}, b.Validate()
+	b = Balance{amount: amount, date: date}
+	return b, b.Validate()
 }
 
 // Balance holds the logic for a balance item.
 type Balance struct {
-	Date   time.Time
-	Amount Money
+	date   time.Time
+	amount Money
+}
+
+// Date returns the Date of the Balance
+func (b Balance) Date() time.Time {
+	return b.date
+}
+
+// Amount returns the Amount of the Balance
+func (b Balance) Amount() Money {
+	return b.amount
 }
 
 // Validate checks the fields of a Balance and returns any logic errors that are present within it.
 func (b Balance) Validate() error {
-	if b.Date.IsZero() {
+	if b.date.IsZero() {
 		return ZeroDate
 	}
 	return nil
@@ -32,7 +43,7 @@ type FieldError string
 
 // A collection of possible BalanceFieldErrors
 const (
-	ZeroDate = FieldError("Date of balance is zero.")
+	ZeroDate = FieldError("date of balance is zero.")
 )
 
 // Error ensures that FieldError adheres to the error interface.
@@ -43,12 +54,12 @@ func (e FieldError) Error() string {
 //Balances holds multiple Balance items.
 type Balances []Balance
 
-// Sum returns the value of all of the balances Amount summed together.
+// Sum returns the value of all of the balances amount summed together.
 func (bs Balances) Sum() (Money, error) {
 	sum := NewMoney(0)
 	var err error
 	for _, b := range bs {
-		sum, err = sum.Add(b.Amount)
+		sum, err = sum.Add(b.amount)
 		if err != nil {
 			break
 		}
@@ -62,9 +73,9 @@ func (bs Balances) Earliest() (e Balance, err error) {
 	if len(bs) == 0 {
 		return Balance{}, errors.New(EmptyBalancesMessage)
 	}
-	e = Balance{Date: time.Date(3000, 1, 1, 1, 1, 1, 1, time.UTC)}
+	e = Balance{date: time.Date(3000, 1, 1, 1, 1, 1, 1, time.UTC)}
 	for _, b := range bs {
-		if b.Date.Before(e.Date) {
+		if b.date.Before(e.date) {
 			e = Balance(b)
 		}
 	}
@@ -77,9 +88,9 @@ func (bs Balances) Latest() (l Balance, err error) {
 	if len(bs) == 0 {
 		return Balance{}, errors.New(EmptyBalancesMessage)
 	}
-	l = Balance{Date: time.Date(0, 1, 1, 1, 1, 1, 1, time.UTC)}
+	l = Balance{date: time.Date(0, 1, 1, 1, 1, 1, 1, time.UTC)}
 	for _, b := range bs {
-		if !l.Date.After(b.Date) {
+		if !l.date.After(b.date) {
 			l = Balance(b)
 		}
 	}

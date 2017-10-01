@@ -211,9 +211,10 @@ func Test_AccountValidateBalance(t *testing.T) {
 		},
 	}
 
-	pastBalance := balance.Balance{Date: past}
-	presentBalance := balance.Balance{Date: present}
-	futureBalance := balance.Balance{Date: future}
+	pastBalance, _ := balance.New(past, balance.NewMoney(-1))
+	presentBalance, _ := balance.New(present, balance.NewMoney(1928376))
+	futureBalance, _ := balance.New(future, balance.NewMoney(-9876))
+	evenFuturerBalance, _ := balance.New(future.AddDate(1, 0, 0), balance.NewMoney(-9876234))
 	testSets := []struct {
 		Account
 		balance.Balance
@@ -223,7 +224,7 @@ func Test_AccountValidateBalance(t *testing.T) {
 			Account: openAccount,
 			Balance: pastBalance,
 			error: balance.DateOutOfAccountTimeRange{
-				BalanceDate:      pastBalance.Date,
+				BalanceDate:      pastBalance.Date(),
 				AccountTimeRange: openAccount.timeRange,
 			},
 		},
@@ -241,7 +242,7 @@ func Test_AccountValidateBalance(t *testing.T) {
 			Account: closedAccount,
 			Balance: pastBalance,
 			error: balance.DateOutOfAccountTimeRange{
-				BalanceDate:      pastBalance.Date,
+				BalanceDate:      pastBalance.Date(),
 				AccountTimeRange: closedAccount.timeRange,
 			},
 		},
@@ -257,11 +258,9 @@ func Test_AccountValidateBalance(t *testing.T) {
 		},
 		{
 			Account: closedAccount,
-			Balance: balance.Balance{
-				Date: futureBalance.Date.AddDate(1, 0, 0),
-			},
+			Balance: evenFuturerBalance,
 			error: balance.DateOutOfAccountTimeRange{
-				BalanceDate:      futureBalance.Date.AddDate(1, 0, 0),
+				BalanceDate:      futureBalance.Date().AddDate(1, 0, 0),
 				AccountTimeRange: closedAccount.timeRange,
 			},
 		},

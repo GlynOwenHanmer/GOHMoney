@@ -22,6 +22,11 @@ func (m Money) Add(m2 Money) (Money, error) {
 	return Money(*ret), nil
 }
 
+func (m Money) Amount() int64 {
+	n := money.Money(m)
+	return (&n).Amount()
+}
+
 // Equals returns true if 2 Money objects are identical
 func (m Money) Equals(m2 Money) (bool, error) {
 	a, b := moneysToCompare(m, m2)

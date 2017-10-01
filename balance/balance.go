@@ -3,13 +3,15 @@ package balance
 import (
 	"errors"
 	"time"
+
+	"github.com/rhymond/go-money"
 )
 
 // EmptyBalancesMessage is the error message used when a Balances object contains no Balance items.
 const EmptyBalancesMessage = "empty Balances object"
 
 // New creates a new Balance object
-func New(date time.Time, amount Money) (b Balance, err error) {
+func New(date time.Time, amount money.Money) (b Balance, err error) {
 	b = Balance{amount: amount, date: date}
 	return b, b.Validate()
 }
@@ -17,7 +19,7 @@ func New(date time.Time, amount Money) (b Balance, err error) {
 // Balance holds the logic for a balance item.
 type Balance struct {
 	date   time.Time
-	amount Money
+	amount money.Money
 }
 
 // Date returns the Date of the Balance
@@ -26,7 +28,7 @@ func (b Balance) Date() time.Time {
 }
 
 // Amount returns the Amount of the Balance
-func (b Balance) Amount() Money {
+func (b Balance) Amount() money.Money {
 	return b.amount
 }
 
@@ -55,16 +57,18 @@ func (e FieldError) Error() string {
 type Balances []Balance
 
 // Sum returns the value of all of the balances amount summed together.
-func (bs Balances) Sum() (Money, error) {
-	sum := NewMoney(0)
+func (bs Balances) Sum() (money.Money, error) {
+	sum := new(money.Money)
+	*sum = NewMoney(0)
 	var err error
 	for _, b := range bs {
-		sum, err = sum.Add(b.amount)
+		newAmount := b.Amount()
+		sum, err = (*sum).Add(&newAmount)
 		if err != nil {
 			break
 		}
 	}
-	return sum, err
+	return *sum, err
 }
 
 // Earliest returns the Balance with the earliest date contained in a Balances set.
@@ -95,4 +99,9 @@ func (bs Balances) Latest() (l Balance, err error) {
 		}
 	}
 	return
+}
+
+// NewMoney creates a new money.Money object with currency of GBP
+func NewMoney(amount int64) money.Money {
+	return *money.New(amount, "GBP")
 }

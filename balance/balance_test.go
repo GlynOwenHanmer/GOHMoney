@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/GlynOwenHanmer/GOHMoney/balance"
+	"github.com/rhymond/go-money"
 )
 
 func TestNew(t *testing.T) {
@@ -24,7 +25,7 @@ func TestNew(t *testing.T) {
 	}
 
 	expected = nil
-	if _, err := balance.New(validTime, balance.Money{}); err != expected {
+	if _, err := balance.New(validTime, money.Money{}); err != expected {
 		t.Errorf("Unexpected error\nExpected: %s\nActual  : %s", expected, err)
 	}
 }
@@ -165,7 +166,7 @@ func testBalanceResults(t *testing.T, expected BalanceErrorSet, actual BalanceEr
 func TestBalances_Sum(t *testing.T) {
 	testSets := []struct {
 		amounts     []int64
-		expectedSum balance.Money
+		expectedSum money.Money
 	}{
 		{
 			expectedSum: balance.NewMoney(0),
@@ -197,7 +198,7 @@ func TestBalances_Sum(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Error summing balances: %s", err)
 		}
-		equal, err := actual.Equals(testSet.expectedSum)
+		equal, err := actual.Equals(&testSet.expectedSum)
 		if !equal {
 			t.Errorf("Unexpected sum.\nExpected: %f\nActual  : %f\nBalances: %v", testSet.expectedSum, actual, bs)
 		}

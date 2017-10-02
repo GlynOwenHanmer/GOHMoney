@@ -3,6 +3,8 @@ package money_test
 import (
 	"testing"
 
+	"encoding/json"
+
 	"github.com/GlynOwenHanmer/GOHMoney/money"
 	money2 "github.com/rhymond/go-money"
 )
@@ -105,5 +107,20 @@ func TestMoneyAdd(t *testing.T) {
 		if equal, _ := sum.Equal(ts.sum); !equal {
 			t.Errorf("Expected %v, got %v", ts.sum, sum)
 		}
+	}
+}
+
+func TestMoneyJSONLoop(t *testing.T) {
+	a := money.New(934)
+	jsonBytes, err := json.Marshal(a)
+	if err != nil {
+		t.Fatalf("Error marshalling json for testing: %s", err)
+	}
+	var b money.Money
+	if err := json.Unmarshal(jsonBytes, &b); err != nil {
+		t.Fatalf("Error unmarshaling bytes into object: %s", err)
+	}
+	if equal, _ := a.Equal(b); !equal {
+		t.Fatalf("Expected %v, but got %v", a, b)
 	}
 }

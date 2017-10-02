@@ -4,6 +4,8 @@ import (
 	"errors"
 	"time"
 
+	"encoding/json"
+
 	"github.com/GlynOwenHanmer/GOHMoney/money"
 )
 
@@ -12,14 +14,14 @@ const EmptyBalancesMessage = "empty Balances object"
 
 // New creates a new Balance object
 func New(date time.Time, amount money.Money) (b Balance, err error) {
-	b = Balance{amount: amount, date: date}
+	b = Balance{money: amount, date: date}
 	return b, b.Validate()
 }
 
 // Balance holds the logic for a balance item.
 type Balance struct {
-	date   time.Time
-	amount money.Money
+	date  time.Time
+	money money.Money
 }
 
 // Date returns the Date of the Balance
@@ -27,14 +29,14 @@ func (b Balance) Date() time.Time {
 	return b.date
 }
 
-// Amount returns the Amount of the Balance
-func (b Balance) Amount() money.Money {
-	return b.amount
+// Money returns the Money of the Balance
+func (b Balance) Money() money.Money {
+	return b.money
 }
 
 // Equal returns true if two Balance objects are logically equal
 func (b Balance) Equal(ob Balance) bool {
-	if amountEqual, _ := b.Amount().Equal(ob.Amount()); !amountEqual || !b.Date().Equal(ob.Date()) {
+	if amountEqual, _ := b.Money().Equal(ob.Money()); !amountEqual || !b.Date().Equal(ob.Date()) {
 		return false
 	}
 	return true
@@ -46,6 +48,36 @@ func (b Balance) Validate() error {
 		return ZeroDate
 	}
 	return nil
+}
+
+type jsonHelper struct {
+	Date  time.Time
+	Money money.Money
+}
+
+// MarshalJSON marshals an Account into a json blob, returning the blob with any errors that occur during the marshalling.
+func (b Balance) MarshalJSON() ([]byte, error) {
+	type Alias Balance
+	return json.Marshal(&jsonHelper{
+		Date:  b.Date(),
+		Money: b.Money(),
+	})
+}
+
+// UnmarshalJSON attempts to unmarshal a json blob into an Account object, returning any errors that occur during the unmarshalling.
+func (b *Balance) UnmarshalJSON(data []byte) error {
+	type Alias Balance
+	aux := &jsonHelper{}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	b.date = aux.Date
+	b.money = aux.Money
+	var returnErr error
+	if err := b.Validate(); err != nil {
+		returnErr = err
+	}
+	return returnErr
 }
 
 // FieldError represents an error with the logic of a Balance item.
@@ -64,12 +96,12 @@ func (e FieldError) Error() string {
 //Balances holds multiple Balance items.
 type Balances []Balance
 
-// Sum returns the value of all of the balances amount summed together.
+// Sum returns the value of all of the balances money summed together.
 func (bs Balances) Sum() (money.Money, error) {
 	sum := money.New(0)
 	var err error
 	for _, b := range bs {
-		sum, err = sum.Add(b.Amount())
+		sum, err = sum.Add(b.Money())
 		if err != nil {
 			break
 		}

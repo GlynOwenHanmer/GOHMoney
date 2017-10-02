@@ -3,6 +3,8 @@ package money
 import (
 	"fmt"
 
+	"encoding/json"
+
 	"github.com/rhymond/go-money"
 )
 
@@ -44,6 +46,32 @@ func (m Money) Add(om Money) (Money, error) {
 		return Money{}, err
 	}
 	return Money{inner: money.New(m.Amount()+om.Amount(), m.Currency().Code)}, nil
+}
+
+// MarshalJSON marshals an Account into a json blob, returning the blob with any errors that occur during the marshalling.
+func (b Money) MarshalJSON() ([]byte, error) {
+	type Alias Money
+	return json.Marshal(&struct {
+		Amount   int64
+		Currency string
+	}{
+		Amount:   b.Amount(),
+		Currency: b.Currency().Code,
+	})
+}
+
+// UnmarshalJSON attempts to unmarshal a json blob into an Account object, returning any errors that occur during the unmarshalling.
+func (m *Money) UnmarshalJSON(data []byte) error {
+	type Alias Money
+	aux := &struct {
+		Amount   int64
+		Currency string
+	}{}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	m.inner = money.New(aux.Amount, aux.Currency)
+	return nil
 }
 
 func defaultMoney(amount int64) *money.Money {

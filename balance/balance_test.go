@@ -5,6 +5,8 @@ import (
 	"testing"
 	"time"
 
+	"encoding/json"
+
 	"github.com/GlynOwenHanmer/GOHMoney/balance"
 	"github.com/GlynOwenHanmer/GOHMoney/money"
 )
@@ -202,5 +204,41 @@ func TestBalances_Sum(t *testing.T) {
 		if !equal {
 			t.Errorf("Unexpected sum.\nExpected: %f\nActual  : %f\nBalances: %v", testSet.expectedSum, actual, bs)
 		}
+	}
+}
+
+func TestBalance_MarshalJSON(t *testing.T) {
+	a, _ := balance.New(time.Now(), money.New(7654))
+	jsonBytes, err := json.Marshal(a)
+	if err != nil {
+		t.Fatalf("Error marshalling json for testing: %s", err)
+	}
+	var b struct {
+		Date  time.Time
+		Money money.Money
+	}
+	if err := json.Unmarshal(jsonBytes, &b); err != nil {
+		t.Fatalf("Error unmarshalling data into object: %s", err)
+	}
+	if equal, _ := a.Money().Equal(b.Money); !equal {
+		t.Errorf("Expected %+v but got %+v.\njson: %s", a.Money(), b.Money, jsonBytes)
+	}
+	if !a.Date().Equal(b.Date) {
+		t.Errorf("Expected %+v but got %+v.\njson: %s", a.Date(), b.Date, jsonBytes)
+	}
+}
+
+func TestBalance_JSONLoop(t *testing.T) {
+	a, _ := balance.New(time.Now(), money.New(7654))
+	jsonBytes, err := json.Marshal(a)
+	if err != nil {
+		t.Fatalf("Error marshalling json for testing: %s", err)
+	}
+	var b balance.Balance
+	if err := json.Unmarshal(jsonBytes, &b); err != nil {
+		t.Fatalf("Error unmarshaling bytes into Balance: %s", err)
+	}
+	if !a.Equal(b) {
+		t.Fatalf("Expected %v, but got %v", a, b)
 	}
 }

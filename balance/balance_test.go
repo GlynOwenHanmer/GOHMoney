@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/GlynOwenHanmer/GOHMoney/balance"
-	"github.com/rhymond/go-money"
+	"github.com/GlynOwenHanmer/GOHMoney/money"
 )
 
 func TestNew(t *testing.T) {
@@ -14,13 +14,13 @@ func TestNew(t *testing.T) {
 
 	expected = balance.ZeroDate
 	invalidTime := time.Time{}
-	if _, err := balance.New(invalidTime, balance.NewMoney(0)); err != expected {
+	if _, err := balance.New(invalidTime, money.New(0)); err != expected {
 		t.Errorf("Unexpected error\nExpected: %s\nActual  : %s", expected, err)
 	}
 
 	expected = nil
 	validTime := time.Now()
-	if _, err := balance.New(validTime, balance.NewMoney(0)); err != expected {
+	if _, err := balance.New(validTime, money.New(0)); err != expected {
 		t.Errorf("Unexpected error\nExpected: %s\nActual  : %s", expected, err)
 	}
 
@@ -37,7 +37,7 @@ func Test_ValidateBalance(t *testing.T) {
 		t.Errorf("Unexpected error.\nExpected: %s\nActual  : %s", balance.ZeroDate, err)
 	}
 
-	validBalance, err := balance.New(time.Now(), balance.NewMoney(0))
+	validBalance, err := balance.New(time.Now(), money.New(0))
 	if err != nil {
 		t.Errorf("Unexpected error.\nExpected: %s\nActual  : %s", error(nil), err)
 	}
@@ -64,7 +64,7 @@ func Test_Earliest_BalancesWithNoDate(t *testing.T) {
 }
 
 func Test_Earliest_BalancesWithSingleDate(t *testing.T) {
-	earliest, _ := balance.New(time.Date(2000, 1, 1, 1, 1, 1, 1, time.UTC), balance.NewMoney(10))
+	earliest, _ := balance.New(time.Date(2000, 1, 1, 1, 1, 1, 1, time.UTC), money.New(10))
 	balances := balance.Balances{earliest}
 	expected := BalanceErrorSet{earliest, nil}
 	testEarliestSet(t, expected, balances)
@@ -72,8 +72,8 @@ func Test_Earliest_BalancesWithSingleDate(t *testing.T) {
 
 func Test_Earliest_BalancesWithSameDate(t *testing.T) {
 	date := time.Date(2000, 1, 1, 1, 1, 1, 1, time.UTC)
-	earliest, _ := balance.New(date, balance.NewMoney(10))
-	other, _ := balance.New(date, balance.NewMoney(20))
+	earliest, _ := balance.New(date, money.New(10))
+	other, _ := balance.New(date, money.New(20))
 	balances := balance.Balances{earliest, other}
 	expected := BalanceErrorSet{earliest, nil}
 	testEarliestSet(t, expected, balances)
@@ -83,10 +83,10 @@ func Test_Earliest_BalancesWithMultipleDates(t *testing.T) {
 	date1 := time.Date(2000, 1, 1, 1, 1, 1, 1, time.UTC)
 	date2 := time.Date(2001, 1, 1, 1, 1, 1, 1, time.UTC)
 	date3 := time.Date(2002, 1, 1, 1, 1, 1, 1, time.UTC)
-	earliest, _ := balance.New(date1, balance.NewMoney(10))
-	other, _ := balance.New(date2, balance.NewMoney(0))
-	other2, _ := balance.New(date1, balance.NewMoney(20))
-	other3, _ := balance.New(date3, balance.NewMoney(489))
+	earliest, _ := balance.New(date1, money.New(10))
+	other, _ := balance.New(date2, money.New(0))
+	other2, _ := balance.New(date1, money.New(20))
+	other3, _ := balance.New(date3, money.New(489))
 	balances := balance.Balances{other, earliest, other2, other3}
 	expected := BalanceErrorSet{earliest, nil}
 	testEarliestSet(t, expected, balances)
@@ -111,7 +111,7 @@ func Test_Latest_BalancesWithNoDate(t *testing.T) {
 }
 
 func Test_Latest_BalancesWithSingleDate(t *testing.T) {
-	latest, _ := balance.New(time.Date(2000, 1, 1, 1, 1, 1, 1, time.UTC), balance.NewMoney(10))
+	latest, _ := balance.New(time.Date(2000, 1, 1, 1, 1, 1, 1, time.UTC), money.New(10))
 	balances := balance.Balances{latest}
 	expected := BalanceErrorSet{latest, nil}
 	testLatestSet(t, expected, balances)
@@ -119,8 +119,8 @@ func Test_Latest_BalancesWithSingleDate(t *testing.T) {
 
 func Test_Latest_BalancesWithSameDate(t *testing.T) {
 	date := time.Date(2000, 1, 1, 1, 1, 1, 1, time.UTC)
-	latest, _ := balance.New(date, balance.NewMoney(10))
-	other, _ := balance.New(date, balance.NewMoney(20))
+	latest, _ := balance.New(date, money.New(10))
+	other, _ := balance.New(date, money.New(20))
 	balances := balance.Balances{other, latest}
 	expected := BalanceErrorSet{latest, nil}
 	testLatestSet(t, expected, balances)
@@ -130,10 +130,10 @@ func Test_Latest_BalancesWithMultipleDates(t *testing.T) {
 	date1 := time.Date(2000, 1, 1, 1, 1, 1, 1, time.UTC)
 	date2 := time.Date(2001, 1, 1, 1, 1, 1, 1, time.UTC)
 	date3 := time.Date(2002, 1, 1, 1, 1, 1, 1, time.UTC)
-	latest, _ := balance.New(date3, balance.NewMoney(20))
-	other1, _ := balance.New(date2, balance.NewMoney(0))
-	other2, _ := balance.New(date3, balance.NewMoney(0))
-	other3, _ := balance.New(date1, balance.NewMoney(20))
+	latest, _ := balance.New(date3, money.New(20))
+	other1, _ := balance.New(date2, money.New(0))
+	other2, _ := balance.New(date3, money.New(0))
+	other3, _ := balance.New(date1, money.New(20))
 	balances := balance.Balances{other1, other2, latest, other3}
 	expected := BalanceErrorSet{latest, nil}
 	testLatestSet(t, expected, balances)
@@ -169,20 +169,20 @@ func TestBalances_Sum(t *testing.T) {
 		expectedSum money.Money
 	}{
 		{
-			expectedSum: balance.NewMoney(0),
+			expectedSum: money.New(0),
 		},
 		{
 			amounts:     []int64{1},
-			expectedSum: balance.NewMoney(1),
+			expectedSum: money.New(1),
 		},
 		{
 			amounts:     []int64{1, 2},
-			expectedSum: balance.NewMoney(3),
+			expectedSum: money.New(3),
 		},
 
 		{
 			amounts:     []int64{1, 2, -3},
-			expectedSum: balance.NewMoney(0),
+			expectedSum: money.New(0),
 		},
 	}
 
@@ -191,14 +191,14 @@ func TestBalances_Sum(t *testing.T) {
 	for _, testSet := range testSets {
 		var bs balance.Balances
 		for _, a := range testSet.amounts {
-			b, _ := balance.New(now, balance.NewMoney(a))
+			b, _ := balance.New(now, money.New(a))
 			bs = append(bs, b)
 		}
 		actual, err := bs.Sum()
 		if err != nil {
 			t.Fatalf("Error summing balances: %s", err)
 		}
-		equal, err := actual.Equals(&testSet.expectedSum)
+		equal, err := actual.Equal(testSet.expectedSum)
 		if !equal {
 			t.Errorf("Unexpected sum.\nExpected: %f\nActual  : %f\nBalances: %v", testSet.expectedSum, actual, bs)
 		}

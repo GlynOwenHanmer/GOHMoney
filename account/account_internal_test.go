@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/GlynOwenHanmer/GOHMoney/balance"
+	"github.com/GlynOwenHanmer/GOHMoney/money"
 	gohtime "github.com/GlynOwenHanmer/go-time"
 )
 
@@ -211,10 +212,10 @@ func Test_AccountValidateBalance(t *testing.T) {
 		},
 	}
 
-	pastBalance, _ := balance.New(past, balance.NewMoney(-1))
-	presentBalance, _ := balance.New(present, balance.NewMoney(1928376))
-	futureBalance, _ := balance.New(future, balance.NewMoney(-9876))
-	evenFuturerBalance, _ := balance.New(future.AddDate(1, 0, 0), balance.NewMoney(-9876234))
+	pastBalance, _ := balance.New(past, money.New(-1))
+	presentBalance, _ := balance.New(present, money.New(1928376))
+	futureBalance, _ := balance.New(future, money.New(-9876))
+	evenFuturerBalance, _ := balance.New(future.AddDate(1, 0, 0), money.New(-9876234))
 	testSets := []struct {
 		Account
 		balance.Balance

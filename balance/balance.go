@@ -4,7 +4,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/rhymond/go-money"
+	"github.com/GlynOwenHanmer/GOHMoney/money"
 )
 
 // EmptyBalancesMessage is the error message used when a Balances object contains no Balance items.
@@ -30,6 +30,14 @@ func (b Balance) Date() time.Time {
 // Amount returns the Amount of the Balance
 func (b Balance) Amount() money.Money {
 	return b.amount
+}
+
+// Equal returns true if two Balance objects are logically equal
+func (b Balance) Equal(ob Balance) bool {
+	if amountEqual, _ := b.Amount().Equal(ob.Amount()); !amountEqual || !b.Date().Equal(ob.Date()) {
+		return false
+	}
+	return true
 }
 
 // Validate checks the fields of a Balance and returns any logic errors that are present within it.
@@ -58,17 +66,15 @@ type Balances []Balance
 
 // Sum returns the value of all of the balances amount summed together.
 func (bs Balances) Sum() (money.Money, error) {
-	sum := new(money.Money)
-	*sum = NewMoney(0)
+	sum := money.New(0)
 	var err error
 	for _, b := range bs {
-		newAmount := b.Amount()
-		sum, err = (*sum).Add(&newAmount)
+		sum, err = sum.Add(b.Amount())
 		if err != nil {
 			break
 		}
 	}
-	return *sum, err
+	return sum, err
 }
 
 // Earliest returns the Balance with the earliest date contained in a Balances set.
@@ -99,9 +105,4 @@ func (bs Balances) Latest() (l Balance, err error) {
 		}
 	}
 	return
-}
-
-// NewMoney creates a new money.Money object with currency of GBP
-func NewMoney(amount int64) money.Money {
-	return *money.New(amount, "GBP")
 }

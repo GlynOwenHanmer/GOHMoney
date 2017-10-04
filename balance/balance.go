@@ -36,7 +36,7 @@ func (b Balance) Money() money.Money {
 
 // Equal returns true if two Balance objects are logically equal
 func (b Balance) Equal(ob Balance) bool {
-	if amountEqual, _ := b.Money().Equal(ob.Money()); !amountEqual || !b.Date().Equal(ob.Date()) {
+	if amountEqual, err := b.Money().Equal(ob.Money()); !amountEqual || !b.Date().Equal(ob.Date()) || err != nil {
 		return false
 	}
 	return true
@@ -118,7 +118,7 @@ func (bs Balances) Earliest() (e Balance, err error) {
 	e = Balance{date: time.Date(3000, 1, 1, 1, 1, 1, 1, time.UTC)}
 	for _, b := range bs {
 		if b.date.Before(e.date) {
-			e = Balance(b)
+			e = b
 		}
 	}
 	return
@@ -133,7 +133,7 @@ func (bs Balances) Latest() (l Balance, err error) {
 	l = Balance{date: time.Date(0, 1, 1, 1, 1, 1, 1, time.UTC)}
 	for _, b := range bs {
 		if !l.date.After(b.date) {
-			l = Balance(b)
+			l = b
 		}
 	}
 	return

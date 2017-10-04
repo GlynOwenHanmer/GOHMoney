@@ -15,7 +15,7 @@ func (e FieldError) Error() string {
 			errorString.WriteByte(' ')
 		}
 	}
-	return string(errorString.String())
+	return errorString.String()
 }
 
 // Equal returns true if two AccountFieldErrors contain the same error information strings in exactly the same order.

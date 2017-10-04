@@ -116,6 +116,7 @@ func TestMoneyJSONLoop(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Error marshalling json for testing: %s", err)
 	}
+
 	var b money.Money
 	if err := json.Unmarshal(jsonBytes, &b); err != nil {
 		t.Fatalf("Error unmarshaling bytes into object: %s", err)

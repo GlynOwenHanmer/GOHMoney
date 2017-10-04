@@ -49,14 +49,14 @@ func (m Money) Add(om Money) (Money, error) {
 }
 
 // MarshalJSON marshals an Account into a json blob, returning the blob with any errors that occur during the marshalling.
-func (b Money) MarshalJSON() ([]byte, error) {
+func (m Money) MarshalJSON() ([]byte, error) {
 	type Alias Money
 	return json.Marshal(&struct {
 		Amount   int64
 		Currency string
 	}{
-		Amount:   b.Amount(),
-		Currency: b.Currency().Code,
+		Amount:   m.Amount(),
+		Currency: m.Currency().Code,
 	})
 }
 

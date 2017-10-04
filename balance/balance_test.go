@@ -12,9 +12,7 @@ import (
 )
 
 func TestNew(t *testing.T) {
-	var expected error
-
-	expected = balance.ZeroDate
+	var expected error = balance.ZeroDate
 	invalidTime := time.Time{}
 	if _, err := balance.New(invalidTime, money.New(0)); err != expected {
 		t.Errorf("Unexpected error\nExpected: %s\nActual  : %s", expected, err)
@@ -200,7 +198,7 @@ func TestBalances_Sum(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Error summing balances: %s", err)
 		}
-		equal, err := actual.Equal(testSet.expectedSum)
+		equal, _ := actual.Equal(testSet.expectedSum)
 		if !equal {
 			t.Errorf("Unexpected sum.\nExpected: %f\nActual  : %f\nBalances: %v", testSet.expectedSum, actual, bs)
 		}

@@ -17,17 +17,18 @@ type Money struct {
 	inner *money.Money
 }
 
+func (m Money) Display() string {
+	initialiseIfRequired(&m)
+	return m.inner.Display()
+}
+
 func (m Money) Currency() money.Currency {
-	if m.inner == nil {
-		m.inner = defaultMoney(0)
-	}
+	initialiseIfRequired(&m)
 	return *m.inner.Currency()
 }
 
 func (m Money) Amount() int64 {
-	if m.inner == nil {
-		return 0
-	}
+	initialiseIfRequired(&m)
 	return m.inner.Amount()
 }
 
@@ -72,6 +73,12 @@ func (m *Money) UnmarshalJSON(data []byte) error {
 	}
 	m.inner = money.New(aux.Amount, aux.Currency)
 	return nil
+}
+
+func initialiseIfRequired(m *Money) {
+	if m.inner == nil {
+		m.inner = defaultMoney(0)
+	}
 }
 
 func defaultMoney(amount int64) *money.Money {

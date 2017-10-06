@@ -7,27 +7,43 @@ import (
 
 	"github.com/GlynOwenHanmer/GOHMoney/money"
 	money2 "github.com/rhymond/go-money"
+	"github.com/stretchr/testify/assert"
 )
+
+func newMoneyIgnoreError(a int64, c string) *money.Money {
+	m, _ := money.New(a, c)
+	return m
+}
 
 func TestMoneyCurrency(t *testing.T) {
 	testSets := []struct {
 		money.Money
 		code string
+		error
 	}{
 		{
-			code: "gbp",
+			error: money.ErrNoCurrency,
+			code: "",
 		},
 		{
-			Money: money.GBP(0),
-			code:  "gbp",
+			Money:*newMoneyIgnoreError(123, ""),
+			error: money.ErrNoCurrency,
+			code: "",
+		},
+		{
+			Money: *newMoneyIgnoreError(0, "GBP"),
+			code:  "GBP",
 		},
 	}
-	for _, ts := range testSets {
+	for i, ts := range testSets {
 		expected := money2.GetCurrency(ts.code)
-		actual := ts.Money.Currency()
-		if actual != *expected {
-			t.Errorf("Expected %v but got %v", expected, actual)
+		if expected == nil {
+			expected = new(money2.Currency)
+			*expected = money2.Currency{}
 		}
+		actual, err := ts.Money.Currency()
+		assert.Equal(t, ts.error, err, "[%d] Money: %+v", i, ts.Money)
+		assert.Equal(t, *expected, actual, "[%d] Money: %+v", i, ts.Money)
 	}
 }
 
@@ -83,8 +99,9 @@ func TestMoneyEqual(t *testing.T) {
 			equal: false,
 		},
 	}
-	for _, ts := range testSets {
+	for i, ts := range testSets {
 		equal, _ := ts.a.Equal(ts.b)
+		assert.Equal(t, ts.equal, equal, "[%d] a: %+v, b: %+v", i, ts.a, ts.b)
 		if equal != ts.equal {
 			t.Errorf("Expected %t but got %t", ts.equal, equal)
 		}
@@ -94,16 +111,34 @@ func TestMoneyEqual(t *testing.T) {
 func TestMoneyAdd(t *testing.T) {
 	testSets := []struct {
 		a, b, sum money.Money
+		error
 	}{
 		{
-			sum: money.GBP(0),
+			error: money.ErrNoCurrency,
 		},
 		{
 			a: money.Money{},
+			b: money.Money{},
+			sum: money.Money{},
+			error: money.ErrNoCurrency,
+		},
+		{
+			a:     *newMoneyIgnoreError(1, "EUR"),
+			b:     *newMoneyIgnoreError(2, "GBP"),
+			error: money.CurrencyMismatchError{A:*money2.GetCurrency("EUR"), B:*money2.GetCurrency("GBP")},
+		},
+		{
+			a: *newMoneyIgnoreError(-3, "USD"),
+			b: *newMoneyIgnoreError(-10, "USD"),
+			sum: *newMoneyIgnoreError(-13, "USD"),
+			error: nil,
 		},
 	}
 	for _, ts := range testSets {
-		sum, _ := ts.a.Add(ts.b)
+		sum, err := ts.a.Add(ts.b)
+		if err != ts.error {
+			t.Fatalf("Expected %+v, got %+v", ts.error, err)
+		}
 		if equal, _ := sum.Equal(ts.sum); !equal {
 			t.Errorf("Expected %v, got %v", ts.sum, sum)
 		}
@@ -123,5 +158,33 @@ func TestMoneyJSONLoop(t *testing.T) {
 	}
 	if equal, _ := a.Equal(b); !equal {
 		t.Fatalf("Expected %v, but got %v", a, b)
+	}
+}
+
+func TestMoneySameCurrency(t *testing.T) {
+	testSets := []struct{
+		a, b money.Money
+		bool
+		error
+	}{
+		{
+			bool:true,
+			error:money.ErrNoCurrency,
+		},
+		{
+			a: *newMoneyIgnoreError(123, "GBP"),
+			b: *newMoneyIgnoreError(123, "EUR"),
+			bool:false,
+		},
+		{
+			a: *newMoneyIgnoreError(123, "GBP"),
+			b: *newMoneyIgnoreError(987, "GBP"),
+			bool:true,
+		},
+	}
+	for i, ts := range testSets {
+		same, err := ts.a.SameCurrency(ts.b)
+		assert.Equal(t, ts.bool, same, "[i] %+v %+v", i, ts.a, ts.b)
+		assert.Equal(t, ts.error, err, "[i] %+v %+v", i, ts.a, ts.b)
 	}
 }

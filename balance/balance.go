@@ -13,8 +13,11 @@ import (
 const EmptyBalancesMessage = "empty Balances object"
 
 // GBP creates a new Balance object
-func New(date time.Time, amount money.Money) (b Balance, err error) {
-	b = Balance{money: amount, date: date}
+func New(date time.Time, amount money.Money) (Balance, error) {
+	if err := amount.Validate(); err != nil {
+		return Balance{}, err
+	}
+	b := Balance{money: amount, date: date}
 	return b, b.Validate()
 }
 

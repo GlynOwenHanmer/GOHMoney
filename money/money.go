@@ -6,9 +6,22 @@ import (
 	"encoding/json"
 
 	"github.com/rhymond/go-money"
+	"errors"
 )
 
-// GBP creates a new money.Money object with currency of gbp
+func New(amount int64, currency string) (*Money, error) {
+	if len(currency) != 3 && currency != "" {
+		return nil, fmt.Errorf(`invalid currency code: "%s". Must be 3 or 0 in length`, currency)
+	}
+	m := newMoney(amount, currency)
+	return &m, nil
+}
+
+func newMoney(amount int64, currency string) Money {
+	return Money{inner:money.New(amount, currency)}
+}
+
+// GBP creates A new money.Money object with currency of gbp
 func GBP(amount int64) Money {
 	return Money{gbp(amount)}
 }
@@ -17,14 +30,57 @@ type Money struct {
 	inner *money.Money
 }
 
+type Moneys []Money
+
+func (ms Moneys) currencies() ([]money.Currency, error) {
+	var cs []money.Currency
+	for _, m := range ms {
+		cur, err := m.Currency()
+		if err != nil {
+			return cs, err
+		}
+		var found bool
+		for _, c := range cs {
+			if cur == c {
+				found = true
+			}
+		}
+		if found {
+			continue
+		}
+		cs = append(cs, cur)
+	}
+	return cs, nil
+}
+
+func (m Money) Validate() error {
+	switch {
+	case m.inner == nil,
+	m.inner.Currency() == nil,
+	m.inner.Currency().Code == "":
+		return ErrNoCurrency
+	}
+	return nil
+}
+
 func (m Money) Display() string {
 	initialiseIfRequired(&m)
 	return m.inner.Display()
 }
 
-func (m Money) Currency() money.Currency {
+func (m Money) Currency() (money.Currency, error){
 	initialiseIfRequired(&m)
-	return *m.inner.Currency()
+	if err := m.Validate(); err != nil {
+		return money.Currency{}, err
+	}
+	return *m.inner.Currency(), nil
+}
+
+func (m Money) SameCurrency(oms ...Money) (bool, error) {
+	moneys := []Money{m}
+	moneys = append(moneys, oms...)
+	cs, err := Moneys(moneys).currencies()
+	return len(cs) < 2, err
 }
 
 func (m Money) Amount() int64 {
@@ -36,32 +92,47 @@ func (m Money) Equal(om Money) (bool, error) {
 	if m.Amount() != om.Amount() {
 		return false, nil
 	}
-	if err := assertSameCurrency(m.Currency(), om.Currency()); err != nil {
-		return false, err
-	}
-	return true, nil
+	return m.SameCurrency(om)
 }
 
 func (m Money) Add(om Money) (Money, error) {
-	if err := assertSameCurrency(m.Currency(), om.Currency()); err != nil {
+	for _, mon := range []Money{m, om} {
+		if err := mon.Validate(); err != nil {
+			return Money{}, err
+		}
+	}
+	cs, err := Moneys{m, om}.currencies()
+	if err != nil {
 		return Money{}, err
 	}
-	return Money{inner: money.New(m.Amount()+om.Amount(), m.Currency().Code)}, nil
+	if err := assertSameCurrency(cs...); err != nil {
+		return Money{}, err
+	}
+	return Money{inner: money.New(m.Amount()+om.Amount(), cs[0].Code)}, nil
 }
 
-// MarshalJSON marshals an Account into a json blob, returning the blob with any errors that occur during the marshalling.
+type CurrencyMismatchError struct {
+	A, B money.Currency
+}
+
+func (e CurrencyMismatchError) Error() string {
+	return fmt.Sprintf("currency mismatch: %s, %s", e.A.Code, e.B.Code)
+}
+
+// MarshalJSON marshals an Account into A json blob, returning the blob with any errors that occur during the marshalling.
 func (m Money) MarshalJSON() ([]byte, error) {
+	c, _ := m.Currency()
 	type Alias Money
 	return json.Marshal(&struct {
 		Amount   int64
 		Currency string
 	}{
 		Amount:   m.Amount(),
-		Currency: m.Currency().Code,
+		Currency: c.Code,
 	})
 }
 
-// UnmarshalJSON attempts to unmarshal a json blob into an Account object, returning any errors that occur during the unmarshalling.
+// UnmarshalJSON attempts to unmarshal A json blob into an Account object, returning any errors that occur during the unmarshalling.
 func (m *Money) UnmarshalJSON(data []byte) error {
 	type Alias Money
 	aux := &struct {
@@ -76,18 +147,25 @@ func (m *Money) UnmarshalJSON(data []byte) error {
 }
 
 func initialiseIfRequired(m *Money) {
-	if m.inner == nil {
-		m.inner = gbp(0)
+	if m == nil || m.inner == nil {
+		aux, _ := New(0, "")
+		*m = *aux
 	}
 }
 
 func gbp(amount int64) *money.Money {
-	return money.New(amount, "gbp")
+	return money.New(amount, "GBP")
 }
 
-func assertSameCurrency(c1, c2 money.Currency) error {
-	if c1 != c2 {
-		return fmt.Errorf("currency mismatch: %s, %s", c1.Code, c2.Code)
+func assertSameCurrency(cs ...money.Currency) error {
+	for i:=1; i<len(cs) ; i++ {
+		if cs[0] != cs[i] {
+			return CurrencyMismatchError{A:cs[0], B:cs[i]}
+		}
 	}
 	return nil
 }
+
+var (
+	ErrNoCurrency = errors.New("currency is not set")
+)

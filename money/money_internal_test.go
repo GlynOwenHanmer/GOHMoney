@@ -9,7 +9,7 @@ func TestMoneyAdd(t *testing.T) {
 		a, b, sum Money
 	}{
 		{
-			sum: New(0),
+			sum: GBP(0),
 		},
 	}
 	for _, ts := range testSets {

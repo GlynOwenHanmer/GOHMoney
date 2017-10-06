@@ -212,10 +212,10 @@ func Test_AccountValidateBalance(t *testing.T) {
 		},
 	}
 
-	pastBalance, _ := balance.New(past, money.New(-1))
-	presentBalance, _ := balance.New(present, money.New(1928376))
-	futureBalance, _ := balance.New(future, money.New(-9876))
-	evenFuturerBalance, _ := balance.New(future.AddDate(1, 0, 0), money.New(-9876234))
+	pastBalance, _ := balance.New(past, money.GBP(-1))
+	presentBalance, _ := balance.New(present, money.GBP(1928376))
+	futureBalance, _ := balance.New(future, money.GBP(-9876))
+	evenFuturerBalance, _ := balance.New(future.AddDate(1, 0, 0), money.GBP(-9876234))
 	testSets := []struct {
 		Account
 		balance.Balance

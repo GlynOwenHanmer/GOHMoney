@@ -8,9 +8,9 @@ import (
 	"github.com/rhymond/go-money"
 )
 
-// New creates a new money.Money object with currency of GBP
-func New(amount int64) Money {
-	return Money{defaultMoney(amount)}
+// GBP creates a new money.Money object with currency of gbp
+func GBP(amount int64) Money {
+	return Money{gbp(amount)}
 }
 
 type Money struct {
@@ -77,12 +77,12 @@ func (m *Money) UnmarshalJSON(data []byte) error {
 
 func initialiseIfRequired(m *Money) {
 	if m.inner == nil {
-		m.inner = defaultMoney(0)
+		m.inner = gbp(0)
 	}
 }
 
-func defaultMoney(amount int64) *money.Money {
-	return money.New(amount, "GBP")
+func gbp(amount int64) *money.Money {
+	return money.New(amount, "gbp")
 }
 
 func assertSameCurrency(c1, c2 money.Currency) error {

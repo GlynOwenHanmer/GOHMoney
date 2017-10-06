@@ -15,11 +15,11 @@ func TestMoneyCurrency(t *testing.T) {
 		code string
 	}{
 		{
-			code: "GBP",
+			code: "gbp",
 		},
 		{
-			Money: money.New(0),
-			code:  "GBP",
+			Money: money.GBP(0),
+			code:  "gbp",
 		},
 	}
 	for _, ts := range testSets {
@@ -38,14 +38,14 @@ func TestMoneyAmount(t *testing.T) {
 	}{
 		{
 			amount: -99,
-			Money:  money.New(-99),
+			Money:  money.GBP(-99),
 		},
 		{
-			Money: money.New(0),
+			Money: money.GBP(0),
 		},
 		{
 			amount: 9876,
-			Money:  money.New(9876),
+			Money:  money.GBP(9876),
 		},
 	}
 	for _, ts := range testSets {
@@ -66,20 +66,20 @@ func TestMoneyEqual(t *testing.T) {
 			equal: true,
 		},
 		{
-			a:     money.New(0),
+			a:     money.GBP(0),
 			equal: true,
 		},
 		{
-			b:     money.New(0),
+			b:     money.GBP(0),
 			equal: true,
 		},
 
 		{
-			a:     money.New(-10),
+			a:     money.GBP(-10),
 			equal: false,
 		},
 		{
-			b:     money.New(1023),
+			b:     money.GBP(1023),
 			equal: false,
 		},
 	}
@@ -96,7 +96,7 @@ func TestMoneyAdd(t *testing.T) {
 		a, b, sum money.Money
 	}{
 		{
-			sum: money.New(0),
+			sum: money.GBP(0),
 		},
 		{
 			a: money.Money{},
@@ -111,7 +111,7 @@ func TestMoneyAdd(t *testing.T) {
 }
 
 func TestMoneyJSONLoop(t *testing.T) {
-	a := money.New(934)
+	a := money.GBP(934)
 	jsonBytes, err := json.Marshal(a)
 	if err != nil {
 		t.Fatalf("Error marshalling json for testing: %s", err)

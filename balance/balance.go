@@ -12,7 +12,7 @@ import (
 // EmptyBalancesMessage is the error message used when a Balances object contains no Balance items.
 const EmptyBalancesMessage = "empty Balances object"
 
-// New creates a new Balance object
+// GBP creates a new Balance object
 func New(date time.Time, amount money.Money) (b Balance, err error) {
 	b = Balance{money: amount, date: date}
 	return b, b.Validate()
@@ -98,7 +98,7 @@ type Balances []Balance
 
 // Sum returns the value of all of the balances money summed together.
 func (bs Balances) Sum() (money.Money, error) {
-	sum := money.New(0)
+	sum := money.GBP(0)
 	var err error
 	for _, b := range bs {
 		sum, err = sum.Add(b.Money())

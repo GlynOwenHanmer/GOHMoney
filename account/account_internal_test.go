@@ -311,18 +311,7 @@ func Test_NewAccount(t *testing.T) {
 	logTestSet := func(ts testSet) { t.Logf("Start: %s,\tEnd: %v,", ts.start, ts.end) }
 	for _, set := range testSets {
 		a, err := New(set.name, set.start, set.end)
-		actualFieldError, actualIsTyped := err.(FieldError)
-		expectedFieldError, expectedIsTyped := set.error.(FieldError)
-
-		if actualIsTyped != expectedIsTyped {
-			t.Errorf("Unexpected error.\n\tExpected: %s\n\tActual  : %s", set.error, err)
-		} else if !actualIsTyped && err != set.error {
-			t.Errorf("Unexpected error.\n\tExpected: %s\n\tActual  : %s", set.error, err)
-			logTestSet(set)
-		} else if actualIsTyped && !actualFieldError.Equal(expectedFieldError) {
-			t.Errorf("Error is correct type but unexpected contents.\n\tExpected: %s\n\tActual  : %s", expectedFieldError, actualFieldError)
-			logTestSet(set)
-		}
+		testNewAccountErrorTypes(t, set.error, err)
 		if a.Name != set.name {
 			t.Errorf("Unexpected name.\n\tExpected: %s\n\tActual  : %s", set.name, a.Name)
 			logTestSet(set)
@@ -335,13 +324,24 @@ func Test_NewAccount(t *testing.T) {
 			t.Errorf("Unexpected start.\n\tExpected: %s\n\tActual  : %s", set.start, a.Start())
 			logTestSet(set)
 		}
-		if a.End().Valid != set.end.Valid {
-			t.Errorf("Unexpected end time validity.\n\tExpected: %t\n\tActual  : %t", a.End().Valid, set.end.Valid)
-			logTestSet(set)
-		}
-		if !a.End().Time.Equal(set.end.Time) {
-			t.Errorf("Unexpected end time.\n\tExpected: %s\n\tActual  : %s", set.end.Time, a.End().Time)
+		if !a.End().Equal(set.end) {
+			t.Errorf("Unexpected end NullTime.\n\tExpected: %+v\n\tActual  : %+v", a.End(), set.end)
 			logTestSet(set)
 		}
 	}
+}
+
+func testNewAccountErrorTypes(t *testing.T, expected, actual error) bool {
+	expectedFieldError, expectedIsTyped := expected.(FieldError)
+	actualFieldError, actualIsTyped := actual.(FieldError)
+	switch {
+	case actualIsTyped != expectedIsTyped,
+		!actualIsTyped && actual != expected:
+		t.Errorf("Unexpected error.\n\tExpected: %s\n\tActual  : %s", expected, actual)
+		return false
+	case actualIsTyped && !actualFieldError.Equal(expectedFieldError):
+		t.Errorf("Error is correct type but unexpected contents.\n\tExpected: %s\n\tActual  : %s", expectedFieldError, actualFieldError)
+		return false
+	}
+	return true
 }

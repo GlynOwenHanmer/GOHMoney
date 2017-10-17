@@ -5,9 +5,10 @@ import (
 
 	"encoding/json"
 
-	"github.com/rhymond/go-money"
 	"errors"
 	"log"
+
+	"github.com/rhymond/go-money"
 )
 
 // New creates a new Money and returns a pointer to it,
@@ -21,7 +22,7 @@ func New(amount int64, currency string) (*Money, error) {
 }
 
 func newMoney(amount int64, currency string) Money {
-	return Money{inner:money.New(amount, currency)}
+	return Money{inner: money.New(amount, currency)}
 }
 
 // GBP creates A new money.Money object with currency of gbp
@@ -64,8 +65,8 @@ func (ms Moneys) currencies() ([]money.Currency, error) {
 func (m Money) Validate() error {
 	switch {
 	case m.inner == nil,
-	m.inner.Currency() == nil,
-	m.inner.Currency().Code == "":
+		m.inner.Currency() == nil,
+		m.inner.Currency().Code == "":
 		return ErrNoCurrency
 	}
 	return nil
@@ -78,7 +79,7 @@ func (m Money) Display() string {
 }
 
 // Currency returns the Currency of the Money. If the Money has no Currency, an error will also be returned.
-func (m Money) Currency() (money.Currency, error){
+func (m Money) Currency() (money.Currency, error) {
 	initialiseIfRequired(&m)
 	if err := m.Validate(); err != nil {
 		return money.Currency{}, err
@@ -141,7 +142,7 @@ func (e CurrencyMismatchError) Error() string {
 // MarshalJSON marshals an Account into A json blob, returning the blob with any errors that occur during the marshalling.
 func (m Money) MarshalJSON() ([]byte, error) {
 	c, err := m.Currency()
-	if err != nil && err != ErrNoCurrency{
+	if err != nil && err != ErrNoCurrency {
 		log.Printf("Error getting currency: %s", err)
 	}
 	type Alias Money
@@ -183,9 +184,9 @@ func gbp(amount int64) *money.Money {
 }
 
 func assertSameCurrency(cs ...money.Currency) error {
-	for i:=1; i<len(cs) ; i++ {
+	for i := 1; i < len(cs); i++ {
 		if cs[0] != cs[i] {
-			return CurrencyMismatchError{A:cs[0], B:cs[i]}
+			return CurrencyMismatchError{A: cs[0], B: cs[i]}
 		}
 	}
 	return nil

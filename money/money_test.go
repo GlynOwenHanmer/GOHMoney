@@ -23,12 +23,12 @@ func TestMoneyCurrency(t *testing.T) {
 	}{
 		{
 			error: money.ErrNoCurrency,
-			code: "",
+			code:  "",
 		},
 		{
-			Money:*newMoneyIgnoreError(123, ""),
+			Money: *newMoneyIgnoreError(123, ""),
 			error: money.ErrNoCurrency,
-			code: "",
+			code:  "",
 		},
 		{
 			Money: *newMoneyIgnoreError(0, "GBP"),
@@ -117,20 +117,20 @@ func TestMoneyAdd(t *testing.T) {
 			error: money.ErrNoCurrency,
 		},
 		{
-			a: money.Money{},
-			b: money.Money{},
-			sum: money.Money{},
+			a:     money.Money{},
+			b:     money.Money{},
+			sum:   money.Money{},
 			error: money.ErrNoCurrency,
 		},
 		{
 			a:     *newMoneyIgnoreError(1, "EUR"),
 			b:     *newMoneyIgnoreError(2, "GBP"),
-			error: money.CurrencyMismatchError{A:*money2.GetCurrency("EUR"), B:*money2.GetCurrency("GBP")},
+			error: money.CurrencyMismatchError{A: *money2.GetCurrency("EUR"), B: *money2.GetCurrency("GBP")},
 		},
 		{
-			a: *newMoneyIgnoreError(-3, "USD"),
-			b: *newMoneyIgnoreError(-10, "USD"),
-			sum: *newMoneyIgnoreError(-13, "USD"),
+			a:     *newMoneyIgnoreError(-3, "USD"),
+			b:     *newMoneyIgnoreError(-10, "USD"),
+			sum:   *newMoneyIgnoreError(-13, "USD"),
 			error: nil,
 		},
 	}
@@ -162,24 +162,24 @@ func TestMoneyJSONLoop(t *testing.T) {
 }
 
 func TestMoneySameCurrency(t *testing.T) {
-	testSets := []struct{
+	testSets := []struct {
 		a, b money.Money
 		bool
 		error
 	}{
 		{
-			bool:true,
-			error:money.ErrNoCurrency,
+			bool:  true,
+			error: money.ErrNoCurrency,
 		},
 		{
-			a: *newMoneyIgnoreError(123, "GBP"),
-			b: *newMoneyIgnoreError(123, "EUR"),
-			bool:false,
+			a:    *newMoneyIgnoreError(123, "GBP"),
+			b:    *newMoneyIgnoreError(123, "EUR"),
+			bool: false,
 		},
 		{
-			a: *newMoneyIgnoreError(123, "GBP"),
-			b: *newMoneyIgnoreError(987, "GBP"),
-			bool:true,
+			a:    *newMoneyIgnoreError(123, "GBP"),
+			b:    *newMoneyIgnoreError(987, "GBP"),
+			bool: true,
 		},
 	}
 	for i, ts := range testSets {

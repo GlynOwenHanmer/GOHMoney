@@ -9,11 +9,15 @@ import (
 	"log"
 
 	"github.com/rhymond/go-money"
+	"strings"
 )
 
 // New creates a new Money and returns a pointer to it,
 // along with any errors associated with the Money whilst creating it.
+// New will always convert any currency code to upper case.
 func New(amount int64, currency string) (*Money, error) {
+	//todo ensure that currency contains no whitespace
+	currency = strings.ToUpper(currency)
 	if len(currency) != 3 && currency != "" {
 		return nil, fmt.Errorf(`invalid currency code: "%s". Must be 3 or 0 in length`, currency)
 	}
@@ -39,7 +43,7 @@ type Money struct {
 type Moneys []Money
 
 // currencies returns an array of the Currencies present within a Moneys.
-// currencies will only have one occurence of each Currency present.
+// currencies will only have one occurrence of each Currency present.
 func (ms Moneys) currencies() ([]money.Currency, error) {
 	var cs []money.Currency
 	for _, m := range ms {
@@ -65,7 +69,8 @@ func (ms Moneys) currencies() ([]money.Currency, error) {
 func (m Money) Validate() error {
 	switch {
 	case m.inner == nil,
-		m.inner.Currency() == nil,
+		m.inner.Currency() == nil,			//todo check for
+
 		m.inner.Currency().Code == "":
 		return ErrNoCurrency
 	}

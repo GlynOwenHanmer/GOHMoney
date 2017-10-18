@@ -70,7 +70,7 @@ func (b Balance) MarshalJSON() ([]byte, error) {
 // UnmarshalJSON attempts to unmarshal a json blob into an Account object, returning any errors that occur during the unmarshalling.
 func (b *Balance) UnmarshalJSON(data []byte) error {
 	type Alias Balance
-	aux := &jsonHelper{}
+	aux := new(jsonHelper)
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
@@ -101,15 +101,24 @@ type Balances []Balance
 
 // Sum returns the value of all of the balances money summed together.
 func (bs Balances) Sum() (money.Money, error) {
-	sum := money.GBP(0)
+	var initialised bool
+	var s money.Money
 	var err error
+	if len(bs) < 1 {
+		return money.Money{}, nil
+	}
 	for _, b := range bs {
-		sum, err = sum.Add(b.Money())
+		if !initialised {
+			s = b.Money()
+			initialised = true
+			continue
+		}
+		s, err = s.Add(b.Money())
 		if err != nil {
 			break
 		}
 	}
-	return sum, err
+	return s, err
 }
 
 // Earliest returns the Balance with the earliest date contained in a Balances set.

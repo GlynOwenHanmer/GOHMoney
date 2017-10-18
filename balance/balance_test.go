@@ -9,6 +9,8 @@ import (
 
 	"github.com/GlynOwenHanmer/GOHMoney/balance"
 	"github.com/GlynOwenHanmer/GOHMoney/money"
+	"github.com/stretchr/testify/assert"
+	innermoney "github.com/rhymond/go-money"
 )
 
 func TestNew(t *testing.T) {
@@ -166,25 +168,48 @@ func testBalanceResults(t *testing.T, expected BalanceErrorSet, actual BalanceEr
 }
 
 func TestBalances_Sum(t *testing.T) {
+	type testMoney struct {
+		amount int64
+		currency string
+	}
 	testSets := []struct {
-		amounts     []int64
+		moneys []testMoney
 		expectedSum money.Money
+		error
 	}{
 		{
-			expectedSum: money.GBP(0),
 		},
 		{
-			amounts:     []int64{1},
+			moneys:     []testMoney{
+				{amount:1, currency:"GBP"},
+			},
 			expectedSum: money.GBP(1),
 		},
 		{
-			amounts:     []int64{1, 2},
+			moneys:     []testMoney{
+				{amount:1, currency:"GBP"},
+				{amount:2, currency:"GBP"},
+			},
 			expectedSum: money.GBP(3),
+		},
+		{
+			moneys:     []testMoney{
+				{amount:1, currency:"GBP"},
+				{amount:2, currency:"GBP"},
+				{amount:-3, currency:"GBP"},
+			},
+			expectedSum: money.GBP(0),
 		},
 
 		{
-			amounts:     []int64{1, 2, -3},
-			expectedSum: money.GBP(0),
+			moneys:     []testMoney{
+				{amount:1, currency:"GBP"},
+				{amount:2, currency:"EUR"},
+			},
+			error: money.CurrencyMismatchError{
+				A:*innermoney.GetCurrency("GBP"),
+				B:*innermoney.GetCurrency("EUR"),
+			},
 		},
 	}
 
@@ -192,17 +217,21 @@ func TestBalances_Sum(t *testing.T) {
 
 	for _, testSet := range testSets {
 		var bs balance.Balances
-		for _, a := range testSet.amounts {
-			b, _ := balance.New(now, money.GBP(a))
+		for _, tsm := range testSet.moneys {
+			m, err := money.New(tsm.amount, tsm.currency)
+			fatalIfError(t, err, "creating Money for testing")
+			b, err := balance.New(now, *m)
+			fatalIfError(t, err, "creating Balance for testing")
 			bs = append(bs, b)
 		}
 		actual, err := bs.Sum()
-		if err != nil {
-			t.Fatalf("Error summing balances: %s", err)
+		assert.Equal(t, testSet.error, err, "summing Balances ", testSet.moneys)
+		equal, err := actual.Equal(testSet.expectedSum)
+		if err != nil && err != money.ErrNoCurrency {
+			fatalIfError(t, err, "Equalling")
 		}
-		equal, _ := actual.Equal(testSet.expectedSum)
 		if !equal {
-			t.Errorf("Unexpected sum.\nExpected: %f\nActual  : %f\nBalances: %v", testSet.expectedSum, actual, bs)
+			t.Errorf("Unexpected sum.\nExpected: %+v\nActual  : %+v\nBalances: %+v", testSet.expectedSum, actual, bs)
 		}
 	}
 }
@@ -240,5 +269,17 @@ func TestBalance_JSONLoop(t *testing.T) {
 	}
 	if !a.Equal(b) {
 		t.Fatalf("Expected %v, but got %v", a, b)
+	}
+}
+
+func fatalIfError(t *testing.T, err error, message string) {
+	if err != nil {
+		t.Fatalf("%s: %s", message, err)
+	}
+}
+
+func errorIfError(t *testing.T, err error, message string) {
+	if err != nil {
+		t.Errorf("%s: %s", message, err)
 	}
 }

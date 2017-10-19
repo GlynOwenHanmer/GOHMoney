@@ -29,11 +29,6 @@ func newMoney(amount int64, currency string) Money {
 	return Money{inner: money.New(amount, currency)}
 }
 
-// GBP creates A new money.Money object with currency of gbp
-func GBP(amount int64) Money {
-	return Money{gbp(amount)}
-}
-
 // Money is an object representing a value and currency
 type Money struct {
 	inner *money.Money
@@ -196,10 +191,6 @@ func initialiseIfRequired(m *Money) {
 		}
 		*m = *aux
 	}
-}
-
-func gbp(amount int64) *money.Money {
-	return money.New(amount, "GBP")
 }
 
 func assertSameCurrency(cs ...money.Currency) error {

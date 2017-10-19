@@ -50,6 +50,30 @@ func TestValidateBalance(t *testing.T) {
 	}
 }
 
+func TestBalance_Equal(t *testing.T) {
+	newBalance := func (t *testing.T, date time.Time, amount int64, currency string) balance.Balance {
+		m , err := money.New(amount, currency)
+		common.FatalIfError(t, err, "Creating new Money")
+		b, err := balance.New(date, *m)
+		common.FatalIfError(t, err, "Creating new Balance")
+		return b
+	}
+
+	now := time.Now()
+	a := newBalance(t, now, 123, "GBP")
+	b := newBalance(t, now, 123, "GBP")
+	assert.True(t, a.Equal(b))
+
+	b = newBalance(t, now, -123, "GBP")
+	assert.True(t, !a.Equal(b))
+
+	b = newBalance(t, now, 123, "EUR")
+	assert.True(t, !a.Equal(b))
+
+	b = newBalance(t, now.Add(1), 123, "GBP")
+	assert.True(t, !a.Equal(b))
+}
+
 type BalanceErrorSet struct {
 	balance.Balance
 	error

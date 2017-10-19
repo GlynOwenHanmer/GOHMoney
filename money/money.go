@@ -8,8 +8,9 @@ import (
 	"errors"
 	"log"
 
-	"github.com/rhymond/go-money"
 	"strings"
+
+	"github.com/rhymond/go-money"
 )
 
 // New creates a new Money and returns a pointer to it,
@@ -66,7 +67,7 @@ func (ms Moneys) currencies() ([]money.Currency, error) {
 func (m Money) Validate() error {
 	switch {
 	case m.inner == nil,
-		m.inner.Currency() == nil,			//todo check for
+		m.inner.Currency() == nil, //todo check for
 
 		m.inner.Currency().Code == "":
 		return ErrNoCurrency

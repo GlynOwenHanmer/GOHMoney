@@ -6,12 +6,11 @@ import (
 	"testing"
 	"time"
 
-
 	"github.com/glynternet/GOHMoney/balance"
+	"github.com/glynternet/GOHMoney/common"
 	"github.com/glynternet/GOHMoney/money"
 	innermoney "github.com/rhymond/go-money"
 	"github.com/stretchr/testify/assert"
-	"github.com/glynternet/GOHMoney/common"
 )
 
 func TestNew(t *testing.T) {
@@ -51,8 +50,8 @@ func TestValidateBalance(t *testing.T) {
 }
 
 func TestBalance_Equal(t *testing.T) {
-	newBalance := func (t *testing.T, date time.Time, amount int64, currency string) balance.Balance {
-		m , err := money.New(amount, currency)
+	newBalance := func(t *testing.T, date time.Time, amount int64, currency string) balance.Balance {
+		m, err := money.New(amount, currency)
 		common.FatalIfError(t, err, "Creating new Money")
 		b, err := balance.New(date, *m)
 		common.FatalIfError(t, err, "Creating new Balance")
@@ -101,7 +100,7 @@ func TestBalances_Earliest_BalancesWithSingleDate(t *testing.T) {
 func TestBalances_Earliest_BalancesWithSameDate(t *testing.T) {
 	date := time.Date(2000, 1, 1, 1, 1, 1, 1, time.UTC)
 	earliest, _ := balance.New(date, newTestMoney(t, 10, "GBP"))
-	other, _ := balance.New(date, newTestMoney(t,20, "EUR"))
+	other, _ := balance.New(date, newTestMoney(t, 20, "EUR"))
 	balances := balance.Balances{earliest, other}
 	expected := BalanceErrorSet{earliest, nil}
 	testEarliestSet(t, expected, balances)
@@ -111,10 +110,10 @@ func TestBalances_Earliest_BalancesWithMultipleDates(t *testing.T) {
 	date1 := time.Date(2000, 1, 1, 1, 1, 1, 1, time.UTC)
 	date2 := time.Date(2001, 1, 1, 1, 1, 1, 1, time.UTC)
 	date3 := time.Date(2002, 1, 1, 1, 1, 1, 1, time.UTC)
-	earliest, _ := balance.New(date1, newTestMoney(t,10, "GBP"))
-	other, _ := balance.New(date2, newTestMoney(t,1, "GBP"))
-	other2, _ := balance.New(date1, newTestMoney(t,8765, "GBP"))
-	other3, _ := balance.New(date3, newTestMoney(t,489, "EUR"))
+	earliest, _ := balance.New(date1, newTestMoney(t, 10, "GBP"))
+	other, _ := balance.New(date2, newTestMoney(t, 1, "GBP"))
+	other2, _ := balance.New(date1, newTestMoney(t, 8765, "GBP"))
+	other3, _ := balance.New(date3, newTestMoney(t, 489, "EUR"))
 	balances := balance.Balances{other, earliest, other2, other3}
 	expected := BalanceErrorSet{earliest, nil}
 	testEarliestSet(t, expected, balances)
@@ -147,8 +146,8 @@ func Test_Latest_BalancesWithSingleDate(t *testing.T) {
 
 func Test_Latest_BalancesWithSameDate(t *testing.T) {
 	date := time.Date(2000, 1, 1, 1, 1, 1, 1, time.UTC)
-	latest, _ := balance.New(date, newTestMoney(t,10, "GBP"))
-	other, _ := balance.New(date, newTestMoney(t,20, "EUR"))
+	latest, _ := balance.New(date, newTestMoney(t, 10, "GBP"))
+	other, _ := balance.New(date, newTestMoney(t, 20, "EUR"))
 	balances := balance.Balances{other, latest}
 	expected := BalanceErrorSet{latest, nil}
 	testLatestSet(t, expected, balances)
@@ -158,10 +157,10 @@ func Test_Latest_BalancesWithMultipleDates(t *testing.T) {
 	date1 := time.Date(2000, 1, 1, 1, 1, 1, 1, time.UTC)
 	date2 := time.Date(2001, 1, 1, 1, 1, 1, 1, time.UTC)
 	date3 := time.Date(2002, 1, 1, 1, 1, 1, 1, time.UTC)
-	latest, _ := balance.New(date3, newTestMoney(t,20, "GBP"))
-	other1, _ := balance.New(date2, newTestMoney(t,0, "GBP"))
-	other2, _ := balance.New(date3, newTestMoney(t,10, "EUR"))
-	other3, _ := balance.New(date1, newTestMoney(t,20, "YEN"))
+	latest, _ := balance.New(date3, newTestMoney(t, 20, "GBP"))
+	other1, _ := balance.New(date2, newTestMoney(t, 0, "GBP"))
+	other2, _ := balance.New(date3, newTestMoney(t, 10, "EUR"))
+	other3, _ := balance.New(date1, newTestMoney(t, 20, "YEN"))
 	balances := balance.Balances{other1, other2, latest, other3}
 	expected := BalanceErrorSet{latest, nil}
 	testLatestSet(t, expected, balances)
@@ -193,46 +192,45 @@ func testBalanceResults(t *testing.T, expected BalanceErrorSet, actual BalanceEr
 
 func TestBalances_Sum(t *testing.T) {
 	type testMoney struct {
-		amount int64
+		amount   int64
 		currency string
 	}
 	testSets := []struct {
-		moneys []testMoney
+		moneys      []testMoney
 		expectedSum money.Money
 		error
 	}{
+		{},
 		{
-		},
-		{
-			moneys:     []testMoney{
-				{amount:1, currency:"GBP"},
+			moneys: []testMoney{
+				{amount: 1, currency: "GBP"},
 			},
 			expectedSum: newTestMoney(t, 1, "GBP"),
 		},
 		{
-			moneys:     []testMoney{
-				{amount:1, currency:"GBP"},
-				{amount:2, currency:"GBP"},
+			moneys: []testMoney{
+				{amount: 1, currency: "GBP"},
+				{amount: 2, currency: "GBP"},
 			},
 			expectedSum: newTestMoney(t, 3, "GBP"),
 		},
 		{
-			moneys:     []testMoney{
-				{amount:1, currency:"GBP"},
-				{amount:2, currency:"GBP"},
-				{amount:-3, currency:"GBP"},
+			moneys: []testMoney{
+				{amount: 1, currency: "GBP"},
+				{amount: 2, currency: "GBP"},
+				{amount: -3, currency: "GBP"},
 			},
 			expectedSum: newTestMoney(t, 0, "GBP"),
 		},
 
 		{
-			moneys:     []testMoney{
-				{amount:1, currency:"GBP"},
-				{amount:2, currency:"EUR"},
+			moneys: []testMoney{
+				{amount: 1, currency: "GBP"},
+				{amount: 2, currency: "EUR"},
 			},
 			error: money.CurrencyMismatchError{
-				A:*innermoney.GetCurrency("GBP"),
-				B:*innermoney.GetCurrency("EUR"),
+				A: *innermoney.GetCurrency("GBP"),
+				B: *innermoney.GetCurrency("EUR"),
 			},
 		},
 	}

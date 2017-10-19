@@ -5,10 +5,10 @@ import (
 
 	"encoding/json"
 
+	"github.com/glynternet/GOHMoney/common"
 	"github.com/glynternet/GOHMoney/money"
 	money2 "github.com/rhymond/go-money"
 	"github.com/stretchr/testify/assert"
-	"github.com/glynternet/GOHMoney/common"
 )
 
 func newMoneyIgnoreError(a int64, c string) *money.Money {
@@ -189,7 +189,7 @@ func TestMoneyJSONLoop(t *testing.T) {
 }
 
 func TestMoneySameCurrency(t *testing.T) {
-	same, err := (*newMoneyIgnoreError(234,"EUR")).SameCurrency()
+	same, err := (*newMoneyIgnoreError(234, "EUR")).SameCurrency()
 	assert.True(t, same)
 	assert.Nil(t, err)
 
@@ -207,8 +207,8 @@ func TestMoneySameCurrency(t *testing.T) {
 			error: money.ErrNoCurrency,
 		},
 		{
-			b:    *newMoneyIgnoreError(123, "EUR"),
-			bool: false,
+			b:     *newMoneyIgnoreError(123, "EUR"),
+			bool:  false,
 			error: money.ErrNoCurrency,
 		},
 		{

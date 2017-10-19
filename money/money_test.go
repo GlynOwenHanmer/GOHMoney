@@ -8,6 +8,7 @@ import (
 	"github.com/GlynOwenHanmer/GOHMoney/money"
 	money2 "github.com/rhymond/go-money"
 	"github.com/stretchr/testify/assert"
+	"github.com/GlynOwenHanmer/GOHMoney/common"
 )
 
 func newMoneyIgnoreError(a int64, c string) *money.Money {
@@ -172,12 +173,12 @@ func TestMoneyAdd(t *testing.T) {
 }
 
 func TestMoneyJSONLoop(t *testing.T) {
-	a := money.GBP(934)
+	a, err := money.New(934, "YEN")
+	common.FatalIfError(t, err, "Creating Money")
 	jsonBytes, err := json.Marshal(a)
 	if err != nil {
 		t.Fatalf("Error marshalling json for testing: %s", err)
 	}
-
 	var b money.Money
 	if err := json.Unmarshal(jsonBytes, &b); err != nil {
 		t.Fatalf("Error unmarshaling bytes into object: %s", err)

@@ -6,9 +6,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/GlynOwenHanmer/GOHMoney/balance"
-	"github.com/GlynOwenHanmer/GOHMoney/money"
-	gohtime "github.com/GlynOwenHanmer/go-time"
+	"github.com/glynternet/GOHMoney/balance"
+	"github.com/glynternet/GOHMoney/common"
+	"github.com/glynternet/GOHMoney/money"
+	gohtime "github.com/glynternet/go-time"
 )
 
 func Test_ValidateAccount(t *testing.T) {
@@ -212,15 +213,25 @@ func Test_AccountValidateBalance(t *testing.T) {
 		},
 	}
 
-	pastBalance, _ := balance.New(past, money.GBP(-1))
-	presentBalance, _ := balance.New(present, money.GBP(1928376))
-	futureBalance, _ := balance.New(future, money.GBP(-9876))
-	evenFuturerBalance, _ := balance.New(future.AddDate(1, 0, 0), money.GBP(-9876234))
+	newTestMoney := func(t *testing.T, amount int64, currency string) money.Money {
+		m, err := money.New(amount, currency)
+		common.FatalIfError(t, err, "Creating Balance for testing")
+		return *m
+	}
+
+	pastBalance, _ := balance.New(past, newTestMoney(t, 1, "GBP"))
+	presentBalance, _ := balance.New(present, newTestMoney(t, 98737879, "GBP"))
+	futureBalance, _ := balance.New(future, newTestMoney(t, -9876, "EUR"))
+	evenFuturerBalance, _ := balance.New(future.AddDate(1, 0, 0), newTestMoney(t, -987654, "GBP"))
 	testSets := []struct {
 		Account
 		balance.Balance
 		error
 	}{
+		{
+			Account: openAccount,
+			Balance: balance.Balance{},
+		},
 		{
 			Account: openAccount,
 			Balance: pastBalance,
@@ -276,6 +287,12 @@ func Test_AccountValidateBalance(t *testing.T) {
 		if testSetErrorIsType != actualErrorIsType {
 			t.Errorf("Expected and resultant errors are differently typed.\nExpected: %s\nActual  : %s", testSet.error, err)
 			t.Logf("Account: %s\nBalance: %v", testSet.Account, testSet.Balance)
+			continue
+		}
+		switch {
+		case testSetTyped.AccountTimeRange.Equal(actualErrorTyped.AccountTimeRange):
+			fallthrough
+		case testSetTyped.BalanceDate.Equal(actualErrorTyped.BalanceDate):
 			continue
 		}
 		var message bytes.Buffer

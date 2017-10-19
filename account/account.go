@@ -5,8 +5,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/GlynOwenHanmer/GOHMoney/balance"
-	gohtime "github.com/GlynOwenHanmer/go-time"
+	"github.com/glynternet/GOHMoney/balance"
+	gohtime "github.com/glynternet/go-time"
 )
 
 // New creates a new Account object with a Valid Start time and returns it, also returning any logical errors with the newly created account.
@@ -46,18 +46,6 @@ func (a Account) End() gohtime.NullTime {
 // IsOpen return true if the Account is open.
 func (a Account) IsOpen() bool {
 	return !a.timeRange.End.Valid
-}
-
-// String() ensures that Account conforms to the Stringer interface.
-func (a Account) String() string {
-	jsonBytes, err := json.Marshal(a)
-	var ret string
-	if err != nil {
-		ret = "Unable to form Account string."
-	} else {
-		ret = string(jsonBytes)
-	}
-	return ret
 }
 
 // Validate checks the state of an account to see if it is has any logical errors. Validate returns a set of errors representing errors with different fields of the account.

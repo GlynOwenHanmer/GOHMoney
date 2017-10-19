@@ -1,14 +1,16 @@
 package balance_test
 
 import (
+	"encoding/json"
 	"errors"
 	"testing"
 	"time"
 
-	"encoding/json"
-
-	"github.com/GlynOwenHanmer/GOHMoney/balance"
-	"github.com/GlynOwenHanmer/GOHMoney/money"
+	"github.com/glynternet/GOHMoney/balance"
+	"github.com/glynternet/GOHMoney/common"
+	"github.com/glynternet/GOHMoney/money"
+	innermoney "github.com/rhymond/go-money"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestNew(t *testing.T) {
@@ -38,14 +40,37 @@ func TestValidateBalance(t *testing.T) {
 	if err != balance.ZeroDate {
 		t.Errorf("Unexpected error.\nExpected: %s\nActual  : %s", balance.ZeroDate, err)
 	}
-
-	validBalance, err := balance.New(time.Now(), money.GBP(0))
-	if err != nil {
-		t.Errorf("Unexpected error.\nExpected: %s\nActual  : %s", error(nil), err)
-	}
+	money, err := money.New(12, "GBP")
+	common.FatalIfError(t, err, "Creating Money for testing")
+	validBalance, err := balance.New(time.Now(), *money)
+	common.ErrorIfError(t, err, "Creating Balance for testing")
 	if err := validBalance.Validate(); err != nil {
 		t.Errorf("Unexpected error.\nExpected: %s\nActual  : %s", error(nil), err)
 	}
+}
+
+func TestBalance_Equal(t *testing.T) {
+	newBalance := func(t *testing.T, date time.Time, amount int64, currency string) balance.Balance {
+		m, err := money.New(amount, currency)
+		common.FatalIfError(t, err, "Creating new Money")
+		b, err := balance.New(date, *m)
+		common.FatalIfError(t, err, "Creating new Balance")
+		return b
+	}
+
+	now := time.Now()
+	a := newBalance(t, now, 123, "GBP")
+	b := newBalance(t, now, 123, "GBP")
+	assert.True(t, a.Equal(b))
+
+	b = newBalance(t, now, -123, "GBP")
+	assert.True(t, !a.Equal(b))
+
+	b = newBalance(t, now, 123, "EUR")
+	assert.True(t, !a.Equal(b))
+
+	b = newBalance(t, now.Add(1), 123, "GBP")
+	assert.True(t, !a.Equal(b))
 }
 
 type BalanceErrorSet struct {
@@ -66,7 +91,7 @@ func TestBalances_Earliest_BalancesWithNoDate(t *testing.T) {
 }
 
 func TestBalances_Earliest_BalancesWithSingleDate(t *testing.T) {
-	earliest, _ := balance.New(time.Date(2000, 1, 1, 1, 1, 1, 1, time.UTC), money.GBP(10))
+	earliest, _ := balance.New(time.Date(2000, 1, 1, 1, 1, 1, 1, time.UTC), newTestMoney(t, 10, "GBP"))
 	balances := balance.Balances{earliest}
 	expected := BalanceErrorSet{earliest, nil}
 	testEarliestSet(t, expected, balances)
@@ -74,8 +99,8 @@ func TestBalances_Earliest_BalancesWithSingleDate(t *testing.T) {
 
 func TestBalances_Earliest_BalancesWithSameDate(t *testing.T) {
 	date := time.Date(2000, 1, 1, 1, 1, 1, 1, time.UTC)
-	earliest, _ := balance.New(date, money.GBP(10))
-	other, _ := balance.New(date, money.GBP(20))
+	earliest, _ := balance.New(date, newTestMoney(t, 10, "GBP"))
+	other, _ := balance.New(date, newTestMoney(t, 20, "EUR"))
 	balances := balance.Balances{earliest, other}
 	expected := BalanceErrorSet{earliest, nil}
 	testEarliestSet(t, expected, balances)
@@ -85,10 +110,10 @@ func TestBalances_Earliest_BalancesWithMultipleDates(t *testing.T) {
 	date1 := time.Date(2000, 1, 1, 1, 1, 1, 1, time.UTC)
 	date2 := time.Date(2001, 1, 1, 1, 1, 1, 1, time.UTC)
 	date3 := time.Date(2002, 1, 1, 1, 1, 1, 1, time.UTC)
-	earliest, _ := balance.New(date1, money.GBP(10))
-	other, _ := balance.New(date2, money.GBP(0))
-	other2, _ := balance.New(date1, money.GBP(20))
-	other3, _ := balance.New(date3, money.GBP(489))
+	earliest, _ := balance.New(date1, newTestMoney(t, 10, "GBP"))
+	other, _ := balance.New(date2, newTestMoney(t, 1, "GBP"))
+	other2, _ := balance.New(date1, newTestMoney(t, 8765, "GBP"))
+	other3, _ := balance.New(date3, newTestMoney(t, 489, "EUR"))
 	balances := balance.Balances{other, earliest, other2, other3}
 	expected := BalanceErrorSet{earliest, nil}
 	testEarliestSet(t, expected, balances)
@@ -113,7 +138,7 @@ func Test_Latest_BalancesWithNoDate(t *testing.T) {
 }
 
 func Test_Latest_BalancesWithSingleDate(t *testing.T) {
-	latest, _ := balance.New(time.Date(2000, 1, 1, 1, 1, 1, 1, time.UTC), money.GBP(10))
+	latest, _ := balance.New(time.Date(2000, 1, 1, 1, 1, 1, 1, time.UTC), newTestMoney(t, 10, "GBP"))
 	balances := balance.Balances{latest}
 	expected := BalanceErrorSet{latest, nil}
 	testLatestSet(t, expected, balances)
@@ -121,8 +146,8 @@ func Test_Latest_BalancesWithSingleDate(t *testing.T) {
 
 func Test_Latest_BalancesWithSameDate(t *testing.T) {
 	date := time.Date(2000, 1, 1, 1, 1, 1, 1, time.UTC)
-	latest, _ := balance.New(date, money.GBP(10))
-	other, _ := balance.New(date, money.GBP(20))
+	latest, _ := balance.New(date, newTestMoney(t, 10, "GBP"))
+	other, _ := balance.New(date, newTestMoney(t, 20, "EUR"))
 	balances := balance.Balances{other, latest}
 	expected := BalanceErrorSet{latest, nil}
 	testLatestSet(t, expected, balances)
@@ -132,10 +157,10 @@ func Test_Latest_BalancesWithMultipleDates(t *testing.T) {
 	date1 := time.Date(2000, 1, 1, 1, 1, 1, 1, time.UTC)
 	date2 := time.Date(2001, 1, 1, 1, 1, 1, 1, time.UTC)
 	date3 := time.Date(2002, 1, 1, 1, 1, 1, 1, time.UTC)
-	latest, _ := balance.New(date3, money.GBP(20))
-	other1, _ := balance.New(date2, money.GBP(0))
-	other2, _ := balance.New(date3, money.GBP(0))
-	other3, _ := balance.New(date1, money.GBP(20))
+	latest, _ := balance.New(date3, newTestMoney(t, 20, "GBP"))
+	other1, _ := balance.New(date2, newTestMoney(t, 0, "GBP"))
+	other2, _ := balance.New(date3, newTestMoney(t, 10, "EUR"))
+	other3, _ := balance.New(date1, newTestMoney(t, 20, "YEN"))
 	balances := balance.Balances{other1, other2, latest, other3}
 	expected := BalanceErrorSet{latest, nil}
 	testLatestSet(t, expected, balances)
@@ -166,49 +191,73 @@ func testBalanceResults(t *testing.T, expected BalanceErrorSet, actual BalanceEr
 }
 
 func TestBalances_Sum(t *testing.T) {
+	type testMoney struct {
+		amount   int64
+		currency string
+	}
 	testSets := []struct {
-		amounts     []int64
+		moneys      []testMoney
 		expectedSum money.Money
+		error
 	}{
+		{},
 		{
-			expectedSum: money.GBP(0),
+			moneys: []testMoney{
+				{amount: 1, currency: "GBP"},
+			},
+			expectedSum: newTestMoney(t, 1, "GBP"),
 		},
 		{
-			amounts:     []int64{1},
-			expectedSum: money.GBP(1),
+			moneys: []testMoney{
+				{amount: 1, currency: "GBP"},
+				{amount: 2, currency: "GBP"},
+			},
+			expectedSum: newTestMoney(t, 3, "GBP"),
 		},
 		{
-			amounts:     []int64{1, 2},
-			expectedSum: money.GBP(3),
+			moneys: []testMoney{
+				{amount: 1, currency: "GBP"},
+				{amount: 2, currency: "GBP"},
+				{amount: -3, currency: "GBP"},
+			},
+			expectedSum: newTestMoney(t, 0, "GBP"),
 		},
 
 		{
-			amounts:     []int64{1, 2, -3},
-			expectedSum: money.GBP(0),
+			moneys: []testMoney{
+				{amount: 1, currency: "GBP"},
+				{amount: 2, currency: "EUR"},
+			},
+			error: money.CurrencyMismatchError{
+				A: *innermoney.GetCurrency("GBP"),
+				B: *innermoney.GetCurrency("EUR"),
+			},
 		},
 	}
 
 	now := time.Now()
 
-	for _, testSet := range testSets {
+	for i, testSet := range testSets {
 		var bs balance.Balances
-		for _, a := range testSet.amounts {
-			b, _ := balance.New(now, money.GBP(a))
+		for _, tsm := range testSet.moneys {
+			m := newTestMoney(t, tsm.amount, tsm.currency)
+			b, err := balance.New(now, m)
+			common.FatalIfErrorf(t, err, "[%d] creating Balance for testing", i)
 			bs = append(bs, b)
 		}
 		actual, err := bs.Sum()
-		if err != nil {
-			t.Fatalf("Error summing balances: %s", err)
+		assert.Equal(t, testSet.error, err, "summing Balances ", testSet.moneys)
+		if err != nil || len(bs) == 0 {
+			continue
 		}
-		equal, _ := actual.Equal(testSet.expectedSum)
-		if !equal {
-			t.Errorf("Unexpected sum.\nExpected: %f\nActual  : %f\nBalances: %v", testSet.expectedSum, actual, bs)
-		}
+		equal, err := actual.Equal(testSet.expectedSum)
+		common.FatalIfErrorf(t, err, "[%d] Equalling", i)
+		assert.True(t, equal, "[%d] %+v", i, testSet.moneys)
 	}
 }
 
 func TestBalance_MarshalJSON(t *testing.T) {
-	a, _ := balance.New(time.Now(), money.GBP(7654))
+	a, _ := balance.New(time.Now(), newTestMoney(t, 8237, "YEN"))
 	jsonBytes, err := json.Marshal(a)
 	if err != nil {
 		t.Fatalf("Error marshalling json for testing: %s", err)
@@ -229,7 +278,7 @@ func TestBalance_MarshalJSON(t *testing.T) {
 }
 
 func TestBalance_JSONLoop(t *testing.T) {
-	a, _ := balance.New(time.Now(), money.GBP(7654))
+	a, _ := balance.New(time.Now(), newTestMoney(t, 8237, "USD"))
 	jsonBytes, err := json.Marshal(a)
 	if err != nil {
 		t.Fatalf("Error marshalling json for testing: %s", err)
@@ -241,4 +290,10 @@ func TestBalance_JSONLoop(t *testing.T) {
 	if !a.Equal(b) {
 		t.Fatalf("Expected %v, but got %v", a, b)
 	}
+}
+
+func newTestMoney(t *testing.T, amount int64, currency string) money.Money {
+	a, err := money.New(amount, currency)
+	common.FatalIfError(t, err, "Creating Balance for testing")
+	return *a
 }

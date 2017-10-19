@@ -8,7 +8,6 @@ import (
 	"github.com/GlynOwenHanmer/GOHMoney/money"
 	money2 "github.com/rhymond/go-money"
 	"github.com/stretchr/testify/assert"
-	"fmt"
 )
 
 func newMoneyIgnoreError(a int64, c string) *money.Money {
@@ -199,7 +198,6 @@ func TestMoneySameCurrency(t *testing.T) {
 			a:    *newMoneyIgnoreError(123, "GBP"),
 			b:    *newMoneyIgnoreError(123, "EUR"),
 			bool: false,
-			error: money.CurrencyMismatchError{A:money2.Currency{Code:"GBP"},B:money2.Currency{Code:"EUR"}},
 		},
 		{
 			a:    *newMoneyIgnoreError(123, "GBP"),
@@ -208,7 +206,6 @@ func TestMoneySameCurrency(t *testing.T) {
 		},
 	}
 	for i, ts := range testSets {
-		fmt.Printf("Test Set - %d\n", i)
 		same, err := ts.a.SameCurrency(ts.b)
 		assert.Equal(t, ts.bool, same, "[%d] a: %+v, b: %+v", i, ts.a, ts.b)
 		assert.Equal(t, ts.error, err, "[%d] a: %+v, b: %+v", i, ts.a, ts.b)

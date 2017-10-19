@@ -96,19 +96,18 @@ func (m Money) Currency() (money.Currency, error) {
 
 // SameCurrency returns true if the money and provided Money arguments all have the same Currency.
 // If a only one Money object is provided, m, SameCurrency will always return true with no error.
+// If any Money has no currency assigned, SameCurrency will return false.
 func (m Money) SameCurrency(oms ...Money) (bool, error) {
 	if len(oms) == 0 {
 		return true, nil
 	}
-	moneys := []Money{m}
-	moneys = append(moneys, oms...)
+	moneys := append([]Money{m}, oms...)
 	cs, err := Moneys(moneys).currencies()
-	if err == ErrNoCurrency {
-		return len(cs) == 0, err
+	// if error is not nil, currencies may not return all currencies
+	if err != nil {
+		return false, err
 	}
-	fmt.Printf("Length %d: %s\n", len(cs), err)
-	fmt.Printf("%+v\n", cs)
-	return len(cs) < 2, err
+	return len(cs) == 1, err
 }
 
 // Amount returns the value of the Money formed from the currency's lowest denominator.

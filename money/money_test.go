@@ -84,12 +84,17 @@ func TestMoneyEqual(t *testing.T) {
 		error
 	}{
 		{
-			equal: true,
+			equal: false,
 			error: money.ErrNoCurrency,
 		},
 		{
 			a:     *newMoneyIgnoreError(0, ""),
-			equal: true,
+			equal: false,
+			error: money.ErrNoCurrency,
+		},
+		{
+			a:     money.Money{},
+			equal: false,
 			error: money.ErrNoCurrency,
 		},
 		{
@@ -98,22 +103,29 @@ func TestMoneyEqual(t *testing.T) {
 			error: money.ErrNoCurrency,
 		},
 		{
-			b:     *newMoneyIgnoreError(0, "GBP"),
-			equal: true,
-		},
-
-		{
 			a:     *newMoneyIgnoreError(-10, "GBP"),
 			equal: false,
+			error: money.ErrNoCurrency,
 		},
 		{
-			b:     money.GBP(1023),
+			b:     *newMoneyIgnoreError(1023, "GBP"),
 			equal: false,
+			error: money.ErrNoCurrency,
+		},
+		{
+			a:     *newMoneyIgnoreError(103, "GBP"),
+			b:     *newMoneyIgnoreError(1023, "GBP"),
+			equal: false,
+		},
+		{
+			a:     *newMoneyIgnoreError(1023, "USD"),
+			b:     *newMoneyIgnoreError(1023, "USD"),
+			equal: true,
 		},
 	}
 	for i, ts := range testSets {
 		equal, err := ts.a.Equal(ts.b)
-		assert.Equal(t, err, ts.error, "[%+v] a: %v, b: %v", i, ts.a, ts.b)
+		assert.Equal(t, ts.error, err, "[%+v] a: %v, b: %v", i, ts.a, ts.b)
 		assert.Equal(t, ts.equal, equal, "[%d] a: %+v, b: %+v", i, ts.a, ts.b)
 	}
 }

@@ -118,13 +118,12 @@ func (m Money) Amount() int64 {
 }
 
 // Equal returns true if both Money objects are equal.
-// Equal will return an ErrNoCurrency if either Money has no currency set.
-// Equal will still return true if both Money objects have no currency set but the same amount.
+// Equal will return false and an ErrNoCurrency if either Money has no currency set.
 func (m Money) Equal(om Money) (bool, error) {
-	if m.Amount() != om.Amount() {
-		return false, nil
+	if same, err := m.SameCurrency(om); !same || err != nil {
+		return false, err
 	}
-	return m.SameCurrency(om)
+	return m.Amount() == om.Amount(), nil
 }
 
 func (m Money) String() string {

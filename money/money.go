@@ -110,7 +110,8 @@ func (m Money) SameCurrency(oms ...Money) (bool, error) {
 	return len(cs) == 1, err
 }
 
-// Amount returns the value of the Money formed from the currency's lowest denominator.
+// Amount returns the value of the Money formed from the currency's lowest
+// denominator.
 // e.g. For £45.67, Amount() would return 4567
 func (m Money) Amount() int64 {
 	initialiseIfRequired(&m)
@@ -118,7 +119,8 @@ func (m Money) Amount() int64 {
 }
 
 // Equal returns true if both Money objects are equal.
-// Equal will return false and an ErrNoCurrency if either Money has no currency set.
+// Equal will return false and an ErrNoCurrency if either Money has no currency
+// set.
 func (m Money) Equal(om Money) (bool, error) {
 	if same, err := m.SameCurrency(om); !same || err != nil {
 		return false, err
@@ -151,8 +153,8 @@ func (m Money) Add(om Money) (Money, error) {
 	return Money{inner: money.New(m.Amount()+om.Amount(), cs[0].Code)}, nil
 }
 
-// CurrencyMismatchError is an error that is returned when an operation that requires
-// multiple Money objects to be of the same currency is called.
+// CurrencyMismatchError is an error that is returned when an operation that
+// requires multiple Money objects to be of the same currency is called.
 type CurrencyMismatchError struct {
 	A, B money.Currency
 }
@@ -162,7 +164,8 @@ func (e CurrencyMismatchError) Error() string {
 	return fmt.Sprintf("currency mismatch: %s, %s", e.A.Code, e.B.Code)
 }
 
-// MarshalJSON marshals an Account into A json blob, returning the blob with any errors that occur during the marshalling.
+// MarshalJSON marshals an Account into A json blob, returning the blob with
+// any errors that occur during the marshalling.
 func (m Money) MarshalJSON() ([]byte, error) {
 	c, err := m.Currency()
 	if err != nil && err != ErrNoCurrency {

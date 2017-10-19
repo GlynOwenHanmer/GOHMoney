@@ -141,7 +141,11 @@ func TestMoneyAdd(t *testing.T) {
 		{
 			a:     money.Money{},
 			b:     money.Money{},
-			sum:   money.Money{},
+			error: money.ErrNoCurrency,
+		},
+		{
+			a:     *newMoneyIgnoreError(1, "EUR"),
+			b:     money.Money{},
 			error: money.ErrNoCurrency,
 		},
 		{
@@ -156,14 +160,14 @@ func TestMoneyAdd(t *testing.T) {
 			error: nil,
 		},
 	}
-	for _, ts := range testSets {
+	for i, ts := range testSets {
 		sum, err := ts.a.Add(ts.b)
-		if err != ts.error {
-			t.Fatalf("Expected %+v, got %+v", ts.error, err)
+		assert.Equal(t, ts.error, err, "[%d] a: %v, b: %v", i, ts.error, err)
+		if err != nil {
+			continue
 		}
-		if equal, _ := sum.Equal(ts.sum); !equal {
-			t.Errorf("Expected %v, got %v", ts.sum, sum)
-		}
+		equal, _ := sum.Equal(ts.sum)
+		assert.True(t, equal, "[%d] a: %v, b: %v, sum: %v", i, ts.a, ts.b, sum)
 	}
 }
 

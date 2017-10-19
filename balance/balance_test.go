@@ -83,12 +83,6 @@ func TestBalances_Earliest_BalancesWithSameDate(t *testing.T) {
 	testEarliestSet(t, expected, balances)
 }
 
-func newTestMoney(t *testing.T, amount int64, currency string) money.Money {
-	a, err := money.New(amount, currency)
-	common.FatalIfError(t, err, "Creating Balance for testing")
-	return *a
-}
-
 func TestBalances_Earliest_BalancesWithMultipleDates(t *testing.T) {
 	date1 := time.Date(2000, 1, 1, 1, 1, 1, 1, time.UTC)
 	date2 := time.Date(2001, 1, 1, 1, 1, 1, 1, time.UTC)
@@ -274,4 +268,10 @@ func TestBalance_JSONLoop(t *testing.T) {
 	if !a.Equal(b) {
 		t.Fatalf("Expected %v, but got %v", a, b)
 	}
+}
+
+func newTestMoney(t *testing.T, amount int64, currency string) money.Money {
+	a, err := money.New(amount, currency)
+	common.FatalIfError(t, err, "Creating Balance for testing")
+	return *a
 }

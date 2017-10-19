@@ -9,6 +9,7 @@ import (
 	"github.com/glynternet/GOHMoney/balance"
 	"github.com/glynternet/GOHMoney/money"
 	gohtime "github.com/glynternet/go-time"
+	"github.com/glynternet/GOHMoney/common"
 )
 
 func Test_ValidateAccount(t *testing.T) {
@@ -212,10 +213,16 @@ func Test_AccountValidateBalance(t *testing.T) {
 		},
 	}
 
-	pastBalance, _ := balance.New(past, money.GBP(-1))
-	presentBalance, _ := balance.New(present, money.GBP(1928376))
-	futureBalance, _ := balance.New(future, money.GBP(-9876))
-	evenFuturerBalance, _ := balance.New(future.AddDate(1, 0, 0), money.GBP(-9876234))
+	newTestMoney := func(t *testing.T, amount int64, currency string) money.Money {
+		m, err := money.New(amount, currency)
+		common.FatalIfError(t, err, "Creating Balance for testing")
+		return *m
+	}
+
+	pastBalance, _ := balance.New(past, newTestMoney(t, 1, "GBP"))
+	presentBalance, _ := balance.New(present, newTestMoney(t, 98737879, "GBP"))
+	futureBalance, _ := balance.New(future, newTestMoney(t, -9876, "EUR"))
+	evenFuturerBalance, _ := balance.New(future.AddDate(1, 0, 0), newTestMoney(t, -987654, "GBP"))
 	testSets := []struct {
 		Account
 		balance.Balance

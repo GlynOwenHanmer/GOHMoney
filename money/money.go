@@ -44,6 +44,8 @@ type Moneys []Money
 
 // currencies returns an array of the Currencies present within a Moneys.
 // currencies will only have one occurrence of each Currency present.
+// currencies will return an error as soon as one occurs whilst retrieving
+// the Currency of any Money.
 func (ms Moneys) currencies() ([]money.Currency, error) {
 	var cs []money.Currency
 	for _, m := range ms {
@@ -93,10 +95,19 @@ func (m Money) Currency() (money.Currency, error) {
 }
 
 // SameCurrency returns true if the money and provided Money arguments all have the same Currency.
+// If a only one Money object is provided, m, SameCurrency will always return true with no error.
 func (m Money) SameCurrency(oms ...Money) (bool, error) {
+	if len(oms) == 0 {
+		return true, nil
+	}
 	moneys := []Money{m}
 	moneys = append(moneys, oms...)
 	cs, err := Moneys(moneys).currencies()
+	if err == ErrNoCurrency {
+		return len(cs) == 0, err
+	}
+	fmt.Printf("Length %d: %s\n", len(cs), err)
+	fmt.Printf("%+v\n", cs)
 	return len(cs) < 2, err
 }
 
@@ -108,11 +119,20 @@ func (m Money) Amount() int64 {
 }
 
 // Equal returns true if both Money objects are equal.
+// Equal will return an ErrNoCurrency if either Money has no currency set.
+// Equal will still return true if both Money objects have no currency set but the same amount.
 func (m Money) Equal(om Money) (bool, error) {
 	if m.Amount() != om.Amount() {
 		return false, nil
 	}
 	return m.SameCurrency(om)
+}
+
+func (m Money) String() string {
+	if m.inner == nil {
+		return "NIL"
+	}
+	return fmt.Sprintf("%v, %v", m.inner.Currency(), m.inner.Amount())
 }
 
 // Add returns the sum of both Money objects

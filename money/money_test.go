@@ -8,6 +8,7 @@ import (
 	"github.com/GlynOwenHanmer/GOHMoney/money"
 	money2 "github.com/rhymond/go-money"
 	"github.com/stretchr/testify/assert"
+	"fmt"
 )
 
 func newMoneyIgnoreError(a int64, c string) *money.Money {
@@ -81,21 +82,29 @@ func TestMoneyEqual(t *testing.T) {
 	testSets := []struct {
 		a, b  money.Money
 		equal bool
+		error
 	}{
 		{
 			equal: true,
+			error: money.ErrNoCurrency,
 		},
 		{
-			a:     money.GBP(0),
+			a:     *newMoneyIgnoreError(0, ""),
 			equal: true,
+			error: money.ErrNoCurrency,
 		},
 		{
-			b:     money.GBP(0),
+			a:     *newMoneyIgnoreError(0, "EUR"),
+			equal: false,
+			error: money.ErrNoCurrency,
+		},
+		{
+			b:     *newMoneyIgnoreError(0, "GBP"),
 			equal: true,
 		},
 
 		{
-			a:     money.GBP(-10),
+			a:     *newMoneyIgnoreError(-10, "GBP"),
 			equal: false,
 		},
 		{
@@ -104,11 +113,9 @@ func TestMoneyEqual(t *testing.T) {
 		},
 	}
 	for i, ts := range testSets {
-		equal, _ := ts.a.Equal(ts.b)
+		equal, err := ts.a.Equal(ts.b)
+		assert.Equal(t, err, ts.error, "[%+v] a: %v, b: %v", i, ts.a, ts.b)
 		assert.Equal(t, ts.equal, equal, "[%d] a: %+v, b: %+v", i, ts.a, ts.b)
-		if equal != ts.equal {
-			t.Errorf("Expected %t but got %t", ts.equal, equal)
-		}
 	}
 }
 
@@ -166,19 +173,33 @@ func TestMoneyJSONLoop(t *testing.T) {
 }
 
 func TestMoneySameCurrency(t *testing.T) {
+	same, err := (*newMoneyIgnoreError(234,"EUR")).SameCurrency()
+	assert.True(t, same)
+	assert.Nil(t, err)
+
+	same, err = money.Money{}.SameCurrency()
+	assert.True(t, same)
+	assert.Nil(t, err)
+
 	testSets := []struct {
 		a, b money.Money
 		bool
 		error
 	}{
 		{
-			bool:  true,
+			bool:  false,
+			error: money.ErrNoCurrency,
+		},
+		{
+			b:    *newMoneyIgnoreError(123, "EUR"),
+			bool: false,
 			error: money.ErrNoCurrency,
 		},
 		{
 			a:    *newMoneyIgnoreError(123, "GBP"),
 			b:    *newMoneyIgnoreError(123, "EUR"),
 			bool: false,
+			error: money.CurrencyMismatchError{A:money2.Currency{Code:"GBP"},B:money2.Currency{Code:"EUR"}},
 		},
 		{
 			a:    *newMoneyIgnoreError(123, "GBP"),
@@ -187,8 +208,9 @@ func TestMoneySameCurrency(t *testing.T) {
 		},
 	}
 	for i, ts := range testSets {
+		fmt.Printf("Test Set - %d\n", i)
 		same, err := ts.a.SameCurrency(ts.b)
-		assert.Equal(t, ts.bool, same, "[i] %+v %+v", i, ts.a, ts.b)
-		assert.Equal(t, ts.error, err, "[i] %+v %+v", i, ts.a, ts.b)
+		assert.Equal(t, ts.bool, same, "[%d] a: %+v, b: %+v", i, ts.a, ts.b)
+		assert.Equal(t, ts.error, err, "[%d] a: %+v, b: %+v", i, ts.a, ts.b)
 	}
 }

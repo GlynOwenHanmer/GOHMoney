@@ -271,15 +271,3 @@ func TestBalance_JSONLoop(t *testing.T) {
 		t.Fatalf("Expected %v, but got %v", a, b)
 	}
 }
-
-func fatalIfError(t *testing.T, err error, message string) {
-	if err != nil {
-		t.Fatalf("%s: %s", message, err)
-	}
-}
-
-func errorIfError(t *testing.T, err error, message string) {
-	if err != nil {
-		t.Errorf("%s: %s", message, err)
-	}
-}

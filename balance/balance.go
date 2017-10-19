@@ -6,7 +6,7 @@ import (
 
 	"encoding/json"
 
-	"github.com/GlynOwenHanmer/GOHMoney/money"
+	"github.com/glynternet/GOHMoney/money"
 )
 
 // EmptyBalancesMessage is the error message used when a Balances object contains no Balance items.

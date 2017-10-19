@@ -128,13 +128,6 @@ func (m Money) Equal(om Money) (bool, error) {
 	return m.Amount() == om.Amount(), nil
 }
 
-func (m Money) String() string {
-	if m.inner == nil {
-		return "NIL"
-	}
-	return fmt.Sprintf("%v, %v", m.inner.Currency(), m.inner.Amount())
-}
-
 // Add returns the sum of both Money objects
 // If the Money objects are of different currencies, an error will be returned.
 func (m Money) Add(om Money) (Money, error) {

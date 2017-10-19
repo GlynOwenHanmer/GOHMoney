@@ -6,9 +6,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/GlynOwenHanmer/GOHMoney/balance"
-	"github.com/GlynOwenHanmer/GOHMoney/money"
-	gohtime "github.com/GlynOwenHanmer/go-time"
+	"github.com/glynternet/GOHMoney/balance"
+	"github.com/glynternet/GOHMoney/money"
+	gohtime "github.com/glynternet/go-time"
 )
 
 func Test_ValidateAccount(t *testing.T) {

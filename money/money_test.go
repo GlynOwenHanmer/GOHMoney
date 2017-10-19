@@ -5,10 +5,10 @@ import (
 
 	"encoding/json"
 
-	"github.com/GlynOwenHanmer/GOHMoney/money"
+	"github.com/glynternet/GOHMoney/money"
 	money2 "github.com/rhymond/go-money"
 	"github.com/stretchr/testify/assert"
-	"github.com/GlynOwenHanmer/GOHMoney/common"
+	"github.com/glynternet/GOHMoney/common"
 )
 
 func newMoneyIgnoreError(a int64, c string) *money.Money {

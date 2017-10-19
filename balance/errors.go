@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	gohtime "github.com/GlynOwenHanmer/go-time"
+	gohtime "github.com/glynternet/go-time"
 )
 
 // DateOutOfAccountTimeRange is a type returned when the date of a Balance is not contained within the Range of the Account that holds it.

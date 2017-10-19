@@ -7,11 +7,11 @@ import (
 	"time"
 
 
-	"github.com/GlynOwenHanmer/GOHMoney/balance"
-	"github.com/GlynOwenHanmer/GOHMoney/money"
+	"github.com/glynternet/GOHMoney/balance"
+	"github.com/glynternet/GOHMoney/money"
 	innermoney "github.com/rhymond/go-money"
 	"github.com/stretchr/testify/assert"
-	"github.com/GlynOwenHanmer/GOHMoney/common"
+	"github.com/glynternet/GOHMoney/common"
 )
 
 func TestNew(t *testing.T) {

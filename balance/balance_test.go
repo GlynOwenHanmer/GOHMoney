@@ -1,16 +1,16 @@
 package balance_test
 
 import (
+	"encoding/json"
 	"errors"
 	"testing"
 	"time"
 
-	"encoding/json"
 
 	"github.com/GlynOwenHanmer/GOHMoney/balance"
 	"github.com/GlynOwenHanmer/GOHMoney/money"
-	"github.com/stretchr/testify/assert"
 	innermoney "github.com/rhymond/go-money"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestNew(t *testing.T) {

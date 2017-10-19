@@ -54,14 +54,18 @@ func TestMoneyAmount(t *testing.T) {
 	}{
 		{
 			amount: -99,
-			Money:  money.GBP(-99),
+			Money:  *newMoneyIgnoreError(-99, "GBP"),
 		},
 		{
-			Money: money.GBP(0),
+			amount: -99,
+			Money:  *newMoneyIgnoreError(-99, "EUR"),
+		},
+		{
+			Money: *newMoneyIgnoreError(0, "EUR"),
 		},
 		{
 			amount: 9876,
-			Money:  money.GBP(9876),
+			Money:  *newMoneyIgnoreError(9876, "GBP"),
 		},
 	}
 	for _, ts := range testSets {

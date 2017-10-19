@@ -230,6 +230,10 @@ func Test_AccountValidateBalance(t *testing.T) {
 	}{
 		{
 			Account: openAccount,
+			Balance: balance.Balance{},
+		},
+		{
+			Account: openAccount,
 			Balance: pastBalance,
 			error: balance.DateOutOfAccountTimeRange{
 				BalanceDate:      pastBalance.Date(),
@@ -283,6 +287,12 @@ func Test_AccountValidateBalance(t *testing.T) {
 		if testSetErrorIsType != actualErrorIsType {
 			t.Errorf("Expected and resultant errors are differently typed.\nExpected: %s\nActual  : %s", testSet.error, err)
 			t.Logf("Account: %s\nBalance: %v", testSet.Account, testSet.Balance)
+			continue
+		}
+		switch {
+		case testSetTyped.AccountTimeRange.Equal(actualErrorTyped.AccountTimeRange):
+			fallthrough
+		case testSetTyped.BalanceDate.Equal(actualErrorTyped.BalanceDate):
 			continue
 		}
 		var message bytes.Buffer

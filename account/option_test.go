@@ -7,6 +7,7 @@ import (
 	"github.com/glynternet/GOHMoney/account"
 	"github.com/glynternet/GOHMoney/common"
 	"github.com/stretchr/testify/assert"
+	"errors"
 )
 
 func TestClosedTime(t *testing.T) {
@@ -21,4 +22,12 @@ func TestClosedTime(t *testing.T) {
 	err = account.CloseTime(closeB)(&a)
 	common.FatalIfError(t, err, "Creating CloseTime Option")
 	assert.True(t, a.End().EqualTime(closeB))
+}
+
+func TestErrorOption(t *testing.T) {
+	errorFn := func(a *account.Account) error {
+		return errors.New("TEST ERROR")
+	}
+	_, err := account.New("TEST_ACCOUNT", time.Now(), errorFn)
+	assert.Equal(t, errors.New("TEST ERROR"), err)
 }

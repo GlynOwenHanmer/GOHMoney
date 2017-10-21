@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/glynternet/GOHMoney/account"
-	"github.com/stretchr/testify/assert"
 	"github.com/glynternet/GOHMoney/common"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestAccount_MarshalJSON(t *testing.T) {
@@ -40,9 +40,9 @@ func TestAccount_Equal(t *testing.T) {
 	a, err := account.New("A", now)
 	common.ErrorIfError(t, err, "Creating account")
 	tests := []struct {
-		name  string
+		name       string
 		start, end time.Time
-		equal bool
+		equal      bool
 	}{
 		{"A", now, time.Time{}, true},
 		{"B", now, time.Time{}, false},

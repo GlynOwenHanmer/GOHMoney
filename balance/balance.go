@@ -24,7 +24,7 @@ func New(date time.Time, options ...Option) (b Balance, err error) {
 
 // Balance holds the logic for a Balance item.
 type Balance struct {
-	date  time.Time
+	date   time.Time
 	amount int64
 }
 
@@ -55,7 +55,7 @@ func (b Balance) Validate() error {
 }
 
 type jsonHelper struct {
-	Date  time.Time
+	Date   time.Time
 	Amount int64
 }
 
@@ -63,7 +63,7 @@ type jsonHelper struct {
 func (b Balance) MarshalJSON() ([]byte, error) {
 	type Alias Balance
 	return json.Marshal(&jsonHelper{
-		Date:  b.date,
+		Date:   b.date,
 		Amount: b.amount,
 	})
 }

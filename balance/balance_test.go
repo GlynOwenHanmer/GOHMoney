@@ -6,10 +6,11 @@ import (
 	"testing"
 	"time"
 
+	"fmt"
+
 	"github.com/glynternet/GOHMoney/balance"
 	"github.com/glynternet/GOHMoney/common"
 	"github.com/stretchr/testify/assert"
-	"fmt"
 )
 
 func TestNew(t *testing.T) {
@@ -167,11 +168,11 @@ func TestBalances_Sum(t *testing.T) {
 			sum:     1,
 		},
 		{
-			amounts: []int64{1,2},
+			amounts: []int64{1, 2},
 			sum:     3,
 		},
 		{
-			amounts: []int64{1,2,-3},
+			amounts: []int64{1, 2, -3},
 			sum:     0,
 		},
 	}
@@ -196,7 +197,7 @@ func TestBalance_MarshalJSON(t *testing.T) {
 		t.Fatalf("Error marshalling json for testing: %s", err)
 	}
 	var b struct {
-		Date  time.Time
+		Date   time.Time
 		Amount int64
 	}
 	err = json.Unmarshal(jsonBytes, &b)

@@ -2,10 +2,11 @@ package account_test
 
 import (
 	"testing"
-	"github.com/glynternet/GOHMoney/account"
 	"time"
-	"github.com/stretchr/testify/assert"
+
+	"github.com/glynternet/GOHMoney/account"
 	"github.com/glynternet/GOHMoney/common"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestClosedTime(t *testing.T) {

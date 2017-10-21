@@ -2,6 +2,7 @@ package account
 
 import (
 	"time"
+
 	gtime "github.com/glynternet/go-time"
 )
 
@@ -12,7 +13,7 @@ func CloseTime(time time.Time) Option {
 		return nil
 	}
 	return func(a *Account) error {
-		a.timeRange.End = gtime.NullTime{Valid:true, Time: time}
+		a.timeRange.End = gtime.NullTime{Valid: true, Time: time}
 		return nil
 	}
 }

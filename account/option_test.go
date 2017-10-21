@@ -14,7 +14,7 @@ func TestClosedTime(t *testing.T) {
 	start := time.Now()
 	closeA := start.Add(72 * time.Hour)
 	closeFn := account.CloseTime(closeA)
-	a, err := account.New("TEST_ACCOUNT", start, closeFn)
+	a, err := account.New("TEST_ACCOUNT", newTestCurrency(t, "EUR"), start, closeFn)
 	common.FatalIfError(t, err, "Creating Account")
 	assert.True(t, a.End().EqualTime(closeA))
 
@@ -28,6 +28,6 @@ func TestErrorOption(t *testing.T) {
 	errorFn := func(a *account.Account) error {
 		return errors.New("TEST ERROR")
 	}
-	_, err := account.New("TEST_ACCOUNT", time.Now(), errorFn)
+	_, err := account.New("TEST_ACCOUNT", newTestCurrency(t, "EUR"), time.Now(), errorFn)
 	assert.Equal(t, errors.New("TEST ERROR"), err)
 }

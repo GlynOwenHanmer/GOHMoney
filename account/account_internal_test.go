@@ -8,6 +8,8 @@ import (
 
 	"github.com/glynternet/GOHMoney/balance"
 	gtime "github.com/glynternet/go-time"
+	"github.com/glynternet/GOHMoney/common"
+	"github.com/glynternet/GOHMoney/money/currency"
 )
 
 func Test_ValidateAccount(t *testing.T) {
@@ -322,7 +324,7 @@ func Test_NewAccount(t *testing.T) {
 	logTestSet := func(ts testSet) { t.Logf("Start: %s,\tEnd: %v,", ts.start, ts.end) }
 	for _, set := range testSets {
 		close := CloseTime(set.end)
-		a, err := New(set.name, set.start, close)
+		a, err := New(set.name, newTestCurrency(t, "YEN"), set.start, close)
 		if !testNewAccountErrorTypes(t, set.error, err) {
 			logTestSet(set)
 		}
@@ -364,4 +366,10 @@ func testNewAccountErrorTypes(t *testing.T, expected, actual error) bool {
 		return false
 	}
 	return true
+}
+
+func newTestCurrency(t *testing.T, code string) currency.Code {
+	c, err := currency.New(code)
+	common.FatalIfError(t, err, "Creating New Currency Code")
+	return c
 }

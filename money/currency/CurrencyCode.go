@@ -27,7 +27,7 @@ func validateCodeLength(code string) error {
 }
 
 func (c Code)Validate() error {
-	err := validateCodeLength(c)
+	err := validateCodeLength(string(c))
 	if err != nil {
 		return err
 	}

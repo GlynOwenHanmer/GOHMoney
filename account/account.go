@@ -69,11 +69,11 @@ func (a Account) Validate() FieldError {
 	return nil
 }
 
-// ValidateBalance validates a Balance against an Account.
-// ValidateBalance returns any logical errors between the Account and the Balance.
-// ValidateBalance first attempts to validate the Account as an entity by itself. If there are any errors with the Account, these errors are returned and the Balance is not attempted to be validated against the account.
-// If the date of the Balance is outside of the TimeRange of the Account, a DateOutOfAccountTimeRange will be returned.
-func (a Account) ValidateBalance(b balance.Balance) error {
+// ValidateBalance validates a balance against an Account.
+// ValidateBalance returns any logical errors between the Account and the balance.
+// ValidateBalance first attempts to validate the Account as an entity by itself. If there are any errors with the Account, these errors are returned and the balance is not attempted to be validated against the account.
+// If the date of the balance is outside of the TimeRange of the Account, a DateOutOfAccountTimeRange will be returned.
+func (a Account) ValidateBalance(b balance.balance) error {
 	if err := a.Validate(); err != nil {
 		return err
 	}

@@ -68,7 +68,6 @@ func (m Money) Validate() error {
 	switch {
 	case m.inner == nil,
 		m.inner.Currency() == nil, //todo check for
-
 		m.inner.Currency().Code == "":
 		return ErrNoCurrency
 	}
@@ -182,6 +181,14 @@ func (m *Money) UnmarshalJSON(data []byte) error {
 	}
 	m.inner = money.New(aux.Amount, aux.Currency)
 	return nil
+}
+
+// String displays information about the underlying state of a Money
+func (m Money) String() string {
+	if m.inner == nil {
+		return "NIL"
+	}
+	return fmt.Sprintf("%v, %v", m.inner.Currency(), m.inner.Amount())
 }
 
 func initialiseIfRequired(m *Money) {

@@ -5,26 +5,27 @@ import (
 	"time"
 
 	"encoding/json"
-
-	"github.com/glynternet/GOHMoney/money"
 )
 
 // EmptyBalancesMessage is the error message used when a Balances object contains no Balance items.
 const EmptyBalancesMessage = "empty Balances object"
 
 // New creates a new Balance
-func New(date time.Time, amount money.Money) (Balance, error) {
-	if err := amount.Validate(); err != nil {
-		return Balance{}, err
+func New(date time.Time, options ...Option) (b Balance, err error) {
+	b = Balance{date: date}
+	for _, o := range options {
+		err = o(&b)
+		if err != nil {
+			return
+		}
 	}
-	b := Balance{money: amount, date: date}
 	return b, b.Validate()
 }
 
-// Balance holds the logic for a balance item.
+// Balance holds the logic for a Balance item.
 type Balance struct {
 	date  time.Time
-	money money.Money
+	amount int64
 }
 
 // Date returns the Date of the Balance
@@ -32,14 +33,14 @@ func (b Balance) Date() time.Time {
 	return b.date
 }
 
-// Money returns the Money of the Balance
-func (b Balance) Money() money.Money {
-	return b.money
+// Amount returns the amount of the Balance
+func (b Balance) Amount() int64 {
+	return b.amount
 }
 
 // Equal returns true if two Balance objects are logically equal
 func (b Balance) Equal(ob Balance) bool {
-	if amountEqual, err := b.Money().Equal(ob.Money()); !amountEqual || !b.Date().Equal(ob.Date()) || err != nil {
+	if b.amount != ob.Amount() || !b.Date().Equal(ob.Date()) {
 		return false
 	}
 	return true
@@ -55,15 +56,15 @@ func (b Balance) Validate() error {
 
 type jsonHelper struct {
 	Date  time.Time
-	Money money.Money
+	Amount int64
 }
 
 // MarshalJSON marshals an Account into a json blob, returning the blob with any errors that occur during the marshalling.
 func (b Balance) MarshalJSON() ([]byte, error) {
 	type Alias Balance
 	return json.Marshal(&jsonHelper{
-		Date:  b.Date(),
-		Money: b.Money(),
+		Date:  b.date,
+		Amount: b.amount,
 	})
 }
 
@@ -75,7 +76,7 @@ func (b *Balance) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	b.date = aux.Date
-	b.money = aux.Money
+	b.amount = aux.Amount
 	var returnErr error
 	if err := b.Validate(); err != nil {
 		returnErr = err
@@ -88,7 +89,7 @@ type FieldError string
 
 // A collection of possible BalanceFieldErrors
 const (
-	ZeroDate = FieldError("date of balance is zero.")
+	ZeroDate = FieldError("date of Balance is zero.")
 )
 
 // Error ensures that FieldError adheres to the error interface.
@@ -99,35 +100,21 @@ func (e FieldError) Error() string {
 //Balances holds multiple Balance items.
 type Balances []Balance
 
-// Sum returns the value of all of the balances money summed together.
-func (bs Balances) Sum() (money.Money, error) {
-	var initialised bool
-	var s money.Money
-	var err error
-	if len(bs) < 1 {
-		return money.Money{}, nil
-	}
+// Sum returns the value of all of the balances summed together.
+func (bs Balances) Sum() (s int64) {
 	for _, b := range bs {
-		if !initialised {
-			s = b.Money()
-			initialised = true
-			continue
-		}
-		s, err = s.Add(b.Money())
-		if err != nil {
-			break
-		}
+		s += b.amount
 	}
-	return s, err
+	return
 }
 
 // Earliest returns the Balance with the earliest date contained in a Balances set.
 // If multiple Balance object have the same date, the Balance encountered first will be returned.
 func (bs Balances) Earliest() (e Balance, err error) {
 	if len(bs) == 0 {
-		return Balance{}, errors.New(EmptyBalancesMessage)
+		return e, errors.New(EmptyBalancesMessage)
 	}
-	e = Balance{date: time.Date(3000, 1, 1, 1, 1, 1, 1, time.UTC)}
+	e = Balance{date: time.Date(2000000, 1, 1, 1, 1, 1, 1, time.UTC)}
 	for _, b := range bs {
 		if b.date.Before(e.date) {
 			e = b
@@ -140,7 +127,7 @@ func (bs Balances) Earliest() (e Balance, err error) {
 // If multiple Balance object have the same date, the Balance encountered last will be returned.
 func (bs Balances) Latest() (l Balance, err error) {
 	if len(bs) == 0 {
-		return Balance{}, errors.New(EmptyBalancesMessage)
+		return l, errors.New(EmptyBalancesMessage)
 	}
 	l = Balance{date: time.Date(0, 1, 1, 1, 1, 1, 1, time.UTC)}
 	for _, b := range bs {

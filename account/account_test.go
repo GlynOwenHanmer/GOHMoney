@@ -6,74 +6,57 @@ import (
 	"time"
 
 	"github.com/glynternet/GOHMoney/account"
-	gohtime "github.com/glynternet/go-time"
+	"github.com/stretchr/testify/assert"
+	"github.com/glynternet/GOHMoney/common"
 )
 
 func TestAccount_MarshalJSON(t *testing.T) {
-	now := time.Now()
-	testSets := []struct {
-		start time.Time
-		end   gohtime.NullTime
-	}{
-		{
-			start: now,
-			end:   gohtime.NullTime{},
-		},
-		{
-			start: now,
-			end: gohtime.NullTime{
-				Valid: true,
-				Time:  now.AddDate(1, 0, 0),
-			},
-		},
+	a, err := account.New("TEST ACCOUNT", time.Now())
+	if err != nil {
+		t.Fatalf("Error creating new a for testings. Error: %s", err.Error())
 	}
-	for _, set := range testSets {
-		a, err := account.New("TEST ACCOUNT", set.start, set.end)
-		if err != nil {
-			t.Fatalf("Error creating new a for testings. Error: %s", err.Error())
-		}
-		bytes, err := json.Marshal(&a)
-		if err != nil {
-			t.Fatalf("Error marshalling json for testing. Error: %s", err.Error())
-		}
-		var unmarshalled account.Account
-		err = json.Unmarshal(bytes, &unmarshalled)
-		if err != nil {
-			t.Errorf("Error unmarshalling Account json blob. Error: %s\njson: %s", err.Error(), bytes)
-		}
-		if unmarshalled.Name != a.Name {
-			t.Errorf(`Unexpected name. Expected "%s" but got "%s"`, a.Name, unmarshalled.Name)
-		}
-		if !a.Start().Equal(unmarshalled.Start()) {
-			t.Errorf("Unexpected a Start.\n\tExpected: %s\n\tActual  : %s", a.Start(), unmarshalled.Start())
-		}
-		if a.End().Valid != unmarshalled.End().Valid || !a.End().Time.Equal(unmarshalled.End().Time) {
-			t.Errorf("Unexpected a End. \n\tExpected: %v\n\tActual  : %v", a.End(), unmarshalled.End())
-		}
+	bytes, err := json.Marshal(&a)
+	if err != nil {
+		t.Fatalf("Error marshalling json for testing. Error: %s", err.Error())
 	}
+	var b account.Account
+	err = json.Unmarshal(bytes, &b)
+	common.ErrorIfErrorf(t, err, "Unmarshalling Account json")
+	assert.True(t, b.Equal(a))
+	close := time.Now().Add(48 * time.Hour)
+	err = account.CloseTime(close)(&a)
+	assert.Nil(t, err)
+	assert.True(t, a.End().EqualTime(close))
+	bytes, err = json.Marshal(&a)
+	common.FatalIfError(t, err, "Marshalling json")
+	var c account.Account
+	err = json.Unmarshal(bytes, &c)
+	common.ErrorIfErrorf(t, err, "Unmarshalling Account json")
+	assert.Equal(t, c, a, "bytes: %s", bytes)
 }
 
 func TestAccount_Equal(t *testing.T) {
 	now := time.Now()
-	a, err := account.New("A", now, gohtime.NullTime{})
-	if err != nil {
-		t.Errorf("Error creating account for testing: %s", err)
-	}
+	a, err := account.New("A", now)
+	common.ErrorIfError(t, err, "Creating account")
 	tests := []struct {
 		name  string
-		start time.Time
-		end   gohtime.NullTime
+		start, end time.Time
 		equal bool
 	}{
-		{"A", now, gohtime.NullTime{}, true},
-		{"B", now, gohtime.NullTime{}, false},
-		{"A", now.AddDate(-1, 0, 0), gohtime.NullTime{}, false},
-		{"A", now, gohtime.NullTime{Valid: true, Time: now.Add(1)}, false},
-		{"A", now.AddDate(-1, 0, 0), gohtime.NullTime{Valid: true, Time: now.Add(1)}, false},
-		{"B", now.AddDate(-1, 0, 0), gohtime.NullTime{Valid: true, Time: now.Add(1)}, false},
+		{"A", now, time.Time{}, true},
+		{"B", now, time.Time{}, false},
+		{"A", now.AddDate(-1, 0, 0), time.Time{}, false},
+		{"A", now, now.Add(1), false},
+		{"A", now.AddDate(-1, 0, 0), now.Add(1), false},
+		{"B", now.AddDate(-1, 0, 0), now.Add(1), false},
 	}
 	for _, test := range tests {
-		b, err := account.New(test.name, test.start, test.end)
+		var os []account.Option
+		if !test.end.IsZero() {
+			os = append(os, account.CloseTime(test.end))
+		}
+		b, err := account.New(test.name, test.start, os...)
 		if err != nil {
 			t.Errorf("Error creating account for testing: %s", err)
 		}

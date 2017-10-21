@@ -10,7 +10,7 @@ import (
 )
 
 // New creates a new Account object with a Valid Start time and returns it, also returning any logical errors with the newly created account.
-func New(name string, opened time.Time, closed gohtime.NullTime) (a Account, err error) {
+func New(name string, opened time.Time, os ...Option) (a Account, err error) {
 	a = Account{
 		Name: name,
 		timeRange: gohtime.Range{
@@ -18,13 +18,21 @@ func New(name string, opened time.Time, closed gohtime.NullTime) (a Account, err
 				Valid: true,
 				Time:  opened,
 			},
-			End: closed,
 		},
+	}
+	for _, o := range os {
+		if o == nil {
+			continue
+		}
+		err = o(&a)
+		if err != nil {
+			return
+		}
 	}
 	if aErr := a.Validate(); len(aErr) > 0 {
 		err = aErr
 	}
-	return a, err
+	return
 }
 
 // An Account holds the logic for an account.
@@ -73,7 +81,7 @@ func (a Account) Validate() FieldError {
 // ValidateBalance returns any logical errors between the Account and the balance.
 // ValidateBalance first attempts to validate the Account as an entity by itself. If there are any errors with the Account, these errors are returned and the balance is not attempted to be validated against the account.
 // If the date of the balance is outside of the TimeRange of the Account, a DateOutOfAccountTimeRange will be returned.
-func (a Account) ValidateBalance(b balance.balance) error {
+func (a Account) ValidateBalance(b balance.Balance) error {
 	if err := a.Validate(); err != nil {
 		return err
 	}

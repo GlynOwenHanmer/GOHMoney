@@ -24,3 +24,7 @@ func TestErrorOption(t *testing.T) {
 	_, err := balance.New(time.Now(), errorFn)
 	assert.Equal(t, errors.New("TEST ERROR"), err)
 }
+
+func TestCurrencyCode(t *testing.T) {
+	
+}

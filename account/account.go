@@ -7,10 +7,15 @@ import (
 
 	"github.com/glynternet/GOHMoney/balance"
 	gohtime "github.com/glynternet/go-time"
+	"github.com/glynternet/GOHMoney/money/currency"
 )
 
 // New creates a new Account object with a Valid Start time and returns it, also returning any logical errors with the newly created account.
-func New(name string, opened time.Time, os ...Option) (a Account, err error) {
+func New(name string, currencyCode currency.Code, opened time.Time, os ...Option) (a Account, err error) {
+	err = currencyCode.Validate()
+	if err != nil {
+		return Account{}, err
+	}
 	a = Account{
 		Name: name,
 		timeRange: gohtime.Range{
@@ -19,6 +24,7 @@ func New(name string, opened time.Time, os ...Option) (a Account, err error) {
 				Time:  opened,
 			},
 		},
+		currencyCode:currencyCode,
 	}
 	for _, o := range os {
 		if o == nil {
@@ -39,6 +45,7 @@ func New(name string, opened time.Time, os ...Option) (a Account, err error) {
 type Account struct {
 	Name      string
 	timeRange gohtime.Range
+	currencyCode currency.Code
 }
 
 // Start returns the start time that the Account opened.

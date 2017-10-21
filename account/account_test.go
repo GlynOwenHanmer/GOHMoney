@@ -8,10 +8,11 @@ import (
 	"github.com/glynternet/GOHMoney/account"
 	"github.com/glynternet/GOHMoney/common"
 	"github.com/stretchr/testify/assert"
+	"github.com/glynternet/GOHMoney/money/currency"
 )
 
 func TestAccount_MarshalJSON(t *testing.T) {
-	a, err := account.New("TEST ACCOUNT", time.Now())
+	a, err := account.New("TEST ACCOUNT", newTestCurrency(t, "EUR"), time.Now())
 	if err != nil {
 		t.Fatalf("Error creating new a for testings. Error: %s", err.Error())
 	}
@@ -37,7 +38,7 @@ func TestAccount_MarshalJSON(t *testing.T) {
 
 func TestAccount_Equal(t *testing.T) {
 	now := time.Now()
-	a, err := account.New("A", now)
+	a, err := account.New("A", newTestCurrency(t, "EUR"), now)
 	common.ErrorIfError(t, err, "Creating account")
 	tests := []struct {
 		name       string
@@ -56,7 +57,7 @@ func TestAccount_Equal(t *testing.T) {
 		if !test.end.IsZero() {
 			os = append(os, account.CloseTime(test.end))
 		}
-		b, err := account.New(test.name, test.start, os...)
+		b, err := account.New(test.name, newTestCurrency(t, "EUR"), test.start, os...)
 		if err != nil {
 			t.Errorf("Error creating account for testing: %s", err)
 		}
@@ -65,4 +66,10 @@ func TestAccount_Equal(t *testing.T) {
 			t.Errorf("Expected %t, but got %t.\nA: %v\nB: %v", test.equal, equal, a, b)
 		}
 	}
+}
+
+func newTestCurrency(t *testing.T, code string) currency.Code {
+	c, err := currency.New(code)
+	common.FatalIfError(t, err, "Creating New Currency Code")
+	return c
 }

@@ -191,18 +191,18 @@ func TestBalances_Sum(t *testing.T) {
 }
 
 func TestBalance_MarshalJSON(t *testing.T) {
-	a, _ := balance.New(time.Now(), balance.Amount(921368))
+	a, err := balance.New(time.Now(), balance.Amount(921368))
+	common.FatalIfError(t, err, "Creating Balance")
 	jsonBytes, err := json.Marshal(a)
-	if err != nil {
-		t.Fatalf("Error marshalling json for testing: %s", err)
-	}
+	common.FatalIfError(t, err, "Marshalling JSON")
+
 	var b struct {
 		Date   time.Time
 		Amount int64
 	}
 	err = json.Unmarshal(jsonBytes, &b)
 	common.FatalIfError(t, err, "Unmarshalling data")
-	assert.Equal(t, a.Date(), b.Date, "json: %s", jsonBytes)
+	assert.True(t, a.Date().Equal(b.Date), "json: %s", jsonBytes)
 	assert.Equal(t, a.Amount(), b.Amount, "json: %s", jsonBytes)
 }
 

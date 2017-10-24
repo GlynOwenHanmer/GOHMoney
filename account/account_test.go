@@ -12,28 +12,28 @@ import (
 )
 
 func TestAccount_MarshalJSON(t *testing.T) {
-	a, err := account.New("TEST ACCOUNT", newTestCurrency(t, "EUR"), time.Now())
-	if err != nil {
-		t.Fatalf("Error creating new a for testings. Error: %s", err.Error())
-	}
+	now := time.Now()
+	a, err := account.New("TEST ACCOUNT", newTestCurrency(t, "EUR"), now)
+	common.FatalIfError(t, err, "Creating Account for testing")
 	bytes, err := json.Marshal(&a)
-	if err != nil {
-		t.Fatalf("Error marshalling json for testing. Error: %s", err.Error())
-	}
+	common.FatalIfError(t, err, "Marshalling json for testing")
+
 	var b account.Account
 	err = json.Unmarshal(bytes, &b)
 	common.ErrorIfErrorf(t, err, "Unmarshalling Account json")
 	assert.True(t, b.Equal(a))
-	close := time.Now().Add(48 * time.Hour)
+
+	close := now.Add(48 * time.Hour)
 	err = account.CloseTime(close)(&a)
 	assert.Nil(t, err)
 	assert.True(t, a.End().EqualTime(close))
 	bytes, err = json.Marshal(&a)
 	common.FatalIfError(t, err, "Marshalling json")
+
 	var c account.Account
 	err = json.Unmarshal(bytes, &c)
 	common.ErrorIfErrorf(t, err, "Unmarshalling Account json")
-	assert.Equal(t, c, a, "bytes: %s", bytes)
+	assert.True(t, c.Equal(a), "bytes: %s", bytes)
 }
 
 func TestAccount_Equal(t *testing.T) {

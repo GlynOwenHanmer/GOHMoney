@@ -8,12 +8,12 @@ import (
 
 type Option func(*Account) error
 
-func CloseTime(time time.Time) Option {
-	if time.IsZero() {
+func CloseTime(t time.Time) Option {
+	if t.IsZero() {
 		return nil
 	}
 	return func(a *Account) error {
-		a.timeRange.End = gtime.NullTime{Valid: true, Time: time}
+		a.timeRange.End = gtime.NullTime{Valid: true, Time: t}
 		return nil
 	}
 }

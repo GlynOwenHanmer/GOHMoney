@@ -111,10 +111,12 @@ func (a Account) MarshalJSON() ([]byte, error) {
 		*Alias
 		Start time.Time
 		End   gohtime.NullTime
+		Currency currency.Code
 	}{
 		Alias: (*Alias)(&a),
 		Start: a.Start(),
 		End:   a.End(),
+		Currency: a.currencyCode,
 	})
 }
 
@@ -124,6 +126,7 @@ func (a *Account) UnmarshalJSON(data []byte) error {
 	aux := &struct {
 		Start time.Time
 		End   gohtime.NullTime
+		Currency currency.Code
 		*Alias
 	}{
 		Alias: (*Alias)(a),
@@ -135,6 +138,7 @@ func (a *Account) UnmarshalJSON(data []byte) error {
 		Start: gohtime.NullTime{Valid: true, Time: aux.Start},
 		End:   aux.End,
 	}
+	a.currencyCode = aux.Currency
 	var returnErr error
 	if err := a.Validate(); err != nil {
 		returnErr = err

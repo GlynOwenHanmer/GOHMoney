@@ -13,10 +13,7 @@ func FatalIfError(t *testing.T, err error, message string) {
 }
 
 func FatalIfErrorf(t *testing.T, err error, format string, args ...interface{}) {
-	if err == nil {
-		return
-	}
-	t.Fatalf("%s: %s", fmt.Sprintf(format, args...), err)
+	FatalIfError(t, err, fmt.Sprintf(format, args...))
 }
 
 func ErrorIfError(t *testing.T, err error, message string) {
@@ -27,8 +24,5 @@ func ErrorIfError(t *testing.T, err error, message string) {
 }
 
 func ErrorIfErrorf(t *testing.T, err error, format string, args ...interface{}) {
-	if err == nil {
-		return
-	}
-	t.Errorf("%s: %s", fmt.Sprintf(format, args...), err)
+	ErrorIfError(t, err, fmt.Sprintf(format, args...))
 }

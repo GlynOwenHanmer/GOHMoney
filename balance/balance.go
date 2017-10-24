@@ -61,7 +61,6 @@ type jsonHelper struct {
 
 // MarshalJSON marshals an Account into a json blob, returning the blob with any errors that occur during the marshalling.
 func (b Balance) MarshalJSON() ([]byte, error) {
-	type Alias Balance
 	return json.Marshal(&jsonHelper{
 		Date:   b.date,
 		Amount: b.amount,
@@ -70,9 +69,8 @@ func (b Balance) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON attempts to unmarshal a json blob into an Account object, returning any errors that occur during the unmarshalling.
 func (b *Balance) UnmarshalJSON(data []byte) error {
-	type Alias Balance
 	aux := new(jsonHelper)
-	if err := json.Unmarshal(data, &aux); err != nil {
+	if err := json.Unmarshal(data, aux); err != nil {
 		return err
 	}
 	b.date = aux.Date

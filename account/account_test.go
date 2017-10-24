@@ -70,17 +70,11 @@ func TestAccount_Equal(t *testing.T) {
 		{"B", now.AddDate(-1, 0, 0), now.Add(1), false},
 	} {
 		var os []account.Option
-		if !test.end.IsZero() {
-			os = append(os, account.CloseTime(test.end))
-		}
+		os = append(os, account.CloseTime(test.end))
 		b, err := account.New(test.name, newTestCurrency(t, "EUR"), test.start, os...)
-		if err != nil {
-			t.Errorf("Error creating account for testing: %s", err)
-		}
+		assert.Nil(t, err, "Error creating account")
 		equal := a.Equal(b)
-		if equal != test.equal {
-			t.Errorf("Expected %t, but got %t.\nA: %v\nB: %v", test.equal, equal, a, b)
-		}
+		assert.Equal(t, test.equal, equal, "A: %v\nB: %v", a, b)
 	}
 }
 

@@ -56,7 +56,7 @@ func TestAccount_MarshalJSON(t *testing.T) {
 func TestAccount_Equal(t *testing.T) {
 	now := time.Now()
 	a, err := account.New("A", newTestCurrency(t, "EUR"), now)
-	common.ErrorIfError(t, err, "Creating account")
+	assert.Nil(t, err, "Creating Account")
 	for _, test := range []struct {
 		name       string
 		start, end time.Time
@@ -69,12 +69,9 @@ func TestAccount_Equal(t *testing.T) {
 		{"A", now.AddDate(-1, 0, 0), now.Add(1), false},
 		{"B", now.AddDate(-1, 0, 0), now.Add(1), false},
 	} {
-		var os []account.Option
-		os = append(os, account.CloseTime(test.end))
-		b, err := account.New(test.name, newTestCurrency(t, "EUR"), test.start, os...)
+		b, err := account.New(test.name, newTestCurrency(t, "EUR"), test.start, account.CloseTime(test.end))
 		assert.Nil(t, err, "Error creating account")
-		equal := a.Equal(b)
-		assert.Equal(t, test.equal, equal, "A: %v\nB: %v", a, b)
+		assert.Equal(t, test.equal, a.Equal(b), "A: %v\nB: %v", a, b)
 	}
 }
 

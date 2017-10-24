@@ -2,8 +2,11 @@ package currency
 
 import "fmt"
 
+// InvalidCodeIdentifier is the cotaining string of a Code that is created
+// when an invalid string is given to New
 const InvalidCodeIdentifier = "INVALID CODE"
 
+// New returns a new Code if a valid string is given.
 func New(c string) (Code, error) {
 	code := Code(c)
 	err := code.Validate()
@@ -13,6 +16,7 @@ func New(c string) (Code, error) {
 	return code, nil
 }
 
+// Code is a 3 character string representing a code for a currency
 type Code string
 
 func invalidCodeLength(length int) error {
@@ -26,10 +30,7 @@ func validateCodeLength(code string) error {
 	return nil
 }
 
+// Validate returns an error if a Code is invalid
 func (c Code)Validate() error {
-	err := validateCodeLength(string(c))
-	if err != nil {
-		return err
-	}
-	return nil
+	return validateCodeLength(string(c))
 }

@@ -1,7 +1,6 @@
 package balance
 
 import (
-	"fmt"
 	"time"
 
 	gohtime "github.com/glynternet/go-time"
@@ -18,5 +17,5 @@ type DateOutOfAccountTimeRange struct {
 
 // Error ensures that DateOutOfAccountTimeRange adheres to the error interface.
 func (e DateOutOfAccountTimeRange) Error() string {
-	return fmt.Sprintf(balanceDateOutOfRangeMessage)
+	return balanceDateOutOfRangeMessage
 }

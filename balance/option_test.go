@@ -13,7 +13,7 @@ func TestAmount(t *testing.T) {
 	b, err := balance.New(time.Now())
 	common.FatalIfError(t, err, "Creating Balance")
 	assert.Equal(t, int64(0), b.Amount())
-	balance.Amount(-645)(&b)
+	assert.Nil(t, balance.Amount(-645)(&b))
 	assert.Equal(t, int64(-645), b.Amount())
 }
 

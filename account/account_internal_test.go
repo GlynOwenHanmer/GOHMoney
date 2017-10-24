@@ -10,6 +10,7 @@ import (
 	gtime "github.com/glynternet/go-time"
 	"github.com/glynternet/GOHMoney/common"
 	"github.com/glynternet/GOHMoney/money/currency"
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_ValidateAccount(t *testing.T) {
@@ -88,7 +89,7 @@ func Test_ValidateAccount(t *testing.T) {
 		actual := testSet.insertedAccount.Validate()
 		expected := testSet.FieldError
 		if !stringSlicesMatch(expected, actual) {
-			t.Errorf("Unexpected error.\nExpected: %s\nActual  : %s\nInserted Account: %s", expected, actual, testSet.insertedAccount)
+			t.Errorf("Unexpected error.\nExpected: %+v\nActual  : %+v\nInserted Account: %+v", expected, actual, testSet.insertedAccount)
 		}
 	}
 }
@@ -279,7 +280,7 @@ func Test_AccountValidateBalance(t *testing.T) {
 		actualErrorTyped, actualErrorIsType := err.(balance.DateOutOfAccountTimeRange)
 		if testSetErrorIsType != actualErrorIsType {
 			t.Errorf("Expected and resultant errors are differently typed.\nExpected: %s\nActual  : %s", testSet.error, err)
-			t.Logf("Account: %s\nbalance: %v", testSet.Account, testSet.Balance)
+			t.Logf("Account: %v\nbalance: %v", testSet.Account, testSet.Balance)
 			continue
 		}
 		switch {
@@ -332,23 +333,15 @@ func Test_NewAccount(t *testing.T) {
 			t.Errorf("Unexpected name.\n\tExpected: %s\n\tActual  : %s", set.name, a.Name)
 			logTestSet(set)
 		}
-		if !a.timeRange.Start.Valid {
-			t.Errorf("Returned invalid start time.")
-			logTestSet(set)
-		}
-		if !a.Start().Equal(set.start) {
+		if !a.timeRange.Start.EqualTime(set.start){
 			t.Errorf("Unexpected start.\n\tExpected: %s\n\tActual  : %s", set.start, a.Start())
 			logTestSet(set)
 		}
 		switch {
-		case !a.End().Valid && set.end.IsZero():
-			break
-		case a.End().Valid && set.end.IsZero():
-			t.Log("End is Valid but a zero closed time was given")
-			fallthrough
-		case !a.End().EqualTime(set.end):
-			t.Errorf("Unexpected end Time.\n\tExpected: %+v\n\tActual  : %+v", a.End(), set.end)
-			logTestSet(set)
+		case !set.end.IsZero():
+			assert.True(t, a.End().EqualTime(set.end), "End NullTime should be equal to set.end when set.end is non Zero")
+		case set.end.IsZero():
+			assert.False(t, a.End().Valid, "End should not be Valid when set.end IsZero")
 		}
 	}
 }

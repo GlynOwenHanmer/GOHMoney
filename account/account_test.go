@@ -7,9 +7,26 @@ import (
 
 	"github.com/glynternet/GOHMoney/account"
 	"github.com/glynternet/GOHMoney/common"
-	"github.com/stretchr/testify/assert"
 	"github.com/glynternet/GOHMoney/money/currency"
+	"github.com/stretchr/testify/assert"
 )
+
+func TestNew(t *testing.T) {
+	start := time.Now()
+	invalidCurrency, err := currency.New("QWERTYUIOP")
+	assert.NotNil(t, err)
+	a, err := account.New("TEST_ACCOUNT", invalidCurrency, start)
+	assert.Equal(t, account.Account{}, a)
+
+	a, err = account.New("TEST_ACCOUNT", newTestCurrency(t, "EUR"), start)
+	assert.Nil(t, err)
+	assert.Equal(t, currency.Code("EUR"), a.CurrencyCode())
+	assert.False(t, a.End().Valid)
+
+	close := start.Add(100 * time.Hour)
+	assert.Nil(t, account.CloseTime(close)(&a))
+	assert.True(t, a.End().EqualTime(close))
+}
 
 func TestAccount_MarshalJSON(t *testing.T) {
 	now := time.Now()
@@ -40,7 +57,7 @@ func TestAccount_Equal(t *testing.T) {
 	now := time.Now()
 	a, err := account.New("A", newTestCurrency(t, "EUR"), now)
 	common.ErrorIfError(t, err, "Creating account")
-	tests := []struct {
+	for _, test := range []struct {
 		name       string
 		start, end time.Time
 		equal      bool
@@ -51,8 +68,7 @@ func TestAccount_Equal(t *testing.T) {
 		{"A", now, now.Add(1), false},
 		{"A", now.AddDate(-1, 0, 0), now.Add(1), false},
 		{"B", now.AddDate(-1, 0, 0), now.Add(1), false},
-	}
-	for _, test := range tests {
+	} {
 		var os []account.Option
 		if !test.end.IsZero() {
 			os = append(os, account.CloseTime(test.end))

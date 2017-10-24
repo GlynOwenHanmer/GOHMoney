@@ -40,18 +40,15 @@ func (b Balance) Amount() int64 {
 
 // Equal returns true if two Balance objects are logically equal
 func (b Balance) Equal(ob Balance) bool {
-	if b.amount != ob.Amount() || !b.Date().Equal(ob.Date()) {
-		return false
-	}
-	return true
+	return b.amount == ob.Amount() && b.Date().Equal(ob.Date())
 }
 
 // Validate checks the fields of a Balance and returns any logic errors that are present within it.
-func (b Balance) Validate() error {
+func (b Balance) Validate() (err error) {
 	if b.date.IsZero() {
-		return ZeroDate
+		err = ZeroDate
 	}
-	return nil
+	return
 }
 
 type jsonHelper struct {

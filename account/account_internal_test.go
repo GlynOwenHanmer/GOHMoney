@@ -7,9 +7,9 @@ import (
 	"time"
 
 	"github.com/glynternet/GOHMoney/balance"
-	gtime "github.com/glynternet/go-time"
 	"github.com/glynternet/GOHMoney/common"
 	"github.com/glynternet/GOHMoney/money/currency"
+	gtime "github.com/glynternet/go-time"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -333,7 +333,7 @@ func Test_NewAccount(t *testing.T) {
 			t.Errorf("Unexpected name.\n\tExpected: %s\n\tActual  : %s", set.name, a.Name)
 			logTestSet(set)
 		}
-		if !a.timeRange.Start.EqualTime(set.start){
+		if !a.timeRange.Start.EqualTime(set.start) {
 			t.Errorf("Unexpected start.\n\tExpected: %s\n\tActual  : %s", set.start, a.Start())
 			logTestSet(set)
 		}

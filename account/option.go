@@ -11,12 +11,10 @@ import (
 type Option func(*Account) error
 
 // CloseTime returns an Option that will set the close time on an Account object.
+// A time of Zero will set the account close time to not Valid, marking the Account as open ended.
 func CloseTime(t time.Time) Option {
-	if t.IsZero() {
-		return nil
-	}
 	return func(a *Account) error {
-		a.timeRange.End = gtime.NullTime{Valid: true, Time: t}
+		a.timeRange.End = gtime.NullTime{Valid: !t.IsZero(), Time: t}
 		return nil
 	}
 }

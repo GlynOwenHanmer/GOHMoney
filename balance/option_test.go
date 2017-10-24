@@ -1,12 +1,13 @@
 package balance_test
 
 import (
-	"testing"
 	"errors"
-	"github.com/stretchr/testify/assert"
+	"testing"
 	"time"
+
 	"github.com/glynternet/GOHMoney/balance"
 	"github.com/glynternet/GOHMoney/common"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestAmount(t *testing.T) {
@@ -26,5 +27,5 @@ func TestErrorOption(t *testing.T) {
 }
 
 func TestCurrencyCode(t *testing.T) {
-	
+
 }

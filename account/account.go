@@ -6,15 +6,15 @@ import (
 	"time"
 
 	"github.com/glynternet/GOHMoney/balance"
-	gohtime "github.com/glynternet/go-time"
 	"github.com/glynternet/GOHMoney/money/currency"
+	gohtime "github.com/glynternet/go-time"
 )
 
 // New creates a new Account object with a Valid Start time and returns it, also returning any logical errors with the newly created account.
 func New(name string, currencyCode currency.Code, opened time.Time, os ...Option) (a Account, err error) {
 	err = currencyCode.Validate()
 	if err != nil {
-		return Account{}, err
+		return
 	}
 	a = Account{
 		Name: name,
@@ -24,7 +24,7 @@ func New(name string, currencyCode currency.Code, opened time.Time, os ...Option
 				Time:  opened,
 			},
 		},
-		currencyCode:currencyCode,
+		currencyCode: currencyCode,
 	}
 	for _, o := range os {
 		if o == nil {
@@ -43,8 +43,8 @@ func New(name string, currencyCode currency.Code, opened time.Time, os ...Option
 
 // An Account holds the logic for an account.
 type Account struct {
-	Name      string
-	timeRange gohtime.Range
+	Name         string
+	timeRange    gohtime.Range
 	currencyCode currency.Code
 }
 
@@ -61,6 +61,11 @@ func (a Account) End() gohtime.NullTime {
 // IsOpen return true if the Account is open.
 func (a Account) IsOpen() bool {
 	return !a.timeRange.End.Valid
+}
+
+// CurrencyCode returns the currency code of the Account.
+func (a Account) CurrencyCode() currency.Code {
+	return a.currencyCode
 }
 
 // Validate checks the state of an account to see if it is has any logical errors. Validate returns a set of errors representing errors with different fields of the account.
@@ -109,13 +114,13 @@ func (a Account) MarshalJSON() ([]byte, error) {
 	type Alias Account
 	return json.Marshal(&struct {
 		*Alias
-		Start time.Time
-		End   gohtime.NullTime
+		Start    time.Time
+		End      gohtime.NullTime
 		Currency currency.Code
 	}{
-		Alias: (*Alias)(&a),
-		Start: a.Start(),
-		End:   a.End(),
+		Alias:    (*Alias)(&a),
+		Start:    a.Start(),
+		End:      a.End(),
 		Currency: a.currencyCode,
 	})
 }
@@ -124,8 +129,8 @@ func (a Account) MarshalJSON() ([]byte, error) {
 func (a *Account) UnmarshalJSON(data []byte) error {
 	type Alias Account
 	aux := &struct {
-		Start time.Time
-		End   gohtime.NullTime
+		Start    time.Time
+		End      gohtime.NullTime
 		Currency currency.Code
 		*Alias
 	}{

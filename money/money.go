@@ -4,31 +4,31 @@ import (
 	"github.com/glynternet/GOHMoney/money/currency"
 )
 
-func New(amount int64, currency currency.Code) *money {
-	return &money{amount:amount, currency:currency}
+// Money is an object representing a value and currency
+type Money interface {
+	Amount() int
+	Currency() currency.Code
+}
+
+func New(amount int, currency currency.Code) *money {
+	return &money{amount: amount, currency: currency}
 }
 
 type money struct {
-	amount   int64
+	amount   int
 	currency currency.Code
-}
-
-// Money is an object representing a value and currency
-type Money interface {
-	Amount() int64
-	Currency() currency.Code
 }
 
 // amount returns the value of the Money formed from the currency's lowest
 // denominator.
 // e.g. For £45.67, amount() would return 4567
-func (m money) Amount() int64 {
+func (m money) Amount() int {
 	return m.amount
 }
 
 // currency returns the currency of the Money. If the Money has no currency, an error will also be returned.
 func (m money) Currency() currency.Code {
-	return m.Currency()
+	return m.currency
 }
 
 //// Moneys is a group of Moneys
@@ -64,13 +64,11 @@ func (m money) Currency() currency.Code {
 //	switch {
 //	case m.inner == nil,
 //		m.inner.currency() == nil, //todo check for
-//		m.inner.currency().Code == "":
+//		m.inner.currency().code == "":
 //		return ErrNoCurrency
 //	}
 //	return nil
 //}
-
-
 
 // SameCurrency returns true if the money and provided Money arguments all have the same currency.
 // If a only one Money object is provided, m, SameCurrency will always return true with no error.
@@ -82,13 +80,11 @@ func (m money) Currency() currency.Code {
 //	moneys := append([]Money{m}, oms...)
 //	cs, err := Moneys(moneys).currencies()
 //	 if error is not nil, currencies may not return all currencies
-	//if err != nil {
-	//	return false, err
-	//}
-	//return len(cs) == 1, err
+//if err != nil {
+//	return false, err
 //}
-
-
+//return len(cs) == 1, err
+//}
 
 // Equal returns true if both Money objects are equal.
 // Equal will return false and an ErrNoCurrency if either Money has no currency
@@ -115,7 +111,7 @@ func (m money) Currency() currency.Code {
 //	if err := assertSameCurrency(cs...); err != nil {
 //		return Money{}, err
 //	}
-//	return Money{inner: money.New(m.Amount()+om.Amount(), cs[0].Code)}, nil
+//	return Money{inner: money.New(m.Amount()+om.Amount(), cs[0].code)}, nil
 //}
 
 // CurrencyMismatchError is an error that is returned when an operation that
@@ -126,7 +122,7 @@ func (m money) Currency() currency.Code {
 
 // Error returns a string describing the mismatch between multiple Moneys
 //func (e CurrencyMismatchError) Error() string {
-//	return fmt.Sprintf("currency mismatch: %s, %s", e.A.Code, e.B.Code)
+//	return fmt.Sprintf("currency mismatch: %s, %s", e.A.code, e.B.code)
 //}
 
 // MarshalJSON marshals an Account into A json blob, returning the blob with
@@ -142,7 +138,7 @@ func (m money) Currency() currency.Code {
 //		Currency string
 //	}{
 //		Amount:   m.Amount(),
-//		Currency: c.Code,
+//		Currency: c.code,
 //	})
 //}
 //

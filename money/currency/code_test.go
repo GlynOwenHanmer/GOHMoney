@@ -19,8 +19,10 @@ func TestNew(t *testing.T) {
 		c, err := currency.New(test.code)
 		assert.Equal(t, test.err, err != nil)
 		if err != nil {
-			test.code = currency.InvalidCodeIdentifier
+			lenErr, ok := err.(currency.ErrInvalidCodeLength)
+			assert.True(t, ok)
+			assert.Equal(t, len(test.code), lenErr.Length)
 		}
-		assert.Equal(t, test.code, string(c))
+		assert.Equal(t, test.code, (*c).String())
 	}
 }

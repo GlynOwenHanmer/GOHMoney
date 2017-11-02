@@ -11,7 +11,7 @@ import (
 )
 
 // New creates a new Account object with a Valid Start time and returns it, also returning any logical errors with the newly created account.
-func New(name string, currencyCode currency.Code, opened time.Time, os ...Option) (a Account, err error) {
+func New(name string, currencyCode currency.code, opened time.Time, os ...Option) (a Account, err error) {
 	err = currencyCode.Validate()
 	if err != nil {
 		return
@@ -45,7 +45,7 @@ func New(name string, currencyCode currency.Code, opened time.Time, os ...Option
 type Account struct {
 	Name         string
 	timeRange    gohtime.Range
-	currencyCode currency.Code
+	currencyCode currency.code
 }
 
 // Start returns the start time that the Account opened.
@@ -64,7 +64,7 @@ func (a Account) IsOpen() bool {
 }
 
 // CurrencyCode returns the currency code of the Account.
-func (a Account) CurrencyCode() currency.Code {
+func (a Account) CurrencyCode() currency.code {
 	return a.currencyCode
 }
 
@@ -116,7 +116,7 @@ func (a Account) MarshalJSON() ([]byte, error) {
 		*Alias
 		Start    time.Time
 		End      gohtime.NullTime
-		Currency currency.Code
+		Currency currency.code
 	}{
 		Alias:    (*Alias)(&a),
 		Start:    a.Start(),
@@ -131,7 +131,7 @@ func (a *Account) UnmarshalJSON(data []byte) error {
 	aux := &struct {
 		Start    time.Time
 		End      gohtime.NullTime
-		Currency currency.Code
+		Currency currency.code
 		*Alias
 	}{
 		Alias: (*Alias)(a),

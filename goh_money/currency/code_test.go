@@ -3,7 +3,7 @@ package currency_test
 import (
 	"testing"
 
-	"github.com/glynternet/GOHMoney/money/currency"
+	"github.com/glynternet/GOHMoney/goh_money/currency"
 	"github.com/stretchr/testify/assert"
 )
 

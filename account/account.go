@@ -122,29 +122,32 @@ func (a Account) MarshalJSON() ([]byte, error) {
 }
 
 // UnmarshalJSON attempts to unmarshal a json blob into an Account object, returning any errors that occur during the unmarshalling.
-func (a *Account) UnmarshalJSON(data []byte) error {
+func (a *Account) UnmarshalJSON(data []byte) (err error) {
 	type Alias Account
 	aux := &struct {
 		Start    time.Time
 		End      gohtime.NullTime
-		Currency currency.Code
+		Currency string
 		*Alias
 	}{
 		Alias: (*Alias)(a),
 	}
-	if err := json.Unmarshal(data, &aux); err != nil {
-		return err
+	if err = json.Unmarshal(data, &aux); err != nil {
+		return
 	}
+	c, err := currency.NewCode(aux.Currency)
+	if err != nil {
+		return
+	}
+	a.currencyCode = *c
 	a.timeRange = gohtime.Range{
 		Start: gohtime.NullTime{Valid: true, Time: aux.Start},
 		End:   aux.End,
 	}
-	a.currencyCode = aux.Currency
-	var returnErr error
-	if err := a.Validate(); err != nil {
-		returnErr = err
+	if validErr := a.Validate(); validErr != nil {
+		err = validErr
 	}
-	return returnErr
+	return
 }
 
 // Equal returns true if both accounts a and b are logically the same.

@@ -23,9 +23,10 @@ func TestNew(t *testing.T) {
 		c, err := currency.NewCode(test.code)
 		assert.Equal(t, test.err, err != nil)
 		if err != nil {
-			lenErr, ok := err.(currency.ErrInvalidCodeLength)
+			lenErr, ok := err.(currency.InvalidCodeLengthError)
 			assert.True(t, ok)
 			assert.Equal(t, len(test.code), lenErr.Length)
+			continue
 		}
 		assert.Equal(t, test.code, (*c).String())
 	}
@@ -50,12 +51,12 @@ func TestUnmarshalJSON(t *testing.T) {
 		{code: "YEN", err: false},
 		{code: "QWERTYUIOP", err: true},
 	} {
-		json := fmt.Sprintf(`{"Code":"%s"}`, test.code)
+		json := fmt.Sprintf(`"%s"`, test.code)
 		c, err := currency.UnmarshalJSON([]byte(json))
-		assert.Equal(t, test.err, err != nil)
+		assert.Equal(t, test.err, err != nil, "%+v", err)
 		if err != nil {
-			lenErr, ok := err.(currency.ErrInvalidCodeLength)
-			assert.True(t, ok)
+			lenErr, ok := err.(currency.InvalidCodeLengthError)
+			assert.True(t, ok, "%+v", err)
 			assert.Equal(t, len(test.code), lenErr.Length)
 			continue
 		}

@@ -13,12 +13,7 @@ import (
 
 func TestNew(t *testing.T) {
 	start := time.Now()
-	invalidCurrency, err := currency.NewCode("QWERTYUIOP")
-	assert.NotNil(t, err)
-	a, err := account.New("TEST_ACCOUNT", *invalidCurrency, start)
-	assert.Equal(t, account.Account{}, a)
-
-	a, err = account.New("TEST_ACCOUNT", newTestCurrency(t, "EUR"), start)
+	a, err := account.New("TEST_ACCOUNT", newTestCurrency(t, "EUR"), start)
 	assert.Nil(t, err)
 	assert.Equal(t, newTestCurrency(t, "EUR"), a.CurrencyCode())
 	assert.False(t, a.End().Valid)
@@ -37,8 +32,8 @@ func TestAccount_MarshalJSON(t *testing.T) {
 
 	var b account.Account
 	err = json.Unmarshal(bytes, &b)
-	common.ErrorIfErrorf(t, err, "Unmarshalling Account json")
-	assert.True(t, b.Equal(a))
+	common.FatalIfError(t, err, "Unmarshalling Account json")
+	assert.True(t, b.Equal(a), string(bytes))
 
 	close := now.Add(48 * time.Hour)
 	err = account.CloseTime(close)(&a)
@@ -49,7 +44,7 @@ func TestAccount_MarshalJSON(t *testing.T) {
 
 	var c account.Account
 	err = json.Unmarshal(bytes, &c)
-	common.ErrorIfErrorf(t, err, "Unmarshalling Account json")
+	common.FatalIfError(t, err, "Unmarshalling Account json")
 	assert.True(t, c.Equal(a), "bytes: %s", bytes)
 }
 

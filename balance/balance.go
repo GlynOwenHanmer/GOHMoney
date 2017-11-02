@@ -12,14 +12,14 @@ const EmptyBalancesMessage = "empty Balances object"
 
 // New creates a new Balance
 func New(date time.Time, options ...Option) (b Balance, err error) {
-	b = Balance{date: date}
+	b.date = date
 	for _, o := range options {
 		err = o(&b)
 		if err != nil {
 			return
 		}
 	}
-	return b, b.Validate()
+	return
 }
 
 // Balance holds the logic for a Balance item.
@@ -41,14 +41,6 @@ func (b Balance) Amount() int64 {
 // Equal returns true if two Balance objects are logically equal
 func (b Balance) Equal(ob Balance) bool {
 	return b.amount == ob.Amount() && b.Date().Equal(ob.Date())
-}
-
-// validate checks the fields of a Balance and returns any logic errors that are present within it.
-func (b Balance) Validate() (err error) {
-	if b.date.IsZero() {
-		err = ZeroDate
-	}
-	return
 }
 
 type jsonHelper struct {

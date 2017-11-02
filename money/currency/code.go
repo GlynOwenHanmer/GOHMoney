@@ -47,15 +47,17 @@ func (c code) validate() error {
 
 func validateCodeLengthError(code string) (err error) {
 	if length := len(code); length != 3 {
-		err = ErrInvalidCodeLength{length}
+		err = InvalidCodeLengthError{length}
 	}
 	return
 }
 
-type ErrInvalidCodeLength struct {
+// InvalidCodeLengthError is returned if a currency code is attempted to be
+// created with any other string length than 3.
+type InvalidCodeLengthError struct {
 	Length int
 }
 
-func (e ErrInvalidCodeLength) Error() string {
+func (e InvalidCodeLengthError) Error() string {
 	return fmt.Sprintf("invalid currency code Length (%d)", e.Length)
 }

@@ -10,7 +10,6 @@ import (
 	"github.com/glynternet/GOHMoney/common"
 	"github.com/glynternet/GOHMoney/money/currency"
 	gtime "github.com/glynternet/go-time"
-	"github.com/stretchr/testify/assert"
 )
 
 func Test_ValidateAccount(t *testing.T) {
@@ -20,69 +19,34 @@ func Test_ValidateAccount(t *testing.T) {
 	}{
 		{
 			insertedAccount: Account{},
-			FieldError:      FieldError{EmptyNameError, ZeroDateOpenedError},
+			FieldError:      FieldError{EmptyNameError},
 		},
 		{
 			insertedAccount: Account{
 				Name: "TEST_ACCOUNT",
 			},
-			FieldError: FieldError{ZeroDateOpenedError},
 		},
 		{
 			insertedAccount: Account{
-				timeRange: gtime.Range{
-					Start: gtime.NullTime{
-						Valid: true,
-						Time:  time.Date(2000, 1, 1, 1, 1, 1, 1, time.UTC),
-					},
-				},
+				Name:      "TEST_ACCOUNT",
+				timeRange: newTestTimeRange(t, gtime.Start(time.Time{})),
 			},
-			FieldError: FieldError{EmptyNameError},
 		},
 		{
 			insertedAccount: Account{
-				Name: "TEST_ACCOUNT",
-				timeRange: gtime.Range{
-					Start: gtime.NullTime{},
-					End: gtime.NullTime{
-						Valid: true,
-					},
-				},
+				Name:      "TEST_ACCOUNT",
+				timeRange: newTestTimeRange(t, gtime.End(time.Time{})),
 			},
-			FieldError: FieldError{ZeroDateOpenedError, ZeroValidDateClosedError},
 		},
 		{
 			insertedAccount: Account{
 				Name: "TEST_ACCOUNT",
-				timeRange: gtime.Range{
-					Start: gtime.NullTime{
-						Valid: true,
-						Time:  time.Date(2000, 1, 1, 1, 1, 1, 1, time.UTC),
-					},
-					End: gtime.NullTime{
-						Valid: true,
-						Time:  time.Date(1999, 1, 1, 1, 1, 1, 1, time.UTC),
-					},
-				},
+				timeRange: newTestTimeRange(
+					t,
+					gtime.Start(time.Date(1999, 1, 1, 1, 1, 1, 1, time.UTC)),
+					gtime.End(time.Date(2000, 1, 1, 1, 1, 1, 1, time.UTC)),
+				),
 			},
-			FieldError: FieldError{string(gtime.EndTimeBeforeStartTime)},
-		},
-		{
-			insertedAccount: newTestAccount(),
-			FieldError:      nil,
-		},
-		{
-			insertedAccount: Account{
-				Name: "TEST_ACCOUNT",
-				timeRange: gtime.Range{
-					Start: gtime.NullTime{
-						Valid: true,
-						Time:  time.Now(),
-					},
-					End: gtime.NullTime{},
-				},
-			},
-			FieldError: nil,
 		},
 	}
 	for _, testSet := range testSets {
@@ -91,22 +55,6 @@ func Test_ValidateAccount(t *testing.T) {
 		if !stringSlicesMatch(expected, actual) {
 			t.Errorf("Unexpected error.\nExpected: %+v\nActual  : %+v\nInserted Account: %+v", expected, actual, testSet.insertedAccount)
 		}
-	}
-}
-
-func newTestAccount() Account {
-	return Account{
-		Name: "TEST_ACCOUNT",
-		timeRange: gtime.Range{
-			Start: gtime.NullTime{
-				Valid: true,
-				Time:  time.Date(2000, 1, 1, 1, 1, 1, 1, time.UTC),
-			},
-			End: gtime.NullTime{
-				Valid: true,
-				Time:  time.Date(2001, 1, 1, 1, 1, 1, 1, time.UTC),
-			},
-		},
 	}
 }
 
@@ -133,17 +81,7 @@ func Test_IsOpen(t *testing.T) {
 		},
 		{
 			Account: Account{
-				timeRange: gtime.Range{
-					End: gtime.NullTime{Valid: false},
-				},
-			},
-			IsOpen: true,
-		},
-		{
-			Account: Account{
-				timeRange: gtime.Range{
-					End: gtime.NullTime{Valid: true},
-				},
+				timeRange: newTestTimeRange(t, gtime.End(time.Now())),
 			},
 			IsOpen: false,
 		},
@@ -156,62 +94,18 @@ func Test_IsOpen(t *testing.T) {
 	}
 }
 
-func Test_InvalidAccountValidateBalance(t *testing.T) {
-	present := time.Now()
-	past := present.AddDate(-1, 0, 0)
-	future := present.AddDate(1, 0, 0)
-
-	invalidAccount := Account{
-		timeRange: gtime.Range{
-			Start: gtime.NullTime{
-				Valid: true,
-				Time:  future,
-			},
-			End: gtime.NullTime{
-				Valid: true,
-				Time:  past,
-			},
-		},
-	}
-
-	accountErr := invalidAccount.Validate()
-	balanceErr := invalidAccount.ValidateBalance(balance.Balance{})
-	switch {
-	case accountErr == nil && balanceErr == nil:
-		break
-	case accountErr == nil || balanceErr == nil,
-		accountErr.Error() != balanceErr.Error():
-		t.Errorf("ValidateBalance did not return Account error when given invalid account.\nExpected: %s\nActual  : %s", accountErr, balanceErr)
-	}
-}
-
 func Test_AccountValidateBalance(t *testing.T) {
 	present := time.Now()
 	var past time.Time
 	future := present.AddDate(1, 0, 0)
 
 	openAccount := Account{
-		Name: "Test Account",
-		timeRange: gtime.Range{
-			Start: gtime.NullTime{
-				Valid: true,
-				Time:  present,
-			},
-			End: gtime.NullTime{Valid: false},
-		},
+		Name:      "Test Account",
+		timeRange: newTestTimeRange(t, gtime.Start(present)),
 	}
 	closedAccount := Account{
-		Name: "Test Account",
-		timeRange: gtime.Range{
-			Start: gtime.NullTime{
-				Valid: true,
-				Time:  present,
-			},
-			End: gtime.NullTime{
-				Valid: true,
-				Time:  future,
-			},
-		},
+		Name:      "Test Account",
+		timeRange: newTestTimeRange(t, gtime.Start(present), gtime.End(future)),
 	}
 
 	pastBalance := newTestBalance(t, past, balance.Amount(1))
@@ -305,10 +199,12 @@ func Test_NewAccount(t *testing.T) {
 	type testSet struct {
 		name  string
 		start time.Time
-		end   time.Time
 		error
 	}
 	testSets := []testSet{
+		{
+			error: FieldError{EmptyNameError},
+		},
 		{
 			name:  "TEST_ACCOUNT",
 			start: now,
@@ -316,19 +212,15 @@ func Test_NewAccount(t *testing.T) {
 		{
 			name:  "TEST_ACCOUNT_WITH_ACCOUNT_ERROR",
 			start: now,
-			end:   now.AddDate(0, 0, -1),
-			error: FieldError{gtime.EndTimeBeforeStartTime.Error()},
 		},
 		{
 			name:  "TEST_ACCOUNT",
 			start: now,
-			end:   now.AddDate(0, 0, +1),
 		},
 	}
-	logTestSet := func(ts testSet) { t.Logf("Start: %s,\tEnd: %v,", ts.start, ts.end) }
+	logTestSet := func(ts testSet) { t.Logf("Start: %s,", ts.start) }
 	for _, set := range testSets {
-		close := CloseTime(set.end)
-		a, err := New(set.name, newTestCurrency(t, "YEN"), set.start, close)
+		a, err := New(set.name, newTestCurrency(t, "YEN"), set.start)
 		if !testNewAccountErrorTypes(t, set.error, err) {
 			logTestSet(set)
 		}
@@ -336,15 +228,9 @@ func Test_NewAccount(t *testing.T) {
 			t.Errorf("Unexpected name.\n\tExpected: %s\n\tActual  : %s", set.name, a.Name)
 			logTestSet(set)
 		}
-		if !a.timeRange.Start.EqualTime(set.start) {
+		if !a.timeRange.Start().EqualTime(set.start) {
 			t.Errorf("Unexpected start.\n\tExpected: %s\n\tActual  : %s", set.start, a.Start())
 			logTestSet(set)
-		}
-		switch {
-		case !set.end.IsZero():
-			assert.True(t, a.End().EqualTime(set.end), "End NullTime should be equal to set.end when set.end is non Zero")
-		case set.end.IsZero():
-			assert.False(t, a.End().Valid, "End should not be Valid when set.end IsZero")
 		}
 	}
 }
@@ -374,4 +260,10 @@ func newTestBalance(t *testing.T, date time.Time, options ...balance.Option) bal
 	b, err := balance.New(date, options...)
 	common.FatalIfError(t, err, "Creating new Balance")
 	return *b
+}
+
+func newTestTimeRange(t *testing.T, os ...gtime.Option) gtime.Range {
+	r, err := gtime.New(os...)
+	common.FatalIfError(t, err, "Creating time.Range")
+	return *r
 }

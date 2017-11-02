@@ -22,14 +22,14 @@ type money struct {
 	currency currency.Code
 }
 
-// amount returns the value of the Money formed from the currency's lowest
+// Amount returns the value of the Money formed from the currency's lowest
 // denominator.
-// e.g. For £45.67, amount() would return 4567
+// e.g. For £45.67, Amount() would return 4567
 func (m money) Amount() int {
 	return m.amount
 }
 
-// currency returns the currency of the Money. If the Money has no currency, an error will also be returned.
+// Currency returns the currency.Code of the Money.
 func (m money) Currency() currency.Code {
 	return m.currency
 }

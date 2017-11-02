@@ -34,25 +34,19 @@ func TestAccountFieldError_Equal(t *testing.T) {
 		},
 		{
 			errA: account.FieldError{
-				account.ZeroDateOpenedError,
 				account.EmptyNameError,
 			},
 			errB: account.FieldError{
 				account.EmptyNameError,
-				account.ZeroDateOpenedError,
 			},
-			equal: false,
+			equal: true,
 		},
 		{
 			errA: account.FieldError{
-				account.ZeroDateOpenedError,
 				account.EmptyNameError,
-				account.ZeroValidDateClosedError,
 			},
 			errB: account.FieldError{
-				account.ZeroDateOpenedError,
 				account.EmptyNameError,
-				account.ZeroValidDateClosedError,
 			},
 			equal: true,
 		},

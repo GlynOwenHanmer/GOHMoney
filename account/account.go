@@ -10,25 +10,25 @@ import (
 	gohtime "github.com/glynternet/go-time"
 )
 
-// New creates a new Account object with a Valid Start time and returns it, also returning any logical errors with the newly created account.
-func New(name string, currencyCode currency.Code, opened time.Time, os ...Option) (a Account, err error) {
-	a = Account{
-		Name: name,
-		timeRange: gohtime.Range{
-			Start: gohtime.NullTime{
-				Valid: true,
-				Time:  opened,
-			},
-		},
+// New creates a new Account object with a given name, currency.Code and start
+// time.
+// New returns the created account or
+func New(name string, currencyCode currency.Code, opened time.Time, os ...Option) (a *Account, err error) {
+	a = &Account{
+		Name:         name,
 		currencyCode: currencyCode,
+	}
+	err = gohtime.Start(opened)(&a.timeRange)
+	if err != nil {
+		return nil, err
 	}
 	for _, o := range os {
 		if o == nil {
 			continue
 		}
-		err = o(&a)
+		err = o(a)
 		if err != nil {
-			return
+			return nil, err
 		}
 	}
 	if aErr := a.Validate(); len(aErr) > 0 {
@@ -46,17 +46,17 @@ type Account struct {
 
 // Start returns the start time that the Account opened.
 func (a Account) Start() time.Time {
-	return a.timeRange.Start.Time
+	return a.timeRange.Start().Time
 }
 
 // End returns the a NullTime object that is Valid if the account has been closed.
 func (a Account) End() gohtime.NullTime {
-	return a.timeRange.End
+	return a.timeRange.End()
 }
 
 // IsOpen return true if the Account is open.
 func (a Account) IsOpen() bool {
-	return !a.timeRange.End.Valid
+	return !a.timeRange.End().Valid
 }
 
 // CurrencyCode returns the currency code of the Account.
@@ -69,15 +69,6 @@ func (a Account) Validate() FieldError {
 	var fieldErrorDescriptions []string
 	if len(strings.TrimSpace(a.Name)) == 0 {
 		fieldErrorDescriptions = append(fieldErrorDescriptions, EmptyNameError)
-	}
-	if err := a.timeRange.Validate(); err != nil {
-		fieldErrorDescriptions = append(fieldErrorDescriptions, err.Error())
-	}
-	if a.Start().IsZero() {
-		fieldErrorDescriptions = append(fieldErrorDescriptions, ZeroDateOpenedError)
-	}
-	if a.End().Valid && a.End().Time.IsZero() {
-		fieldErrorDescriptions = append(fieldErrorDescriptions, ZeroValidDateClosedError)
 	}
 	if len(fieldErrorDescriptions) > 0 {
 		return FieldError(fieldErrorDescriptions)
@@ -137,10 +128,18 @@ func (a *Account) UnmarshalJSON(data []byte) (err error) {
 		return
 	}
 	a.currencyCode = *c
-	a.timeRange = gohtime.Range{
-		Start: gohtime.NullTime{Valid: true, Time: aux.Start},
-		End:   aux.End,
+	tr := new(gohtime.Range)
+	err = gohtime.Start(aux.Start)(tr)
+	if err != nil {
+		return
 	}
+	if aux.End.Valid {
+		err = gohtime.End(aux.End.Time)(tr)
+		if err != nil {
+			return
+		}
+	}
+	a.timeRange = *tr
 	if validErr := a.Validate(); validErr != nil {
 		err = validErr
 	}

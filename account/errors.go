@@ -34,7 +34,5 @@ func (e FieldError) Equal(other FieldError) bool {
 
 // Various error strings describing possible errors with potential new Account items.
 const (
-	EmptyNameError           = "Empty name."
-	ZeroDateOpenedError      = "No opened date given."
-	ZeroValidDateClosedError = "Closed date marked as valid but not set."
+	EmptyNameError = "Empty name."
 )

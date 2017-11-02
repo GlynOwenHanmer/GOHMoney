@@ -20,12 +20,8 @@ func TestClosedTime(t *testing.T) {
 	assert.True(t, a.End().EqualTime(closeA))
 
 	closeB := closeA.Add(100 * time.Hour)
-	common.FatalIfError(t, account.CloseTime(closeB)(&a), "Executing CloseTime Option")
+	common.FatalIfError(t, account.CloseTime(closeB)(a), "Executing CloseTime Option")
 	assert.True(t, a.End().EqualTime(closeB))
-
-	zero := time.Time{}
-	common.FatalIfError(t, account.CloseTime(zero)(&a), "Executing CloseTime Option")
-	assert.False(t, a.End().Valid)
 }
 
 func TestErrorOption(t *testing.T) {

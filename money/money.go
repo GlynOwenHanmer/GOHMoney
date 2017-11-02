@@ -12,7 +12,8 @@ type Money interface {
 	Currency() currency.Code
 }
 
-func New(amount int, currency currency.Code) *money {
+// New returns a new Money
+func New(amount int, currency currency.Code) Money {
 	return &money{amount: amount, currency: currency}
 }
 
@@ -33,25 +34,34 @@ func (m money) Currency() currency.Code {
 	return m.currency
 }
 
-func (a money) MarshalJSON() ([]byte, error) {
+func (m money) MarshalJSON() ([]byte, error) {
 	return json.Marshal(&struct {
-		Amount   int
-		Currency currency.Code
+		Amount        int
+		currency.Code `json:"Currency"`
 	}{
-		Amount:   a.amount,
-		Currency: a.currency,
+		Amount: m.amount,
+		Code:   m.currency,
 	})
 }
 
+// UnmarshalJSON attampts to unmarshalling a []byte into a money,
+// returning the money, if successful, and an error, if any occured.
 func UnmarshalJSON(data []byte) (*money, error) {
 	var m struct {
 		Amount   int
-		Currency currency.Code
+		Currency string
 	}
 	err := json.Unmarshal(data, &m)
+	if err != nil {
+		return nil, err
+	}
+	c, err := currency.NewCode(m.Currency)
+	if err != nil {
+		return nil, err
+	}
 	return &money{
 		amount:   m.Amount,
-		currency: m.Currency,
+		currency: *c,
 	}, err
 }
 

@@ -20,8 +20,8 @@ func TestNew(t *testing.T) {
 	assert.Nil(t, err)
 	m := money.New(123, *c)
 	assert.NotNil(t, m)
-	assert.Equal(t, "RIN", (*m).Currency().String())
-	assert.Equal(t, 123, (*m).Amount())
+	assert.Equal(t, "RIN", m.Currency().String())
+	assert.Equal(t, 123, m.Amount())
 }
 
 func TestJSON(t *testing.T) {
@@ -30,9 +30,8 @@ func TestJSON(t *testing.T) {
 	ma := money.New(9876, *c)
 	bs, err := json.Marshal(ma)
 	assert.Nil(t, err)
-	t.Log(bs)
 	mb, err := money.UnmarshalJSON(bs)
-	assert.Nil(t, err)
+	assert.Nil(t, err, string(bs))
 	assert.Equal(t, ma, mb)
 }
 

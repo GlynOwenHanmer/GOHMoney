@@ -37,7 +37,7 @@ func TestJSON(t *testing.T) {
 	bs, err := json.Marshal(ca)
 	assert.Nil(t, err)
 	cb, err := currency.UnmarshalJSON(bs)
-	assert.Nil(t, err)
+	assert.Nil(t, err, string(bs))
 	assert.Equal(t, ca, cb)
 }
 

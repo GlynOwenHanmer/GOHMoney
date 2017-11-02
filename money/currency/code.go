@@ -28,22 +28,16 @@ func (c code) String() string {
 }
 
 func (c code) MarshalJSON() ([]byte, error) {
-	return json.Marshal(&struct {
-		Code string
-	}{
-		Code: c.String(),
-	})
+	return json.Marshal(c.String())
 }
 
 func UnmarshalJSON(data []byte) (*Code, error) {
-	var m struct {
-		Code string
-	}
-	err := json.Unmarshal(data, &m)
+	var aux string
+	err := json.Unmarshal(data, &aux)
 	if err != nil {
 		return nil, err
 	}
-	return NewCode(m.Code)
+	return NewCode(aux)
 }
 
 // validate returns an error if a code is invalid

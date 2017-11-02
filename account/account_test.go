@@ -13,7 +13,7 @@ import (
 
 func TestNew(t *testing.T) {
 	start := time.Now()
-	invalidCurrency, err := currency.New("QWERTYUIOP")
+	invalidCurrency, err := currency.NewCode("QWERTYUIOP")
 	assert.NotNil(t, err)
 	a, err := account.New("TEST_ACCOUNT", invalidCurrency, start)
 	assert.Equal(t, account.Account{}, a)
@@ -76,7 +76,6 @@ func TestAccount_Equal(t *testing.T) {
 }
 
 func newTestCurrency(t *testing.T, code string) currency.code {
-	c, err := currency.New(code)
-	common.FatalIfError(t, err, "Creating New Currency code")
+	c, err := currency.NewCode(code)
 	return c
 }

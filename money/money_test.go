@@ -3,23 +3,37 @@ package money_test
 import (
 	"testing"
 
+	"encoding/json"
+
 	"github.com/glynternet/GOHMoney/money"
 	"github.com/glynternet/GOHMoney/money/currency"
 	"github.com/stretchr/testify/assert"
 )
 
 //func newMoneyIgnoreError(a int64, c string) *money.Money {
-//	m, _ := money.New(a, c)
+//	m, _ := money.NewCode(a, c)
 //	return m
 //}
 
 func TestNew(t *testing.T) {
-	c, err := currency.New("RIN")
+	c, err := currency.NewCode("RIN")
 	assert.Nil(t, err)
 	m := money.New(123, *c)
 	assert.NotNil(t, m)
 	assert.Equal(t, "RIN", (*m).Currency().String())
 	assert.Equal(t, 123, (*m).Amount())
+}
+
+func TestJSON(t *testing.T) {
+	c, err := currency.NewCode("RIN")
+	assert.Nil(t, err)
+	ma := money.New(9876, *c)
+	bs, err := json.Marshal(ma)
+	assert.Nil(t, err)
+	t.Log(bs)
+	mb, err := money.UnmarshalJSON(bs)
+	assert.Nil(t, err)
+	assert.Equal(t, ma, mb)
 }
 
 //func TestMoneyEqual(t *testing.T) {
@@ -117,7 +131,7 @@ func TestNew(t *testing.T) {
 //}
 //
 //func TestMoneyJSONLoop(t *testing.T) {
-//	a, err := money.New(934, "YEN")
+//	a, err := money.NewCode(934, "YEN")
 //	common.FatalIfError(t, err, "Creating Money")
 //	jsonBytes, err := json.Marshal(a)
 //	if err != nil {

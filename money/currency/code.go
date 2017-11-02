@@ -1,12 +1,15 @@
 package currency
 
-import "fmt"
+import (
+	"encoding/json"
+	"fmt"
+)
 
-// New returns a new code if a valid string is given.
-func New(currencyCode string) (c *Code, err error) {
+// NewCode returns a new code if a valid string is given.
+func NewCode(currencyCode string) (c *Code, err error) {
 	c = new(Code)
 	*c = code(currencyCode)
-	err = (*c).(code).Validate()
+	err = (*c).(code).validate()
 	if err != nil {
 		c = nil
 	}
@@ -24,8 +27,27 @@ func (c code) String() string {
 	return string(c)
 }
 
-// Validate returns an error if a code is invalid
-func (c code) Validate() error {
+func (c code) MarshalJSON() ([]byte, error) {
+	return json.Marshal(&struct {
+		Code string
+	}{
+		Code: c.String(),
+	})
+}
+
+func UnmarshalJSON(data []byte) (*Code, error) {
+	var m struct {
+		Code string
+	}
+	err := json.Unmarshal(data, &m)
+	if err != nil {
+		return nil, err
+	}
+	return NewCode(m.Code)
+}
+
+// validate returns an error if a code is invalid
+func (c code) validate() error {
 	return validateCodeLengthError(string(c))
 }
 

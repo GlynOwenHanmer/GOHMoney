@@ -362,7 +362,7 @@ func testNewAccountErrorTypes(t *testing.T, expected, actual error) bool {
 }
 
 func newTestCurrency(t *testing.T, code string) currency.code {
-	c, err := currency.New(code)
-	common.FatalIfError(t, err, "Creating New Currency code")
+	c, err := currency.NewCode(code)
+	common.FatalIfError(t, err, "Creating NewCode Currency code")
 	return c
 }

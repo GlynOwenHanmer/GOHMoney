@@ -43,7 +43,7 @@ func (b Balance) Equal(ob Balance) bool {
 	return b.amount == ob.Amount() && b.Date().Equal(ob.Date())
 }
 
-// Validate checks the fields of a Balance and returns any logic errors that are present within it.
+// validate checks the fields of a Balance and returns any logic errors that are present within it.
 func (b Balance) Validate() (err error) {
 	if b.date.IsZero() {
 		err = ZeroDate

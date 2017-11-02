@@ -1,6 +1,8 @@
 package money
 
 import (
+	"encoding/json"
+
 	"github.com/glynternet/GOHMoney/money/currency"
 )
 
@@ -31,6 +33,28 @@ func (m money) Currency() currency.Code {
 	return m.currency
 }
 
+func (a money) MarshalJSON() ([]byte, error) {
+	return json.Marshal(&struct {
+		Amount   int
+		Currency currency.Code
+	}{
+		Amount:   a.amount,
+		Currency: a.currency,
+	})
+}
+
+func UnmarshalJSON(data []byte) (*money, error) {
+	var m struct {
+		Amount   int
+		Currency currency.Code
+	}
+	err := json.Unmarshal(data, &m)
+	return &money{
+		amount:   m.Amount,
+		currency: m.Currency,
+	}, err
+}
+
 //// Moneys is a group of Moneys
 //type Moneys []Money
 //
@@ -59,8 +83,8 @@ func (m money) Currency() currency.Code {
 //	return cs, nil
 //}
 
-// Validate returns an error if part of a Money is not valid.
-//func (m money) Validate() error {
+// validate returns an error if part of a Money is not valid.
+//func (m money) validate() error {
 //	switch {
 //	case m.inner == nil,
 //		m.inner.currency() == nil, //todo check for
@@ -100,7 +124,7 @@ func (m money) Currency() currency.Code {
 // If the Money objects are of different currencies, an error will be returned.
 //func (m Money) Add(om Money) (Money, error) {
 //	for _, mon := range []Money{m, om} {
-//		if err := mon.Validate(); err != nil {
+//		if err := mon.validate(); err != nil {
 //			return Money{}, err
 //		}
 //	}
@@ -111,7 +135,7 @@ func (m money) Currency() currency.Code {
 //	if err := assertSameCurrency(cs...); err != nil {
 //		return Money{}, err
 //	}
-//	return Money{inner: money.New(m.Amount()+om.Amount(), cs[0].code)}, nil
+//	return Money{inner: money.NewCode(m.Amount()+om.Amount(), cs[0].code)}, nil
 //}
 
 // CurrencyMismatchError is an error that is returned when an operation that
@@ -152,7 +176,7 @@ func (m money) Currency() currency.Code {
 //	if err := json.Unmarshal(data, &aux); err != nil {
 //		return err
 //	}
-//	m.inner = money.New(aux.Amount, aux.Currency)
+//	m.inner = money.NewCode(aux.Amount, aux.Currency)
 //	return nil
 //}
 //
@@ -166,9 +190,9 @@ func (m money) Currency() currency.Code {
 //
 //func initialiseIfRequired(m *Money) {
 //	if m == nil || m.inner == nil {
-//		aux, err := New(0, "")
+//		aux, err := NewCode(0, "")
 //		if err != nil {
-//			log.Printf("Error calling New: %s", err)
+//			log.Printf("Error calling NewCode: %s", err)
 //		}
 //		*m = *aux
 //	}

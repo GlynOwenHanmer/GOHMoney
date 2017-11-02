@@ -6,8 +6,8 @@ import (
 
 	"errors"
 
-	"github.com/glynternet/GOHMoney/account"
-	"github.com/glynternet/GOHMoney/common"
+	"github.com/glynternet/go-money/account"
+	"github.com/glynternet/go-money/common"
 	"github.com/stretchr/testify/assert"
 )
 

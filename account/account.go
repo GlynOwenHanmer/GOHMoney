@@ -5,8 +5,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/glynternet/GOHMoney/balance"
-	"github.com/glynternet/GOHMoney/money/currency"
+	"github.com/glynternet/go-money/balance"
+	"github.com/glynternet/go-money/money/currency"
 	gohtime "github.com/glynternet/go-time"
 )
 

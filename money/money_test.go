@@ -5,8 +5,8 @@ import (
 
 	"encoding/json"
 
-	"github.com/glynternet/GOHMoney/money"
-	"github.com/glynternet/GOHMoney/money/currency"
+	"github.com/glynternet/go-money/money"
+	"github.com/glynternet/go-money/money/currency"
 	"github.com/stretchr/testify/assert"
 )
 

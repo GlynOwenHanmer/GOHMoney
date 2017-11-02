@@ -6,9 +6,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/glynternet/GOHMoney/balance"
-	"github.com/glynternet/GOHMoney/common"
-	"github.com/glynternet/GOHMoney/money/currency"
+	"github.com/glynternet/go-money/balance"
+	"github.com/glynternet/go-money/common"
+	"github.com/glynternet/go-money/money/currency"
 	gtime "github.com/glynternet/go-time"
 )
 

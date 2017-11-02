@@ -3,7 +3,7 @@ package account_test
 import (
 	"testing"
 
-	"github.com/glynternet/GOHMoney/account"
+	"github.com/glynternet/go-money/account"
 )
 
 func TestAccountFieldError_Equal(t *testing.T) {

@@ -14,19 +14,16 @@ import (
 )
 
 func TestNew(t *testing.T) {
-	var expected error = balance.ZeroDate
-	invalidTime := time.Time{}
-	_, err := balance.New(invalidTime)
-	assert.Equal(t, expected, err)
-
-	expected = nil
-	validTime := time.Now()
-	_, err = balance.New(validTime, balance.Amount(11))
-	assert.Equal(t, expected, err)
+	now := time.Now()
+	tt := now
+	b, err := balance.New(tt)
+	assert.Nil(t, err)
+	assert.Equal(t, now, b.Date)
+	assert.Equal(t, 0, b.Amount)
 }
 
 func TestBalance_Equal(t *testing.T) {
-	newBalance := func(t *testing.T, date time.Time, amount int64) balance.Balance {
+	newBalance := func(t *testing.T, date time.Time, amount int) balance.balance {
 		b, err := balance.New(date, balance.Amount(amount))
 		common.FatalIfError(t, err, "Creating new balance")
 		return b
@@ -48,13 +45,13 @@ func TestBalance_Equal(t *testing.T) {
 }
 
 type BalanceErrorSet struct {
-	balance.Balance
+	balance.balance
 	error
 }
 
 func TestBalances_Earliest_EmptyBalances(t *testing.T) {
 	balances := balance.Balances{}
-	expected := BalanceErrorSet{error: errors.New(balance.EmptyBalancesMessage)}
+	expected := BalanceErrorSet{error: errors.New(balance.ErrEmptyBalancesMessage)}
 	testEarliestSet(t, expected, balances)
 }
 
@@ -89,7 +86,7 @@ func TestBalances_Earliest_BalancesWithMultipleDates(t *testing.T) {
 
 func testEarliestSet(t *testing.T, expected BalanceErrorSet, balances balance.Balances) {
 	actualBalance, actualError := balances.Earliest()
-	actual := BalanceErrorSet{Balance: actualBalance, error: actualError}
+	actual := BalanceErrorSet{balance: actualBalance, error: actualError}
 	res := testBalanceResults(t, expected, actual)
 	if len(res) > 0 {
 		t.Errorf("%s. Balances: %+v", res, balances)
@@ -98,7 +95,7 @@ func testEarliestSet(t *testing.T, expected BalanceErrorSet, balances balance.Ba
 
 func Test_Latest_EmptyBalances(t *testing.T) {
 	balances := balance.Balances{}
-	expected := BalanceErrorSet{error: errors.New(balance.EmptyBalancesMessage)}
+	expected := BalanceErrorSet{error: errors.New(balance.ErrEmptyBalancesMessage)}
 	testLatestSet(t, expected, balances)
 }
 
@@ -133,7 +130,7 @@ func Test_Latest_BalancesWithMultipleDates(t *testing.T) {
 
 func testLatestSet(t *testing.T, expected BalanceErrorSet, balances balance.Balances) {
 	actualBalance, actualError := balances.Latest()
-	actual := BalanceErrorSet{Balance: actualBalance, error: actualError}
+	actual := BalanceErrorSet{balance: actualBalance, error: actualError}
 	res := testBalanceResults(t, expected, actual)
 	if len(res) > 0 {
 		t.Errorf("%s. Balances: %+v", res, balances)
@@ -153,26 +150,26 @@ func testBalanceResults(t *testing.T, expected BalanceErrorSet, actual BalanceEr
 			message = fmt.Sprintf("Error unexpected\nExpected: %s\nActual  : %s", expected, actual)
 		}
 	}
-	assert.Equal(t, expected.Balance, actual.Balance)
+	assert.Equal(t, expected.balance, actual.balance)
 	return
 }
 
 func TestBalances_Sum(t *testing.T) {
 	testSets := []struct {
-		amounts []int64
-		sum     int64
+		amounts []int
+		sum     int
 	}{
 		{},
 		{
-			amounts: []int64{1},
+			amounts: []int{1},
 			sum:     1,
 		},
 		{
-			amounts: []int64{1, 2},
+			amounts: []int{1, 2},
 			sum:     3,
 		},
 		{
-			amounts: []int64{1, 2, -3},
+			amounts: []int{1, 2, -3},
 			sum:     0,
 		},
 	}
@@ -192,18 +189,18 @@ func TestBalances_Sum(t *testing.T) {
 
 func TestBalance_MarshalJSON(t *testing.T) {
 	a, err := balance.New(time.Now(), balance.Amount(921368))
-	common.FatalIfError(t, err, "Creating Balance")
+	common.FatalIfError(t, err, "Creating balance")
 	jsonBytes, err := json.Marshal(a)
 	common.FatalIfError(t, err, "Marshalling JSON")
 
 	var b struct {
 		Date   time.Time
-		Amount int64
+		Amount int
 	}
 	err = json.Unmarshal(jsonBytes, &b)
 	common.FatalIfError(t, err, "Unmarshalling data")
-	assert.True(t, a.Date().Equal(b.Date), "json: %s", jsonBytes)
-	assert.Equal(t, a.Amount(), b.Amount, "json: %s", jsonBytes)
+	assert.True(t, a.Date.Equal(b.Date), "json: %s", jsonBytes)
+	assert.Equal(t, a.Amount, b.Amount, "json: %s", jsonBytes)
 }
 
 func TestBalance_JSONLoop(t *testing.T) {
@@ -212,7 +209,7 @@ func TestBalance_JSONLoop(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Error marshalling json for testing: %s", err)
 	}
-	var b balance.Balance
+	var b balance.balance
 	if err := json.Unmarshal(jsonBytes, &b); err != nil {
 		t.Fatalf("Error unmarshaling bytes into balance: %s", err)
 	}

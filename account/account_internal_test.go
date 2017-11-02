@@ -175,7 +175,7 @@ func Test_InvalidAccountValidateBalance(t *testing.T) {
 	}
 
 	accountErr := invalidAccount.Validate()
-	balanceErr := invalidAccount.ValidateBalance(balance.Balance{})
+	balanceErr := invalidAccount.ValidateBalance(balance.balance{})
 	switch {
 	case accountErr == nil && balanceErr == nil:
 		break
@@ -187,7 +187,7 @@ func Test_InvalidAccountValidateBalance(t *testing.T) {
 
 func Test_AccountValidateBalance(t *testing.T) {
 	present := time.Now()
-	past := present.AddDate(-1, 0, 0)
+	var past time.Time
 	future := present.AddDate(1, 0, 0)
 
 	openAccount := Account{
@@ -220,7 +220,7 @@ func Test_AccountValidateBalance(t *testing.T) {
 	evenFuturerBalance, _ := balance.New(future.AddDate(1, 0, 0), balance.Amount(-987654))
 	testSets := []struct {
 		Account
-		balance.Balance
+		balance.balance
 		error
 	}{
 		{
@@ -228,59 +228,59 @@ func Test_AccountValidateBalance(t *testing.T) {
 		},
 		{
 			Account: openAccount,
-			Balance: pastBalance,
+			balance: pastBalance,
 			error: balance.DateOutOfAccountTimeRange{
-				BalanceDate:      pastBalance.Date(),
+				BalanceDate:      pastBalance.Date,
 				AccountTimeRange: openAccount.timeRange,
 			},
 		},
 		{
 			Account: openAccount,
-			Balance: presentBalance,
+			balance: presentBalance,
 			error:   nil,
 		},
 		{
 			Account: openAccount,
-			Balance: futureBalance,
+			balance: futureBalance,
 			error:   nil,
 		},
 		{
 			Account: closedAccount,
-			Balance: pastBalance,
+			balance: pastBalance,
 			error: balance.DateOutOfAccountTimeRange{
-				BalanceDate:      pastBalance.Date(),
+				BalanceDate:      pastBalance.Date,
 				AccountTimeRange: closedAccount.timeRange,
 			},
 		},
 		{
 			Account: closedAccount,
-			Balance: presentBalance,
+			balance: presentBalance,
 			error:   nil,
 		},
 		{
 			Account: closedAccount,
-			Balance: futureBalance,
+			balance: futureBalance,
 			error:   nil,
 		},
 		{
 			Account: closedAccount,
-			Balance: evenFuturerBalance,
+			balance: evenFuturerBalance,
 			error: balance.DateOutOfAccountTimeRange{
-				BalanceDate:      futureBalance.Date().AddDate(1, 0, 0),
+				BalanceDate:      futureBalance.Date.AddDate(1, 0, 0),
 				AccountTimeRange: closedAccount.timeRange,
 			},
 		},
 	}
-	for _, testSet := range testSets {
-		err := testSet.Account.ValidateBalance(testSet.Balance)
+	for i, testSet := range testSets {
+		err := testSet.Account.ValidateBalance(testSet.balance)
 		if testSet.error == err {
 			continue
 		}
 		testSetTyped, testSetErrorIsType := testSet.error.(balance.DateOutOfAccountTimeRange)
 		actualErrorTyped, actualErrorIsType := err.(balance.DateOutOfAccountTimeRange)
 		if testSetErrorIsType != actualErrorIsType {
-			t.Errorf("Expected and resultant errors are differently typed.\nExpected: %s\nActual  : %s", testSet.error, err)
-			t.Logf("Account: %v\nbalance: %v", testSet.Account, testSet.Balance)
+			t.Errorf("Test [%d] Expected and resultant errors are differently typed.\nExpected: %s\nActual  : %s", i, testSet.error, err)
+			t.Logf("Account: %+v\nbalance: %+v", testSet.Account, testSet.balance)
 			continue
 		}
 		switch {

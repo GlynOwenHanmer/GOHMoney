@@ -93,9 +93,9 @@ func (a Account) ValidateBalance(b balance.Balance) error {
 	if err := a.Validate(); err != nil {
 		return err
 	}
-	if !a.timeRange.Contains(b.Date()) && (!a.End().Valid || !a.End().Time.Equal(b.Date())) {
+	if !a.timeRange.Contains(b.Date) && (!a.End().Valid || !a.End().Time.Equal(b.Date)) {
 		return balance.DateOutOfAccountTimeRange{
-			BalanceDate:      b.Date(),
+			BalanceDate:      b.Date,
 			AccountTimeRange: a.timeRange,
 		}
 	}

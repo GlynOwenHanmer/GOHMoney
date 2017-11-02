@@ -23,29 +23,23 @@ func TestNew(t *testing.T) {
 }
 
 func TestBalance_Equal(t *testing.T) {
-	newBalance := func(t *testing.T, date time.Time, amount int) balance.balance {
-		b, err := balance.New(date, balance.Amount(amount))
-		common.FatalIfError(t, err, "Creating new balance")
-		return b
-	}
-
 	now := time.Now()
-	a := newBalance(t, now, 123)
-	b := newBalance(t, now, 123)
+	a := newTestBalance(t, now, balance.Amount(123))
+	b := newTestBalance(t, now, balance.Amount(123))
 	assert.True(t, a.Equal(b))
 
-	b = newBalance(t, now, -123)
+	b = newTestBalance(t, now, balance.Amount(-123))
 	assert.True(t, !a.Equal(b))
 
-	b = newBalance(t, now, 123)
+	b = newTestBalance(t, now, balance.Amount(123))
 	assert.True(t, a.Equal(b))
 
-	b = newBalance(t, now.Add(1), 123)
+	b = newTestBalance(t, now.Add(1), balance.Amount(123))
 	assert.True(t, !a.Equal(b))
 }
 
 type BalanceErrorSet struct {
-	balance.balance
+	Balance *balance.Balance
 	error
 }
 
@@ -56,18 +50,18 @@ func TestBalances_Earliest_EmptyBalances(t *testing.T) {
 }
 
 func TestBalances_Earliest_BalancesWithSingleDate(t *testing.T) {
-	earliest, _ := balance.New(time.Date(2000, 1, 1, 1, 1, 1, 1, time.UTC))
+	earliest := newTestBalance(t, time.Date(2000, 1, 1, 1, 1, 1, 1, time.UTC))
 	balances := balance.Balances{earliest}
-	expected := BalanceErrorSet{earliest, nil}
+	expected := BalanceErrorSet{&earliest, nil}
 	testEarliestSet(t, expected, balances)
 }
 
 func TestBalances_Earliest_BalancesWithSameDate(t *testing.T) {
 	date := time.Date(2000, 1, 1, 1, 1, 1, 1, time.UTC)
-	earliest, _ := balance.New(date, balance.Amount(10))
-	other, _ := balance.New(date, balance.Amount(20))
+	earliest := newTestBalance(t, date, balance.Amount(10))
+	other := newTestBalance(t, date, balance.Amount(20))
 	balances := balance.Balances{earliest, other}
-	expected := BalanceErrorSet{earliest, nil}
+	expected := BalanceErrorSet{&earliest, nil}
 	testEarliestSet(t, expected, balances)
 }
 
@@ -75,18 +69,18 @@ func TestBalances_Earliest_BalancesWithMultipleDates(t *testing.T) {
 	date1 := time.Date(2000, 1, 1, 1, 1, 1, 1, time.UTC)
 	date2 := time.Date(2001, 1, 1, 1, 1, 1, 1, time.UTC)
 	date3 := time.Date(2002, 1, 1, 1, 1, 1, 1, time.UTC)
-	earliest, _ := balance.New(date1, balance.Amount(10))
-	other, _ := balance.New(date2, balance.Amount(1))
-	other2, _ := balance.New(date1, balance.Amount(8237))
-	other3, _ := balance.New(date3, balance.Amount(489))
+	earliest := newTestBalance(t, date1, balance.Amount(10))
+	other := newTestBalance(t, date2, balance.Amount(1))
+	other2 := newTestBalance(t, date1, balance.Amount(8237))
+	other3 := newTestBalance(t, date3, balance.Amount(489))
 	balances := balance.Balances{other, earliest, other2, other3}
-	expected := BalanceErrorSet{earliest, nil}
+	expected := BalanceErrorSet{&earliest, nil}
 	testEarliestSet(t, expected, balances)
 }
 
 func testEarliestSet(t *testing.T, expected BalanceErrorSet, balances balance.Balances) {
 	actualBalance, actualError := balances.Earliest()
-	actual := BalanceErrorSet{balance: actualBalance, error: actualError}
+	actual := BalanceErrorSet{Balance: actualBalance, error: actualError}
 	res := testBalanceResults(t, expected, actual)
 	if len(res) > 0 {
 		t.Errorf("%s. Balances: %+v", res, balances)
@@ -100,18 +94,18 @@ func Test_Latest_EmptyBalances(t *testing.T) {
 }
 
 func Test_Latest_BalancesWithSingleDate(t *testing.T) {
-	latest, _ := balance.New(time.Date(2000, 1, 1, 1, 1, 1, 1, time.UTC))
+	latest := newTestBalance(t, time.Date(2000, 1, 1, 1, 1, 1, 1, time.UTC))
 	balances := balance.Balances{latest}
-	expected := BalanceErrorSet{latest, nil}
+	expected := BalanceErrorSet{&latest, nil}
 	testLatestSet(t, expected, balances)
 }
 
 func Test_Latest_BalancesWithSameDate(t *testing.T) {
 	date := time.Date(2000, 1, 1, 1, 1, 1, 1, time.UTC)
-	latest, _ := balance.New(date, balance.Amount(10))
-	other, _ := balance.New(date, balance.Amount(20))
+	latest := newTestBalance(t, date, balance.Amount(10))
+	other := newTestBalance(t, date, balance.Amount(20))
 	balances := balance.Balances{other, latest}
-	expected := BalanceErrorSet{latest, nil}
+	expected := BalanceErrorSet{&latest, nil}
 	testLatestSet(t, expected, balances)
 }
 
@@ -119,18 +113,18 @@ func Test_Latest_BalancesWithMultipleDates(t *testing.T) {
 	date1 := time.Date(2000, 1, 1, 1, 1, 1, 1, time.UTC)
 	date2 := time.Date(2001, 1, 1, 1, 1, 1, 1, time.UTC)
 	date3 := time.Date(2002, 1, 1, 1, 1, 1, 1, time.UTC)
-	latest, _ := balance.New(date3, balance.Amount(20))
-	other1, _ := balance.New(date2)
-	other2, _ := balance.New(date3, balance.Amount(10))
-	other3, _ := balance.New(date1, balance.Amount(-20))
+	latest := newTestBalance(t, date3, balance.Amount(20))
+	other1 := newTestBalance(t, date2)
+	other2 := newTestBalance(t, date3, balance.Amount(10))
+	other3 := newTestBalance(t, date1, balance.Amount(-20))
 	balances := balance.Balances{other1, other2, latest, other3}
-	expected := BalanceErrorSet{latest, nil}
+	expected := BalanceErrorSet{&latest, nil}
 	testLatestSet(t, expected, balances)
 }
 
 func testLatestSet(t *testing.T, expected BalanceErrorSet, balances balance.Balances) {
 	actualBalance, actualError := balances.Latest()
-	actual := BalanceErrorSet{balance: actualBalance, error: actualError}
+	actual := BalanceErrorSet{Balance: actualBalance, error: actualError}
 	res := testBalanceResults(t, expected, actual)
 	if len(res) > 0 {
 		t.Errorf("%s. Balances: %+v", res, balances)
@@ -150,7 +144,7 @@ func testBalanceResults(t *testing.T, expected BalanceErrorSet, actual BalanceEr
 			message = fmt.Sprintf("Error unexpected\nExpected: %s\nActual  : %s", expected, actual)
 		}
 	}
-	assert.Equal(t, expected.balance, actual.balance)
+	assert.Equal(t, expected.Balance, actual.Balance)
 	return
 }
 
@@ -181,7 +175,7 @@ func TestBalances_Sum(t *testing.T) {
 		for _, tsm := range testSet.amounts {
 			b, err := balance.New(now, balance.Amount(tsm))
 			common.FatalIfErrorf(t, err, "[%d] creating balance for testing", i)
-			bs = append(bs, b)
+			bs = append(bs, *b)
 		}
 		assert.Equal(t, testSet.sum, bs.Sum())
 	}
@@ -209,11 +203,17 @@ func TestBalance_JSONLoop(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Error marshalling json for testing: %s", err)
 	}
-	var b balance.balance
+	var b balance.Balance
 	if err := json.Unmarshal(jsonBytes, &b); err != nil {
 		t.Fatalf("Error unmarshaling bytes into balance: %s", err)
 	}
 	if !a.Equal(b) {
 		t.Fatalf("Expected %v, but got %v", a, b)
 	}
+}
+
+func newTestBalance(t *testing.T, date time.Time, options ...balance.Option) balance.Balance {
+	b, err := balance.New(date, options...)
+	common.FatalIfError(t, err, "Creating new Balance")
+	return *b
 }

@@ -16,6 +16,7 @@ func NewCode(currencyCode string) (c *Code, err error) {
 	return
 }
 
+// Code is an interface that will return a string representing a currency code.
 type Code interface {
 	String() string
 }
@@ -31,6 +32,8 @@ func (c code) MarshalJSON() ([]byte, error) {
 	return json.Marshal(c.String())
 }
 
+// UnmarshalJSON attempts to unmarshal a []byte into a Code,
+// returning the money, if successful, and an error, if any occurred.
 func UnmarshalJSON(data []byte) (*Code, error) {
 	var aux string
 	err := json.Unmarshal(data, &aux)

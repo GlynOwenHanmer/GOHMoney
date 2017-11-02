@@ -5,107 +5,94 @@ import (
 	"time"
 )
 
-// ErrEmptyBalancesMessage is the error message used when a Balances object contains no balance items.
+// ErrEmptyBalancesMessage is the error message used when a Balances object contains no Balance items.
 const ErrEmptyBalancesMessage = "empty Balances object"
 
-// New creates a new balance
+// New creates a new Balance
 func New(date time.Time, options ...Option) (b *Balance, err error) {
-	bb := balance{date: date}
+	bb := Balance{Date: date}
 	for _, o := range options {
 		err = o(&bb)
 		if err != nil {
 			return
 		}
 	}
+	b = &bb
 	return
 }
 
-// Balance holds the logic for a balance item.
-type Balance interface {
-	Date() time.Time
-	Amount() int
+// Balance holds the logic for a Balance item.
+type Balance struct {
+	Date   time.Time
+	Amount int
 }
 
-// balance holds the logic for a balance item.
-type balance struct {
-	date   time.Time
-	amount int
-}
-
-func (b balance) Date() time.Time {
-	return b.date
-}
-
-func (b balance) Amount() int {
-	return b.amount
-}
-
-// Equal returns true if two balance objects are logically equal
-func (b balance) Equal(ob Balance) bool {
-	return b.amount == ob.Amount() && b.date.Equal(ob.Date())
+// Equal returns true if two Balance objects are logically equal
+func (b Balance) Equal(ob Balance) bool {
+	return b.Amount == ob.Amount && b.Date.Equal(ob.Date)
 }
 
 //type jsonHelper struct {
-//	date   time.Time
-//	amount int64
+//	Date   time.Time
+//	Amount int64
 //}
 //
 //// MarshalJSON marshals an Account into a json blob, returning the blob with any errors that occur during the marshalling.
-//func (b balance) MarshalJSON() ([]byte, error) {
+//func (b Balance) MarshalJSON() ([]byte, error) {
 //	return json.Marshal(&jsonHelper{
-//		date:   b.date,
-//		amount: b.amount,
+//		Date:   b.Date,
+//		Amount: b.Amount,
 //	})
 //}
 //
 //// UnmarshalJSON attempts to unmarshal a json blob into an Account object, returning any errors that occur during the unmarshalling.
-//func (b *balance) UnmarshalJSON(data []byte) error {
+//func (b *Balance) UnmarshalJSON(data []byte) error {
 //	aux := new(jsonHelper)
 //	if err := json.Unmarshal(data, aux); err != nil {
 //		return err
 //	}
-//	b.date = aux.date
-//	b.amount = aux.amount
+//	b.Date = aux.Date
+//	b.Amount = aux.Amount
 //	return nil
 //}
 
-//Balances holds multiple balance items.
+//Balances holds multiple Balance items.
 type Balances []Balance
 
 // Sum returns the value of all of the balances summed together.
 func (bs Balances) Sum() (s int) {
 	for _, b := range bs {
-		s += b.Amount()
+		s += b.Amount
 	}
 	return
 }
 
-// Earliest returns the balance with the earliest date contained in a Balances set.
-// If multiple balance object have the same date, the balance encountered first will be returned.
+// Earliest returns the Balance with the earliest Date contained in a Balances set.
+// If multiple Balance object have the same Date, the Balance encountered first will be returned.
 func (bs Balances) Earliest() (e *Balance, err error) {
 	if len(bs) == 0 {
 		return e, errors.New(ErrEmptyBalancesMessage)
 	}
 	e = new(Balance)
-	*e = balance{date: time.Date(2000000, 1, 1, 1, 1, 1, 1, time.UTC)}
+	*e = Balance{Date: time.Date(2000000, 1, 1, 1, 1, 1, 1, time.UTC)}
 	for _, b := range bs {
-		if b.Date().Before((*e).Date()) {
+		if b.Date.Before((*e).Date) {
 			*e = b
 		}
 	}
 	return
 }
 
-// Latest returns the balance with the latest date contained in a Balances set.
-// If multiple balance object have the same date, the balance encountered last will be returned.
+// Latest returns the Balance with the latest Date contained in a Balances set.
+// If multiple Balance object have the same Date, the Balance encountered last will be returned.
 func (bs Balances) Latest() (l *Balance, err error) {
 	if len(bs) == 0 {
 		return l, errors.New(ErrEmptyBalancesMessage)
 	}
 	l = new(Balance)
-	*l = balance{date: time.Date(0, 1, 1, 1, 1, 1, 1, time.UTC)}
+	*l = Balance{Date: time.Date(0, 1, 1, 1, 1, 1, 1, time.UTC)}
 	for _, b := range bs {
-		if !(*l).Date().After(b.Date()) {
+		if !(*l).Date.After(b.Date) {
 			*l = b
 		}
 	}

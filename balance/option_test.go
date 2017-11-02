@@ -14,12 +14,12 @@ func TestAmount(t *testing.T) {
 	b, err := balance.New(time.Now())
 	common.FatalIfError(t, err, "Creating balance")
 	assert.Equal(t, 0, b.Amount)
-	assert.Nil(t, balance.Amount(-645)(&b))
+	assert.Nil(t, balance.Amount(-645)(b))
 	assert.Equal(t, -645, b.Amount)
 }
 
 func TestErrorOption(t *testing.T) {
-	errorFn := func(a *balance.balance) error {
+	errorFn := func(a *balance.Balance) error {
 		return errors.New("TEST ERROR")
 	}
 	_, err := balance.New(time.Now(), errorFn)

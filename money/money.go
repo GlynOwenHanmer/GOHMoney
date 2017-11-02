@@ -14,7 +14,7 @@ type Money interface {
 
 // New returns a new Money
 func New(amount int, currency currency.Code) Money {
-	return &money{amount: amount, currency: currency}
+	return money{amount: amount, currency: currency}
 }
 
 type money struct {
@@ -44,25 +44,28 @@ func (m money) MarshalJSON() ([]byte, error) {
 	})
 }
 
-// UnmarshalJSON attampts to unmarshalling a []byte into a money,
-// returning the money, if successful, and an error, if any occured.
-func UnmarshalJSON(data []byte) (*money, error) {
-	var m struct {
+// UnmarshalJSON attempts to unmarshal a []byte into a money,
+// returning the money, if successful, and an error, if any occurred.
+func UnmarshalJSON(data []byte) (m *Money, err error) {
+	var aux struct {
 		Amount   int
 		Currency string
 	}
-	err := json.Unmarshal(data, &m)
+	err = json.Unmarshal(data, &aux)
 	if err != nil {
 		return nil, err
 	}
-	c, err := currency.NewCode(m.Currency)
+	var c *currency.Code
+	c, err = currency.NewCode(aux.Currency)
 	if err != nil {
 		return nil, err
 	}
-	return &money{
-		amount:   m.Amount,
+	m = new(Money)
+	*m = money{
+		amount:   aux.Amount,
 		currency: *c,
-	}, err
+	}
+	return
 }
 
 //// Moneys is a group of Moneys

@@ -31,7 +31,7 @@ func New(name string, currencyCode currency.Code, opened time.Time, os ...Option
 			return nil, err
 		}
 	}
-	return a, a.Validate()
+	return a, a.validate()
 }
 
 // An Account holds the logic for an account.
@@ -61,8 +61,8 @@ func (a Account) CurrencyCode() currency.Code {
 	return a.currencyCode
 }
 
-// Validate checks the state of an account to see if it is has any logical errors. Validate returns a set of errors representing errors with different fields of the account.
-func (a Account) Validate() (err error) {
+// validate checks the state of an account to see if it is has any logical errors. validate returns a set of errors representing errors with different fields of the account.
+func (a Account) validate() (err error) {
 	var fieldErrorDescriptions []string
 	if len(strings.TrimSpace(a.Name)) == 0 {
 		fieldErrorDescriptions = append(fieldErrorDescriptions, EmptyNameError)
@@ -78,7 +78,8 @@ func (a Account) Validate() (err error) {
 // ValidateBalance first attempts to validate the Account as an entity by itself. If there are any errors with the Account, these errors are returned and the balance is not attempted to be validated against the account.
 // If the date of the balance is outside of the TimeRange of the Account, a DateOutOfAccountTimeRange will be returned.
 func (a Account) ValidateBalance(b balance.Balance) (err error) {
-	if err = a.Validate(); err != nil {
+	err = a.validate()
+	if err != nil {
 		return
 	}
 	if !a.timeRange.Contains(b.Date) && (!a.End().Valid || !a.End().Time.Equal(b.Date)) {
@@ -137,10 +138,7 @@ func (a *Account) UnmarshalJSON(data []byte) (err error) {
 		}
 	}
 	a.timeRange = *tr
-	if validErr := a.Validate(); validErr != nil {
-		err = validErr
-	}
-	return
+	return a.validate()
 }
 
 // Equal returns true if both accounts a and b are logically the same.

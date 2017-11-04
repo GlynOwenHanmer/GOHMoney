@@ -36,11 +36,11 @@ func (m money) Currency() currency.Code {
 
 func (m money) MarshalJSON() ([]byte, error) {
 	return json.Marshal(&struct {
-		Amount        int
+		Amount   int
 		Currency currency.Code
 	}{
-		Amount: m.amount,
-		Currency:   m.currency,
+		Amount:   m.amount,
+		Currency: m.currency,
 	})
 }
 

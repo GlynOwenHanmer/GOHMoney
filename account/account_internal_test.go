@@ -51,7 +51,7 @@ func Test_ValidateAccount(t *testing.T) {
 		},
 	}
 	for _, testSet := range testSets {
-		actual := testSet.insertedAccount.Validate()
+		actual := testSet.insertedAccount.validate()
 		expected := testSet.error
 		assert.Equal(t, expected, actual)
 	}

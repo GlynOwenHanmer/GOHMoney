@@ -34,23 +34,22 @@ func (m money) Currency() currency.Code {
 	return m.currency
 }
 
+type jsonHelper struct {
+	Amount        int
+	Currency currency.Code
+}
+
 func (m money) MarshalJSON() ([]byte, error) {
-	return json.Marshal(&struct {
-		Amount        int
-		currency.Code `json:"Currency"`
-	}{
+	return json.Marshal(&jsonHelper{
 		Amount: m.amount,
-		Code:   m.currency,
+		Currency:   m.currency,
 	})
 }
 
 // UnmarshalJSON attempts to unmarshal a []byte into a money,
 // returning the money, if successful, and an error, if any occurred.
 func UnmarshalJSON(data []byte) (m *Money, err error) {
-	var aux struct {
-		Amount   int
-		Currency string
-	}
+	var aux jsonHelper
 	err = json.Unmarshal(data, &aux)
 	if err != nil {
 		return nil, err

@@ -32,30 +32,6 @@ func (b Balance) Equal(ob Balance) bool {
 	return b.Amount == ob.Amount && b.Date.Equal(ob.Date)
 }
 
-//type jsonHelper struct {
-//	Date   time.Time
-//	Amount int64
-//}
-//
-//// MarshalJSON marshals an Account into a json blob, returning the blob with any errors that occur during the marshalling.
-//func (b Balance) MarshalJSON() ([]byte, error) {
-//	return json.Marshal(&jsonHelper{
-//		Date:   b.Date,
-//		Amount: b.Amount,
-//	})
-//}
-//
-//// UnmarshalJSON attempts to unmarshal a json blob into an Account object, returning any errors that occur during the unmarshalling.
-//func (b *Balance) UnmarshalJSON(data []byte) error {
-//	aux := new(jsonHelper)
-//	if err := json.Unmarshal(data, aux); err != nil {
-//		return err
-//	}
-//	b.Date = aux.Date
-//	b.Amount = aux.Amount
-//	return nil
-//}
-
 //Balances holds multiple Balance items.
 type Balances []Balance
 

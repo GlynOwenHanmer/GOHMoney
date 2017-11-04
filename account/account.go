@@ -13,12 +13,12 @@ import (
 // New creates a new Account object with a given name, currency.Code and start
 // time.
 // New returns the created account or
-func New(name string, currencyCode currency.Code, opened time.Time, os ...Option) (a *Account, err error) {
-	a = &Account{
+func New(name string, currencyCode currency.Code, opened time.Time, os ...Option) (*Account, error) {
+	a := &Account{
 		Name:         name,
 		currencyCode: currencyCode,
 	}
-	err = gohtime.Start(opened)(&a.timeRange)
+	err := gohtime.Start(opened)(&a.timeRange)
 	if err != nil {
 		return nil, err
 	}
@@ -31,10 +31,7 @@ func New(name string, currencyCode currency.Code, opened time.Time, os ...Option
 			return nil, err
 		}
 	}
-	if aErr := a.Validate(); len(aErr) > 0 {
-		err = aErr
-	}
-	return
+	return a, a.Validate()
 }
 
 // An Account holds the logic for an account.
@@ -65,24 +62,24 @@ func (a Account) CurrencyCode() currency.Code {
 }
 
 // Validate checks the state of an account to see if it is has any logical errors. Validate returns a set of errors representing errors with different fields of the account.
-func (a Account) Validate() FieldError {
+func (a Account) Validate() (err error) {
 	var fieldErrorDescriptions []string
 	if len(strings.TrimSpace(a.Name)) == 0 {
 		fieldErrorDescriptions = append(fieldErrorDescriptions, EmptyNameError)
 	}
 	if len(fieldErrorDescriptions) > 0 {
-		return FieldError(fieldErrorDescriptions)
+		err = FieldError(fieldErrorDescriptions)
 	}
-	return nil
+	return
 }
 
 // ValidateBalance validates a balance against an Account.
 // ValidateBalance returns any logical errors between the Account and the balance.
 // ValidateBalance first attempts to validate the Account as an entity by itself. If there are any errors with the Account, these errors are returned and the balance is not attempted to be validated against the account.
 // If the date of the balance is outside of the TimeRange of the Account, a DateOutOfAccountTimeRange will be returned.
-func (a Account) ValidateBalance(b balance.Balance) error {
-	if err := a.Validate(); err != nil {
-		return err
+func (a Account) ValidateBalance(b balance.Balance) (err error) {
+	if err = a.Validate(); err != nil {
+		return
 	}
 	if !a.timeRange.Contains(b.Date) && (!a.End().Valid || !a.End().Time.Equal(b.Date)) {
 		return balance.DateOutOfAccountTimeRange{
@@ -90,7 +87,7 @@ func (a Account) ValidateBalance(b balance.Balance) error {
 			AccountTimeRange: a.timeRange,
 		}
 	}
-	return nil
+	return
 }
 
 // MarshalJSON marshals an Account into a json blob, returning the blob with any errors that occur during the marshalling.
@@ -156,6 +153,3 @@ func (a Account) Equal(b Account) bool {
 	}
 	return true
 }
-
-// Accounts holds multiple Account items.
-type Accounts []Account

@@ -10,16 +10,17 @@ import (
 	"github.com/glynternet/go-money/common"
 	"github.com/glynternet/go-money/money/currency"
 	gtime "github.com/glynternet/go-time"
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_ValidateAccount(t *testing.T) {
 	testSets := []struct {
 		insertedAccount Account
-		FieldError
+		error
 	}{
 		{
 			insertedAccount: Account{},
-			FieldError:      FieldError{EmptyNameError},
+			error:           FieldError{EmptyNameError},
 		},
 		{
 			insertedAccount: Account{
@@ -51,23 +52,9 @@ func Test_ValidateAccount(t *testing.T) {
 	}
 	for _, testSet := range testSets {
 		actual := testSet.insertedAccount.Validate()
-		expected := testSet.FieldError
-		if !stringSlicesMatch(expected, actual) {
-			t.Errorf("Unexpected error.\nExpected: %+v\nActual  : %+v\nInserted Account: %+v", expected, actual, testSet.insertedAccount)
-		}
+		expected := testSet.error
+		assert.Equal(t, expected, actual)
 	}
-}
-
-func stringSlicesMatch(array1, array2 []string) bool {
-	if len(array1) != len(array2) {
-		return false
-	}
-	for i := 0; i < len(array1); i++ {
-		if array1[i] != array2[i] {
-			return false
-		}
-	}
-	return true
 }
 
 func Test_IsOpen(t *testing.T) {

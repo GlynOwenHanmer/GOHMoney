@@ -42,6 +42,13 @@ func TestJSON(t *testing.T) {
 	assert.Equal(t, ca, cb)
 }
 
+func TestUnmarshalJSON_Invalid(t *testing.T) {
+	i := []byte(`{"nowthen"}`)
+	_, err := currency.UnmarshalJSON(i)
+	assert.NotNil(t, err)
+	assert.IsType(t, new(json.SyntaxError), err)
+}
+
 func TestUnmarshalJSON(t *testing.T) {
 	for _, test := range []struct {
 		code string
@@ -62,4 +69,14 @@ func TestUnmarshalJSON(t *testing.T) {
 		}
 		assert.Equal(t, test.code, (*c).String())
 	}
+}
+
+func TestInvalidCodeLengthError(t *testing.T) {
+	invalid := "TOO_LONG"
+	_, err := currency.NewCode(invalid)
+	assert.NotNil(t, err)
+	e, ok := err.(currency.InvalidCodeLengthError)
+	assert.True(t, ok)
+	assert.Equal(t, len(invalid), e.Length)
+	assert.Equal(t, fmt.Sprintf("invalid currency code Length (%d)", len(invalid)), err.Error())
 }

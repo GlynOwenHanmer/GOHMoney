@@ -3,7 +3,7 @@ package money
 import (
 	"encoding/json"
 
-	"github.com/glynternet/go-money/money/currency"
+	"github.com/glynternet/go-money/currency"
 )
 
 // Money is an object representing a value and currency

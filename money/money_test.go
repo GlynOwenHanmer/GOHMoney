@@ -6,14 +6,9 @@ import (
 	"encoding/json"
 
 	"github.com/glynternet/go-money/money"
-	"github.com/glynternet/go-money/money/currency"
+	"github.com/glynternet/go-money/currency"
 	"github.com/stretchr/testify/assert"
 )
-
-//func newMoneyIgnoreError(a int64, c string) *money.Money {
-//	m, _ := money.NewCode(a, c)
-//	return m
-//}
 
 func TestNew(t *testing.T) {
 	c, err := currency.NewCode("RIN")

@@ -7,7 +7,7 @@ import (
 
 	"fmt"
 
-	"github.com/glynternet/go-money/money/currency"
+	"github.com/glynternet/go-money/currency"
 	"github.com/stretchr/testify/assert"
 )
 

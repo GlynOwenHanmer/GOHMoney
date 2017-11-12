@@ -1,11 +1,10 @@
 package currency_test
 
 import (
+	"fmt"
 	"testing"
 
 	"encoding/json"
-
-	"fmt"
 
 	"github.com/glynternet/go-money/currency"
 	"github.com/stretchr/testify/assert"

@@ -5,8 +5,8 @@ import (
 
 	"encoding/json"
 
-	"github.com/glynternet/go-money/money"
 	"github.com/glynternet/go-money/currency"
+	"github.com/glynternet/go-money/money"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -40,8 +40,8 @@ func TestUnmarshalJSON(t *testing.T) {
 		Amount   int
 		Currency string
 	}{
-		Amount:12,
-		Currency:"TOO_LONG",
+		Amount:   12,
+		Currency: "TOO_LONG",
 	}
 	j, err := json.Marshal(invalid)
 	assert.Nil(t, err)
